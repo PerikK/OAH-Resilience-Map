@@ -1,22 +1,18 @@
-import React from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend } from 'recharts'
 import { Box, Typography } from '@mui/material'
+import { useMemo } from 'react'
+import { getResilienceMonthly } from '../mock_data/resilience'
+import { useSelection } from '../context/SelectionContext'
 
-const data = [
-  { month: 'Jan 25', current: 0.75, previous: 0.65 },
-  { month: 'Feb 25', current: 0.72, previous: 0.68 },
-  { month: 'Mar 25', current: 0.85, previous: 0.78 },
-  { month: 'Apr 25', current: 0.82, previous: 0.75 },
-  { month: 'May 25', current: 1.05, previous: 0.95 },
-  { month: 'Jun 25', current: 0.95, previous: 0.88 },
-  { month: 'Jul 25', current: 0.88, previous: 0.82 },
-]
+ 
 
-interface ResilienceChartProps {
+export type ResilienceChartProps = {
   height?: number
 }
 
-const ResilienceChart: React.FC<ResilienceChartProps> = ({ height = 300 }) => {
+export function ResilienceChart({ height = 300 }: ResilienceChartProps) {
+  const { city, site } = useSelection()
+  const data = useMemo(() => getResilienceMonthly(city, site), [city, site])
   return (
     <Box sx={{ width: '100%', height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -67,6 +63,4 @@ const ResilienceChart: React.FC<ResilienceChartProps> = ({ height = 300 }) => {
     </Box>
   )
 }
-
-export default ResilienceChart
 

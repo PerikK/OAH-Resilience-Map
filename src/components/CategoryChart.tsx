@@ -1,18 +1,16 @@
-import React from 'react'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 import { Box, Typography } from '@mui/material'
+import { useMemo } from 'react'
+import { getCategoryBars } from '../mock_data/categories'
+import { useSelection } from '../context/SelectionContext'
 
-const data = [
-  { category: 'Water Quality', dataset1: 85, dataset2: 75, dataset3: 65 },
-  { category: 'Biodiversity', dataset1: 45, dataset2: 40, dataset3: 35 },
-  { category: 'Climate Adaptation', dataset1: 70, dataset2: 65, dataset3: 60 },
-  { category: 'Natural Habitat', dataset1: 60, dataset2: 55, dataset3: 50 },
-  { category: 'Waste Reduction', dataset1: 80, dataset2: 70, dataset3: 40 },
-]
+ 
 
 const colors = ['#4f46e5', '#7c3aed', '#8b5cf6']
 
-const CategoryChart: React.FC = () => {
+export function CategoryChart() {
+  const { city, site } = useSelection()
+  const data = useMemo(() => getCategoryBars(city, site), [city, site])
   return (
     <Box sx={{ width: '100%', height: 350 }}>
       <Box sx={{ display: 'flex', gap: 2, mb: 2, justifyContent: 'center' }}>
@@ -53,6 +51,4 @@ const CategoryChart: React.FC = () => {
     </Box>
   )
 }
-
-export default CategoryChart
 

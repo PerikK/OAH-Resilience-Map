@@ -1,13 +1,14 @@
-import React from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { Box, Typography } from '@mui/material'
+import { useMemo } from 'react'
+import { getEcosystemDistribution } from '../mock_data/ecosystem'
+import { useSelection } from '../context/SelectionContext'
 
-const data = [
-  { name: 'Ecosystem Engaged', value: 40, color: '#4f46e5' },
-  { name: 'Maintained', value: 60, color: '#8b5cf6' },
-]
+ 
 
-const EcosystemChart: React.FC = () => {
+export function EcosystemChart() {
+  const { city, site } = useSelection()
+  const data = useMemo(() => getEcosystemDistribution(city, site), [city, site])
   return (
     <Box sx={{ width: '100%', height: 300, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <ResponsiveContainer width="100%" height="80%">
@@ -51,5 +52,3 @@ const EcosystemChart: React.FC = () => {
     </Box>
   )
 }
-
-export default EcosystemChart

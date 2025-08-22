@@ -1,6 +1,8 @@
-import React from 'react'
 import { Box, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
+import { useMemo } from 'react'
+import { getMapPoints, type MapPoint } from '../mock_data/map'
+import { useSelection } from '../context/SelectionContext'
 
 const MapContainer = styled(Box)({
   position: 'relative',
@@ -54,19 +56,9 @@ const LegendDot = styled('div')<{ size: number }>(({ size }) => ({
   backgroundColor: '#6366f1',
 }))
 
-const CityMap: React.FC = () => {
-  const mapPoints = [
-    { x: 120, y: 80, size: 8, value: 5 },
-    { x: 180, y: 120, size: 12, value: 8 },
-    { x: 220, y: 160, size: 16, value: 12 },
-    { x: 160, y: 200, size: 10, value: 6 },
-    { x: 280, y: 180, size: 14, value: 10 },
-    { x: 200, y: 240, size: 6, value: 3 },
-    { x: 140, y: 280, size: 20, value: 15 },
-    { x: 260, y: 300, size: 8, value: 5 },
-    { x: 100, y: 320, size: 12, value: 8 },
-  ]
-
+export function CityMap() {
+  const { city, site } = useSelection()
+  const points = useMemo(() => getMapPoints(city, site), [city, site])
   return (
     <MapContainer>
       <MapSvg viewBox="0 0 400 400">
@@ -79,7 +71,7 @@ const CityMap: React.FC = () => {
         />
         
         {/* Map dots */}
-        {mapPoints.map((point, index) => (
+        {points.map((point: MapPoint, index: number) => (
           <MapDot
             key={index}
             cx={point.x}
@@ -111,5 +103,3 @@ const CityMap: React.FC = () => {
     </MapContainer>
   )
 }
-
-export default CityMap

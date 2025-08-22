@@ -1,5 +1,7 @@
-import React from 'react'
-import { Grid, Card, CardContent, Typography, LinearProgress, Box } from '@mui/material'
+import { Card, CardContent, Typography, LinearProgress, Box } from '@mui/material'
+import { useMemo } from 'react'
+import { getMetrics, type Metric } from '../mock_data/metrics'
+import { useSelection } from '../context/SelectionContext'
 import { styled } from '@mui/material/styles'
 
 const MetricCard = styled(Card)(({ theme }) => ({
@@ -32,14 +34,14 @@ interface MetricCardProps {
   bgColor: string
 }
 
-const MetricCardComponent: React.FC<MetricCardProps> = ({ 
+function MetricCardComponent({ 
   title, 
   value, 
   percentage, 
   subtitle, 
-  color,
   bgColor 
-}) => (
+}: MetricCardProps) {
+  return (
   <MetricCard>
     <CardContent sx={{ backgroundColor: bgColor, color: 'white', textAlign: 'center', py: 3 }}>
       <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
@@ -60,61 +62,30 @@ const MetricCardComponent: React.FC<MetricCardProps> = ({
       </Typography>
     </CardContent>
   </MetricCard>
-)
-
-const MetricsCards: React.FC = () => {
-  const metrics = [
-    {
-      title: 'Water Resources & Quality',
-      value: '29%',
-      percentage: 29,
-      subtitle: 'vs prev 15%',
-      color: '#1e40af',
-      bgColor: '#1e40af',
-    },
-    {
-      title: 'Biodiversity & Habitats',
-      value: '29%',
-      percentage: 29,
-      subtitle: 'vs prev 25%',
-      color: '#7c3aed',
-      bgColor: '#7c3aed',
-    },
-    {
-      title: 'Riverbank Protection',
-      value: '32.5%',
-      percentage: 32.5,
-      subtitle: 'vs prev 30%',
-      color: '#0891b2',
-      bgColor: '#0891b2',
-    },
-    {
-      title: 'Air Quality',
-      value: '10%',
-      percentage: 10,
-      subtitle: 'vs prev 8%',
-      color: '#1f2937',
-      bgColor: '#1f2937',
-    },
-    {
-      title: 'Sustainable Land Use & Agriculture',
-      value: '62%',
-      percentage: 62,
-      subtitle: 'vs prev 55%',
-      color: '#312e81',
-      bgColor: '#312e81',
-    },
-  ]
-
-  return (
-    <Grid container spacing={2}>
-      {metrics.map((metric, index) => (
-        <Grid item xs={12} sm={6} md={2.4} key={index}>
-          <MetricCardComponent {...metric} />
-        </Grid>
-      ))}
-    </Grid>
   )
 }
 
-export default MetricsCards
+export function MetricsCards() {
+  const { city, site } = useSelection()
+  const metrics = useMemo(() => getMetrics(city, site), [city, site])
+
+  return (
+    <Box
+      sx={{
+        display: 'grid',
+        gap: 2,
+        gridTemplateColumns: {
+          xs: '1fr',
+          sm: 'repeat(2, 1fr)',
+          md: 'repeat(5, 1fr)',
+        },
+      }}
+    >
+      {metrics.map((metric: Metric, index: number) => (
+        <Box key={index}>
+          <MetricCardComponent {...metric} />
+        </Box>
+      ))}
+    </Box>
+  )
+}

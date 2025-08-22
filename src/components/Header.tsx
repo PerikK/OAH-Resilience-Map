@@ -1,6 +1,9 @@
-import React, { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Box, Typography, TextField, MenuItem, Button, LinearProgress } from '@mui/material'
 import { styled } from '@mui/material/styles'
+import { useSelection } from '../context/SelectionContext'
+import { getMetrics, type Metric } from '../mock_data/metrics'
+import type { City, Site } from '../mock_data/types'
 
 const HeaderContainer = styled(Box)(({ theme }) => ({
   backgroundColor: 'white',
@@ -106,55 +109,19 @@ const StyledLinearProgress = styled(LinearProgress)({
   },
 })
 
-interface HeaderProps {
+export type HeaderProps = {
   onTabChange?: (tab: string) => void
 }
 
-const Header: React.FC<HeaderProps> = ({ onTabChange }) => {
+export function Header({ onTabChange }: HeaderProps) {
   const [activeTab, setActiveTab] = useState('Overview')
+  const { city, site, setCity, setSite } = useSelection()
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab)
     onTabChange?.(tab)
   }
-
-  const metrics = [
-    {
-      title: 'Water Resources & Quality',
-      value: '29%',
-      percentage: 29,
-      subtitle: 'vs prev 15%',
-      bgColor: '#1e40af',
-    },
-    {
-      title: 'Biodiversity & Habitats',
-      value: '29%',
-      percentage: 29,
-      subtitle: 'vs prev 25%',
-      bgColor: '#7c3aed',
-    },
-    {
-      title: 'Riverbank Protection',
-      value: '32.5%',
-      percentage: 32.5,
-      subtitle: 'vs prev 29% (+10% ▼)',
-      bgColor: '#0891b2',
-    },
-    {
-      title: 'Air Quality',
-      value: '10%',
-      percentage: 10,
-      subtitle: 'vs prev 8%',
-      bgColor: '#1f2937',
-    },
-    {
-      title: 'Sustainable Land Use & Agriculture',
-      value: '62%',
-      percentage: 62,
-      subtitle: 'vs prev 45%',
-      bgColor: '#312e81',
-    },
-  ]
+  const metrics = useMemo(() => getMetrics(city, site), [city, site])
 
   return (
     <HeaderContainer>
@@ -224,7 +191,8 @@ const Header: React.FC<HeaderProps> = ({ onTabChange }) => {
             <TextField
               select
               size="small"
-              defaultValue="coimbra"
+              value={city}
+              onChange={(e) => setCity(e.target.value as City)}
               sx={{ 
                 backgroundColor: '#f9fafb',
                 '& .MuiInputBase-root': { fontSize: '12px', height: '32px' }
@@ -243,7 +211,8 @@ const Header: React.FC<HeaderProps> = ({ onTabChange }) => {
             <TextField
               select
               size="small"
-              defaultValue="all"
+              value={site}
+              onChange={(e) => setSite(e.target.value as Site)}
               sx={{ 
                 backgroundColor: '#f9fafb',
                 '& .MuiInputBase-root': { fontSize: '12px', height: '32px' }
@@ -257,7 +226,7 @@ const Header: React.FC<HeaderProps> = ({ onTabChange }) => {
         </LeftSidebar>
 
         <MetricsContainer>
-          {metrics.map((metric, index) => (
+          {metrics.map((metric: Metric, index: number) => (
             <MetricCard key={index}>
               <Box sx={{
                 backgroundColor: metric.bgColor,
@@ -290,5 +259,3 @@ const Header: React.FC<HeaderProps> = ({ onTabChange }) => {
     </HeaderContainer>
   )
 }
-
-export default Header

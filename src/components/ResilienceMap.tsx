@@ -1,11 +1,10 @@
-import React from 'react'
 import { Box, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import Header from './Header.tsx'
-import CityMap from './CityMap.tsx'
-import ResilienceChart from './ResilienceChart.tsx'
-import CategoryChart from './CategoryChart.tsx'
-import EcosystemChart from './EcosystemChart.tsx'
+import { Header } from './Header'
+import { CityMap } from './CityMap'
+import { ResilienceChart } from './ResilienceChart'
+import { CategoryChart } from './CategoryChart'
+import { EcosystemChart } from './EcosystemChart'
 
 const StyledContainer = styled(Box)(({ theme }) => ({
   backgroundColor: '#f8fafc',
@@ -50,7 +49,7 @@ const RightBottomGrid = styled(Box)({
   gap: '16px',
 })
 
-const ResilienceMap: React.FC = () => {
+export function ResilienceMap() {
   return (
     <StyledContainer>
       <PageFrame>
@@ -95,6 +94,4 @@ const ResilienceMap: React.FC = () => {
     </StyledContainer>
   )
 }
-
-export default ResilienceMap
 
