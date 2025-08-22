@@ -7,7 +7,8 @@ const HeaderContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
   margin: theme.spacing(2),
   borderRadius: theme.spacing(1),
-  boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+  border: '1px solid #e9d5ff',
+  boxShadow: 'none',
 }))
 
 const TopRow = styled(Box)({
@@ -26,7 +27,7 @@ const LogoContainer = styled(Box)({
 const Logo = styled(Box)({
   width: '20px',
   height: '20px',
-  backgroundColor: '#3b82f6',
+  backgroundColor: '#6366f1',
   borderRadius: '4px',
   display: 'flex',
   alignItems: 'center',
@@ -47,11 +48,11 @@ const StyledTab = styled(Button)<{ active?: boolean }>(({ active }) => ({
   textTransform: 'none',
   fontSize: '14px',
   fontWeight: 500,
-  backgroundColor: active ? '#f3f4f6' : 'transparent',
-  color: active ? '#374151' : '#6b7280',
-  border: active ? '1px solid #d1d5db' : '1px solid transparent',
+  backgroundColor: active ? '#ede9fe' : 'transparent',
+  color: active ? '#4f46e5' : '#6b7280',
+  border: active ? '1px solid #c7d2fe' : '1px solid #e5e7eb',
   '&:hover': {
-    backgroundColor: '#f9fafb',
+    backgroundColor: active ? '#e9d5ff' : '#f9fafb',
   },
 }))
 
@@ -61,10 +62,11 @@ const MainContent = styled(Box)({
 })
 
 const LeftSidebar = styled(Box)({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '16px',
-  minWidth: '200px',
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  columnGap: '12px',
+  rowGap: '12px',
+  minWidth: '320px',
 })
 
 const FilterGroup = styled(Box)({
@@ -75,31 +77,32 @@ const FilterGroup = styled(Box)({
 
 const MetricsContainer = styled(Box)({
   display: 'flex',
-  gap: '8px',
+  gap: '12px',
   flex: 1,
 })
 
-const MetricCard = styled(Box)<{ bgColor: string }>(({ bgColor }) => ({
-  backgroundColor: bgColor,
-  color: 'white',
+const MetricCard = styled(Box)({
+  backgroundColor: 'white',
+  color: '#111827',
   padding: '12px',
   borderRadius: '8px',
-  textAlign: 'center',
+  textAlign: 'left',
   flex: 1,
-  minHeight: '80px',
+  minHeight: '110px',
   display: 'flex',
   flexDirection: 'column',
-  justifyContent: 'center',
-}))
+  justifyContent: 'flex-start',
+  border: '1px solid #e9d5ff',
+})
 
 const StyledLinearProgress = styled(LinearProgress)({
-  height: 4,
-  borderRadius: 2,
-  backgroundColor: 'rgba(255,255,255,0.3)',
-  margin: '8px 0 4px 0',
+  height: 6,
+  borderRadius: 3,
+  backgroundColor: '#e9d5ff',
+  margin: '8px 0 6px 0',
   '& .MuiLinearProgress-bar': {
-    backgroundColor: 'rgba(255,255,255,0.8)',
-    borderRadius: 2,
+    backgroundColor: '#4f46e5',
+    borderRadius: 3,
   },
 })
 
@@ -255,20 +258,31 @@ const Header: React.FC<HeaderProps> = ({ onTabChange }) => {
 
         <MetricsContainer>
           {metrics.map((metric, index) => (
-            <MetricCard key={index} bgColor={metric.bgColor}>
-              <Typography variant="caption" sx={{ fontSize: '11px', opacity: 0.9, mb: 0.5 }}>
-                {metric.title}
-              </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '18px' }}>
-                {metric.value}
-              </Typography>
-              <StyledLinearProgress 
-                variant="determinate" 
-                value={metric.percentage} 
-              />
-              <Typography variant="caption" sx={{ fontSize: '10px', opacity: 0.8 }}>
-                {metric.subtitle}
-              </Typography>
+            <MetricCard key={index}>
+              <Box sx={{
+                backgroundColor: metric.bgColor,
+                color: 'white',
+                borderRadius: '6px 6px 0 0',
+                px: 1,
+                py: 0.5,
+                mb: 1,
+              }}>
+                <Typography variant="caption" sx={{ fontSize: '11px' }}>
+                  {metric.title}
+                </Typography>
+              </Box>
+              <Box sx={{ px: 0.5 }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '18px', color: '#111827' }}>
+                  {metric.value}
+                </Typography>
+                <StyledLinearProgress 
+                  variant="determinate" 
+                  value={metric.percentage} 
+                />
+                <Typography variant="caption" sx={{ fontSize: '10px', color: '#6b7280' }}>
+                  {metric.subtitle}
+                </Typography>
+              </Box>
             </MetricCard>
           ))}
         </MetricsContainer>

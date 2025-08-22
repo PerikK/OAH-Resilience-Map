@@ -1,11 +1,11 @@
 import React from 'react'
 import { Box, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import Header from './Header'
-import CityMap from './CityMap'
-import ResilienceChart from './ResilienceChart'
-import CategoryChart from './CategoryChart'
-import EcosystemChart from './EcosystemChart'
+import Header from './Header.tsx'
+import CityMap from './CityMap.tsx'
+import ResilienceChart from './ResilienceChart.tsx'
+import CategoryChart from './CategoryChart.tsx'
+import EcosystemChart from './EcosystemChart.tsx'
 
 const StyledContainer = styled(Box)(({ theme }) => ({
   backgroundColor: '#f8fafc',
@@ -18,69 +18,74 @@ const StyledContainer = styled(Box)(({ theme }) => ({
 const ContentBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   backgroundColor: 'white',
-  margin: theme.spacing(2),
+  margin: 0,
   borderRadius: theme.spacing(1),
-  boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+  border: '1px solid #e9d5ff',
+  boxShadow: 'none',
 }))
 
-const FlexContainer = styled(Box)({
-  display: 'flex',
-  gap: '16px',
+const PageFrame = styled(Box)(({ theme }) => ({
+  margin: theme.spacing(2),
+  borderRadius: theme.spacing(1),
+  border: '1px solid #e9d5ff',
+  backgroundColor: 'white',
+}))
+
+const GridLayout = styled(Box)({
+  display: 'grid',
+  gridTemplateColumns: '42% 1px 58%',
+  columnGap: '16px',
+  rowGap: '16px',
   marginTop: '16px',
 })
 
-const FlexItem = styled(Box)<{ flex?: string }>(({ flex }) => ({
-  flex: flex || '1',
-}))
+const VerticalDivider = styled(Box)({
+  width: '1px',
+  backgroundColor: '#e5e7eb',
+})
 
 const ResilienceMap: React.FC = () => {
   return (
     <StyledContainer>
-      <Header />
-      
-      <Box sx={{ p: 3, width: '100%' }}>        
-        <FlexContainer>
-          <FlexItem flex="0 0 33%">
-            <ContentBox>
-              <Typography variant="h6" gutterBottom sx={{ color: '#374151', fontWeight: 600 }}>
+      <PageFrame>
+        <Header />
+        <Box sx={{ p: 2, width: '100%' }}>
+          <GridLayout>
+            <ContentBox sx={{ gridColumn: 1 }}>
+              <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
                 City Map
               </Typography>
               <CityMap />
             </ContentBox>
-          </FlexItem>
-          
-          <FlexItem flex="0 0 67%">
-            <ContentBox>
-              <Typography variant="h6" gutterBottom sx={{ color: '#374151', fontWeight: 600 }}>
+
+            <ContentBox sx={{ gridColumn: 3 }}>
+              <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
                 Current Resilience vs Baseline/Previous Year
               </Typography>
               <ResilienceChart />
             </ContentBox>
-          </FlexItem>
-        </FlexContainer>
 
-        <FlexContainer>
-          <FlexItem flex="0 0 58%">
-            <ContentBox>
-              <Typography variant="h6" gutterBottom sx={{ color: '#374151', fontWeight: 600 }}>
+            <VerticalDivider sx={{ gridColumn: 2, gridRow: '1 / span 2' }} />
+
+            <ContentBox sx={{ gridColumn: 1 }}>
+              <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
                 Resilience by Category
               </Typography>
               <CategoryChart />
             </ContentBox>
-          </FlexItem>
-          
-          <FlexItem flex="0 0 42%">
-            <ContentBox>
-              <Typography variant="h6" gutterBottom sx={{ color: '#374151', fontWeight: 600 }}>
+
+            <ContentBox sx={{ gridColumn: 3 }}>
+              <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
                 Ecosystem Engagement
               </Typography>
               <EcosystemChart />
             </ContentBox>
-          </FlexItem>
-        </FlexContainer>
-      </Box>
+          </GridLayout>
+        </Box>
+      </PageFrame>
     </StyledContainer>
   )
 }
 
 export default ResilienceMap
+

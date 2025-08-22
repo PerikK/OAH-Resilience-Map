@@ -1,5 +1,5 @@
 import React from 'react'
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 import { Box, Typography } from '@mui/material'
 
 const data = [
@@ -10,7 +10,7 @@ const data = [
   { category: 'Waste Reduction', dataset1: 80, dataset2: 70, dataset3: 40 },
 ]
 
-const colors = ['#3b82f6', '#8b5cf6', '#06b6d4']
+const colors = ['#4f46e5', '#7c3aed', '#8b5cf6']
 
 const CategoryChart: React.FC = () => {
   return (
@@ -36,7 +36,7 @@ const CategoryChart: React.FC = () => {
           layout="horizontal"
           margin={{ top: 20, right: 30, left: 80, bottom: 20 }}
         >
-          <XAxis type="number" domain={[0, 100]} axisLine={false} tickLine={false} />
+          <XAxis type="number" domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
           <YAxis 
             type="category" 
             dataKey="category" 
@@ -55,3 +55,4 @@ const CategoryChart: React.FC = () => {
 }
 
 export default CategoryChart
+

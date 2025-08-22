@@ -5,7 +5,7 @@ import { styled } from '@mui/material/styles'
 const MapContainer = styled(Box)({
   position: 'relative',
   width: '100%',
-  height: '750px',
+  height: '420px',
   backgroundColor: '#f3f4f6',
   borderRadius: '8px',
   overflow: 'hidden',
@@ -17,7 +17,7 @@ const MapSvg = styled('svg')({
 })
 
 const MapDot = styled('circle')(() => ({
-  fill: '#3b82f6',
+  fill: '#6366f1',
   opacity: 0.7,
   cursor: 'pointer',
   transition: 'all 0.2s ease',
@@ -51,7 +51,7 @@ const LegendDot = styled('div')<{ size: number }>(({ size }) => ({
   width: `${size}px`,
   height: `${size}px`,
   borderRadius: '50%',
-  backgroundColor: '#3b82f6',
+  backgroundColor: '#6366f1',
 }))
 
 const CityMap: React.FC = () => {
@@ -74,7 +74,7 @@ const CityMap: React.FC = () => {
         <path
           d="M50 50 L350 50 L350 350 L50 350 Z M80 100 Q120 80 160 100 T240 120 Q280 140 320 120 L320 300 Q280 320 240 300 T160 280 Q120 300 80 280 Z"
           fill="none"
-          stroke="#d1d5db"
+          stroke="#e5e7eb"
           strokeWidth="2"
         />
         
@@ -96,16 +96,16 @@ const CityMap: React.FC = () => {
           Size
         </Typography>
         <LegendItem>
-          <LegendDot size={6} />
+          <LegendDot size={4} />
+          <Typography variant="caption">0</Typography>
+        </LegendItem>
+        <LegendItem>
+          <LegendDot size={8} />
           <Typography variant="caption">5</Typography>
         </LegendItem>
         <LegendItem>
-          <LegendDot size={10} />
+          <LegendDot size={12} />
           <Typography variant="caption">10</Typography>
-        </LegendItem>
-        <LegendItem>
-          <LegendDot size={14} />
-          <Typography variant="caption">15</Typography>
         </LegendItem>
       </Legend>
     </MapContainer>

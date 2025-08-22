@@ -3,7 +3,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { Box, Typography } from '@mui/material'
 
 const data = [
-  { name: 'Ecosystem Engaged', value: 40, color: '#3b82f6' },
+  { name: 'Ecosystem Engaged', value: 40, color: '#4f46e5' },
   { name: 'Maintained', value: 60, color: '#8b5cf6' },
 ]
 

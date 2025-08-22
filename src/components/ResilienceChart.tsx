@@ -17,7 +17,7 @@ const ResilienceChart: React.FC = () => {
     <Box sx={{ width: '100%', height: 300 }}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#ede9fe" />
           <XAxis 
             dataKey="month" 
             axisLine={false}
@@ -30,19 +30,21 @@ const ResilienceChart: React.FC = () => {
             tickLine={false}
             tick={{ fontSize: 12, fill: '#6b7280' }}
             tickFormatter={(value) => value.toFixed(2)}
+            label={{ value: 'Resilience Index', angle: -90, position: 'insideLeft', offset: 10, style: { fill: '#6b7280', fontSize: 12 } }}
           />
           <Legend 
             verticalAlign="top" 
             height={36}
             iconType="circle"
-            wrapperStyle={{ paddingBottom: '20px' }}
+            align="right"
+            wrapperStyle={{ paddingBottom: '20px', color: '#4f46e5' }}
           />
           <Line 
             type="monotone" 
             dataKey="current" 
-            stroke="#3b82f6" 
+            stroke="#4f46e5" 
             strokeWidth={2}
-            dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+            dot={{ fill: '#4f46e5', strokeWidth: 2, r: 4 }}
             name="Current"
           />
           <Line 
@@ -63,3 +65,4 @@ const ResilienceChart: React.FC = () => {
 }
 
 export default ResilienceChart
+
