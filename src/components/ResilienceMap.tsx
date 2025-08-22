@@ -33,7 +33,7 @@ const PageFrame = styled(Box)(({ theme }) => ({
 
 const GridLayout = styled(Box)({
   display: 'grid',
-  gridTemplateColumns: '42% 1px 58%',
+  gridTemplateColumns: '25% 1px 75%',
   columnGap: '16px',
   rowGap: '16px',
   marginTop: '16px',
@@ -44,6 +44,12 @@ const VerticalDivider = styled(Box)({
   backgroundColor: '#e5e7eb',
 })
 
+const RightBottomGrid = styled(Box)({
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: '16px',
+})
+
 const ResilienceMap: React.FC = () => {
   return (
     <StyledContainer>
@@ -51,7 +57,7 @@ const ResilienceMap: React.FC = () => {
         <Header />
         <Box sx={{ p: 2, width: '100%' }}>
           <GridLayout>
-            <ContentBox sx={{ gridColumn: 1 }}>
+            <ContentBox sx={{ gridColumn: 1, gridRow: '1 / span 2' }}>
               <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
                 City Map
               </Typography>
@@ -62,24 +68,27 @@ const ResilienceMap: React.FC = () => {
               <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
                 Current Resilience vs Baseline/Previous Year
               </Typography>
-              <ResilienceChart />
+              <ResilienceChart height={280} />
             </ContentBox>
 
             <VerticalDivider sx={{ gridColumn: 2, gridRow: '1 / span 2' }} />
 
-            <ContentBox sx={{ gridColumn: 1 }}>
-              <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
-                Resilience by Category
-              </Typography>
-              <CategoryChart />
-            </ContentBox>
-
-            <ContentBox sx={{ gridColumn: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
-                Ecosystem Engagement
-              </Typography>
-              <EcosystemChart />
-            </ContentBox>
+            <Box sx={{ gridColumn: 3, gridRow: 2 }}>
+              <RightBottomGrid>
+                <ContentBox>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
+                    Resilience by Category
+                  </Typography>
+                  <CategoryChart />
+                </ContentBox>
+                <ContentBox>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
+                    Ecosystem Engagement
+                  </Typography>
+                  <EcosystemChart />
+                </ContentBox>
+              </RightBottomGrid>
+            </Box>
           </GridLayout>
         </Box>
       </PageFrame>

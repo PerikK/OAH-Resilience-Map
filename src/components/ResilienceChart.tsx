@@ -12,9 +12,13 @@ const data = [
   { month: 'Jul 25', current: 0.88, previous: 0.82 },
 ]
 
-const ResilienceChart: React.FC = () => {
+interface ResilienceChartProps {
+  height?: number
+}
+
+const ResilienceChart: React.FC<ResilienceChartProps> = ({ height = 300 }) => {
   return (
-    <Box sx={{ width: '100%', height: 300 }}>
+    <Box sx={{ width: '100%', height }}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#ede9fe" />

@@ -5,7 +5,7 @@ import { styled } from '@mui/material/styles'
 const MapContainer = styled(Box)({
   position: 'relative',
   width: '100%',
-  height: '420px',
+  height: '560px',
   backgroundColor: '#f3f4f6',
   borderRadius: '8px',
   overflow: 'hidden',
