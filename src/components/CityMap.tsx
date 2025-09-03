@@ -1,105 +1,123 @@
-import { Box, Typography } from '@mui/material'
+import { Box, Typography, CircularProgress } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { useMemo } from 'react'
-import { getMapPoints, type MapPoint } from '../mock_data/map'
+import { useEffect, useState } from 'react'
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import L from 'leaflet'
 import { useSelection } from '../context/SelectionContext'
+import { getCityCoordinates, getSitesByCity, getSite, type ResearchSite } from '../data/researchSites'
+import 'leaflet/dist/leaflet.css'
 
-const MapContainer = styled(Box)({
+const StyledMapContainer = styled(Box)({
   position: 'relative',
   width: '100%',
   height: '560px',
-  backgroundColor: '#f3f4f6',
   borderRadius: '8px',
   overflow: 'hidden',
-})
-
-const MapSvg = styled('svg')({
-  width: '100%',
-  height: '100%',
-})
-
-const MapDot = styled('circle')(() => ({
-  fill: '#6366f1',
-  opacity: 0.7,
-  cursor: 'pointer',
-  transition: 'all 0.2s ease',
-  '&:hover': {
-    opacity: 1,
-    transform: 'scale(1.1)',
+  '& .leaflet-container': {
+    height: '100%',
+    width: '100%',
+    borderRadius: '8px',
   },
-}))
-
-const Legend = styled(Box)({
-  position: 'absolute',
-  top: '16px',
-  right: '16px',
-  backgroundColor: 'white',
-  padding: '12px',
-  borderRadius: '6px',
-  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
 })
 
-const LegendItem = styled(Box)({
+const LoadingContainer = styled(Box)({
   display: 'flex',
+  justifyContent: 'center',
   alignItems: 'center',
-  gap: '8px',
-  marginBottom: '4px',
-  '&:last-child': {
-    marginBottom: 0,
-  },
+  height: '560px',
+  backgroundColor: '#f3f4f6',
+  borderRadius: '8px',
 })
 
-const LegendDot = styled('div')<{ size: number }>(({ size }) => ({
-  width: `${size}px`,
-  height: `${size}px`,
-  borderRadius: '50%',
-  backgroundColor: '#6366f1',
-}))
+// Fix Leaflet default markers
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+delete (L.Icon.Default.prototype as any)._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+})
 
 export function CityMap() {
   const { city, site } = useSelection()
-  const points = useMemo(() => getMapPoints(city, site), [city, site])
+  const [loading, setLoading] = useState(true)
+  const [sitesToShow, setSitesToShow] = useState<ResearchSite[]>([])
+
+  useEffect(() => {
+    setLoading(true)
+    
+    if (city) {
+      const citySites = getSitesByCity(city)
+      
+      if (site === 'all') {
+        setSitesToShow(citySites)
+      } else {
+        const selectedSite = getSite(city, site)
+        setSitesToShow(selectedSite ? [selectedSite] : citySites)
+      }
+    }
+    
+    const timer = setTimeout(() => setLoading(false), 500)
+    return () => clearTimeout(timer)
+  }, [city, site])
+
+  if (loading) {
+    return (
+      <LoadingContainer>
+        <CircularProgress />
+        <Typography variant="body2" sx={{ ml: 2 }}>
+          Loading {city} map...
+        </Typography>
+      </LoadingContainer>
+    )
+  }
+
+  if (!city || sitesToShow.length === 0) {
+    return (
+      <LoadingContainer>
+        <Typography variant="body2" color="error">
+          No sites found for {city}
+        </Typography>
+      </LoadingContainer>
+    )
+  }
+
+  const cityCoords = getCityCoordinates(city)
+
   return (
-    <MapContainer>
-      <MapSvg viewBox="0 0 400 400">
-        {/* Simple map outline */}
-        <path
-          d="M50 50 L350 50 L350 350 L50 350 Z M80 100 Q120 80 160 100 T240 120 Q280 140 320 120 L320 300 Q280 320 240 300 T160 280 Q120 300 80 280 Z"
-          fill="none"
-          stroke="#e5e7eb"
-          strokeWidth="2"
+    <StyledMapContainer>
+      <MapContainer
+        center={[cityCoords.lat, cityCoords.lng]}
+        zoom={13}
+        style={{ height: '100%', width: '100%' }}
+        key={`${city}-${site}`}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
-        {/* Map dots */}
-        {points.map((point: MapPoint, index: number) => (
-          <MapDot
-            key={index}
-            cx={point.x}
-            cy={point.y}
-            r={point.size}
+        {sitesToShow.map((siteData) => (
+          <Marker 
+            key={siteData['Site Nr.']} 
+            position={[siteData.Latitude, siteData.Longitude]}
           >
-            <title>{`Value: ${point.value}`}</title>
-          </MapDot>
+            <Popup>
+              <Box sx={{ minWidth: 200 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                  {siteData['Site Nr.']} - {siteData['Site Name']}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  <strong>City:</strong> {siteData.City}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  <strong>Coordinates:</strong> {siteData.Latitude.toFixed(5)}, {siteData.Longitude.toFixed(5)}
+                </Typography>
+              </Box>
+            </Popup>
+          </Marker>
         ))}
-      </MapSvg>
-      
-      <Legend>
-        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-          Size
-        </Typography>
-        <LegendItem>
-          <LegendDot size={4} />
-          <Typography variant="caption">0</Typography>
-        </LegendItem>
-        <LegendItem>
-          <LegendDot size={8} />
-          <Typography variant="caption">5</Typography>
-        </LegendItem>
-        <LegendItem>
-          <LegendDot size={12} />
-          <Typography variant="caption">10</Typography>
-        </LegendItem>
-      </Legend>
-    </MapContainer>
+      </MapContainer>
+    </StyledMapContainer>
   )
 }

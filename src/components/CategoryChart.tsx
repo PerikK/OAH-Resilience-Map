@@ -3,6 +3,7 @@ import { Box, Typography } from '@mui/material'
 import { useMemo } from 'react'
 import { getCategoryBars } from '../mock_data/categories'
 import { useSelection } from '../context/SelectionContext'
+import { hasDataForSite, getLatestResilienceData } from '../data/resilienceData'
 
  
 
@@ -10,7 +11,43 @@ const colors = ['#4f46e5', '#7c3aed', '#8b5cf6']
 
 export function CategoryChart() {
   const { city, site } = useSelection()
-  const data = useMemo(() => getCategoryBars(city, site), [city, site])
+  const data = useMemo(() => {
+    // Use real data for Coimbra C1
+    if (hasDataForSite(city, site)) {
+      const realData = getLatestResilienceData()
+      if (realData) {
+        return [
+          {
+            category: 'Water Quality',
+            dataset1: realData['Water Resources & Quality'],
+            dataset2: realData['Water Quality'],
+            dataset3: realData['Riverbank Protection']
+          },
+          {
+            category: 'Biodiversity',
+            dataset1: realData['Biodiversity & Habitats'],
+            dataset2: realData['Biodiversity'],
+            dataset3: realData['Natural Habitat']
+          },
+          {
+            category: 'Environment',
+            dataset1: realData['Air Quality'],
+            dataset2: realData['Climate Adaptation'],
+            dataset3: realData['Sustainable Land Use & Agriculture']
+          },
+          {
+            category: 'Engagement',
+            dataset1: realData['Ecosystem Engagement (%)'],
+            dataset2: realData['Maintained (%)'],
+            dataset3: realData['Waste Reduction']
+          }
+        ]
+      }
+    }
+    
+    // Fallback to mock data
+    return getCategoryBars(city, site)
+  }, [city, site])
   return (
     <Box sx={{ width: '100%', height: 350 }}>
       <Box sx={{ display: 'flex', gap: 2, mb: 2, justifyContent: 'center' }}>

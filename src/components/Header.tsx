@@ -1,8 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { Box, Typography, TextField, MenuItem, Button, LinearProgress } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { useSelection } from '../context/SelectionContext'
 import { getMetrics, type Metric } from '../mock_data/metrics'
+import { getUniqueCities, getSitesByCity, type ResearchSite } from '../data/researchSites'
+import { hasDataForSite, getAggregatedMetrics } from '../data/resilienceData'
 import type { City, Site } from '../mock_data/types'
 
 const HeaderContainer = styled(Box)(({ theme }) => ({
@@ -115,13 +117,79 @@ export type HeaderProps = {
 
 export function Header({ onTabChange }: HeaderProps) {
   const [activeTab, setActiveTab] = useState('Overview')
+  const [cities, setCities] = useState<string[]>([])
+  const [availableSites, setAvailableSites] = useState<ResearchSite[]>([])
   const { city, site, setCity, setSite } = useSelection()
+
+  useEffect(() => {
+    // Load unique cities on component mount
+    const uniqueCities = getUniqueCities()
+    setCities(uniqueCities)
+    
+    // Set default city if none selected
+    if (!city && uniqueCities.length > 0) {
+      setCity(uniqueCities[0] as City)
+    }
+  }, [city, setCity])
+
+  useEffect(() => {
+    // Load sites for selected city
+    if (city) {
+      const sites = getSitesByCity(city)
+      setAvailableSites(sites)
+    }
+  }, [city])
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab)
     onTabChange?.(tab)
   }
-  const metrics = useMemo(() => getMetrics(city, site), [city, site])
+  
+  const metrics = useMemo(() => {
+    // Check if we have real data for the selected site
+    if (hasDataForSite(city, site)) {
+      const realData = getAggregatedMetrics()
+      if (realData) {
+        return [
+          {
+            title: 'Water Quality',
+            value: `${realData.waterQuality}%`,
+            percentage: realData.waterQuality,
+            subtitle: 'Water Resources & Quality',
+            bgColor: '#1e40af',
+            color: '#1e40af'
+          },
+          {
+            title: 'Biodiversity',
+            value: `${realData.biodiversity}%`,
+            percentage: realData.biodiversity,
+            subtitle: 'Biodiversity & Habitats',
+            bgColor: '#7c3aed',
+            color: '#7c3aed'
+          },
+          {
+            title: 'Air Quality',
+            value: `${realData.airQuality}%`,
+            percentage: realData.airQuality,
+            subtitle: 'Air Quality Index',
+            bgColor: '#059669',
+            color: '#059669'
+          },
+          {
+            title: 'Ecosystem Health',
+            value: `${realData.ecosystemEngagement}%`,
+            percentage: realData.ecosystemEngagement,
+            subtitle: 'Ecosystem Engagement',
+            bgColor: '#dc2626',
+            color: '#dc2626'
+          }
+        ]
+      }
+    }
+    
+    // Fallback to mock data
+    return getMetrics(city, site)
+  }, [city, site])
 
   return (
     <HeaderContainer>
@@ -198,9 +266,11 @@ export function Header({ onTabChange }: HeaderProps) {
                 '& .MuiInputBase-root': { fontSize: '12px', height: '32px' }
               }}
             >
-              <MenuItem value="coimbra">● Coimbra</MenuItem>
-              <MenuItem value="lisbon">● Lisbon</MenuItem>
-              <MenuItem value="porto">● Porto</MenuItem>
+              {cities.map((cityName) => (
+                <MenuItem key={cityName} value={cityName}>
+                  ● {cityName}
+                </MenuItem>
+              ))}
             </TextField>
           </FilterGroup>
           
@@ -218,9 +288,12 @@ export function Header({ onTabChange }: HeaderProps) {
                 '& .MuiInputBase-root': { fontSize: '12px', height: '32px' }
               }}
             >
-              <MenuItem value="all">All</MenuItem>
-              <MenuItem value="site1">Site 1</MenuItem>
-              <MenuItem value="site2">Site 2</MenuItem>
+              <MenuItem value="all">All Sites</MenuItem>
+              {availableSites.map((siteData) => (
+                <MenuItem key={siteData['Site Nr.']} value={siteData['Site Nr.']}>
+                  {siteData['Site Nr.']} - {siteData['Site Name']}
+                </MenuItem>
+              ))}
             </TextField>
           </FilterGroup>
         </LeftSidebar>
