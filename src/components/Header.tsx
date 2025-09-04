@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Box, Typography, TextField, MenuItem, Button, LinearProgress } from '@mui/material'
+import top_left_logo from '../assets/top_left_logo.svg'
 import { styled } from '@mui/material/styles'
 import { useSelection } from '../context/SelectionContext'
 import { getMetrics, type Metric } from '../mock_data/metrics'
@@ -29,18 +30,18 @@ const LogoContainer = styled(Box)({
   gap: '8px',
 })
 
-const Logo = styled(Box)({
-  width: '20px',
-  height: '20px',
-  backgroundColor: '#6366f1',
-  borderRadius: '4px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: 'white',
-  fontSize: '10px',
-  fontWeight: 'bold',
-})
+// const Logo = styled(Box)({
+//   width: '20px',
+//   height: '20px',
+//   backgroundColor: '#6366f1',
+//   borderRadius: '4px',
+//   display: 'flex',
+//   alignItems: 'center',
+//   justifyContent: 'center',
+//   color: 'white',
+//   fontSize: '10px',
+//   fontWeight: 'bold',
+// })
 
 const TabsContainer = styled(Box)({
   display: 'flex',
@@ -195,13 +196,15 @@ export function Header({ onTabChange }: HeaderProps) {
     <HeaderContainer>
       <TopRow>
         <LogoContainer>
-          <Logo>O</Logo>
-          <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '14px' }}>
-            One Aqua Health
-          </Typography>
-          <Typography variant="h6" sx={{ color: '#111827', fontWeight: 600, ml: 1, fontSize: '18px' }}>
-            Resilience Map
-          </Typography>
+          <img 
+            src={top_left_logo} 
+            alt="Logo" 
+            style={{ 
+              width: '320px', 
+              height: '120px',
+              objectFit: 'contain'
+            }} 
+          />
         </LogoContainer>
 
         <TabsContainer>
