@@ -1,4 +1,4 @@
-import type { City, Site } from './types'
+import type { City, Site, CityKey, SiteKey } from './types'
 
 export type Metric = {
   title: string
@@ -60,7 +60,7 @@ const adjust = (arr: Metric[], delta: number): Metric[] =>
     return { ...m, percentage: pct, value: `${pct}%` }
   })
 
-export const metricsByCitySite: Record<City, Record<Site, Metric[]>> = {
+export const metricsByCitySite: Record<CityKey, Record<SiteKey, Metric[]>> = {
   coimbra: {
     all: base,
     site1: adjust(base, 0.05),
@@ -78,5 +78,7 @@ export const metricsByCitySite: Record<City, Record<Site, Metric[]>> = {
   },
 }
 
-export const getMetrics = (city: City, site: Site): Metric[] =>
-  metricsByCitySite[city]?.[site] ?? metricsByCitySite.coimbra.all
+export const getMetrics = (city: City, site: Site): Metric[] => {
+  if (!city || !site) return metricsByCitySite.coimbra.all
+  return metricsByCitySite[city as CityKey]?.[site as SiteKey] ?? metricsByCitySite.coimbra.all
+}

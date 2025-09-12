@@ -1,4 +1,4 @@
-import type { City, Site } from './types'
+import type { City, Site, CityKey, SiteKey } from './types'
 
 export type MapPoint = {
   x: number
@@ -28,7 +28,7 @@ const scale = (arr: MapPoint[], delta: number): MapPoint[] =>
     value: clamp(Math.round(p.value * (1 + delta * 1.5)), 0, 100),
   }))
 
-export const mapByCitySite: Record<City, Record<Site, MapPoint[]>> = {
+export const mapByCitySite: Record<CityKey, Record<SiteKey, MapPoint[]>> = {
   coimbra: {
     all: base,
     site1: scale(base, 0.15),
@@ -46,5 +46,7 @@ export const mapByCitySite: Record<City, Record<Site, MapPoint[]>> = {
   },
 }
 
-export const getMapPoints = (city: City, site: Site): MapPoint[] =>
-  mapByCitySite[city]?.[site] ?? mapByCitySite.coimbra.all
+export const getMapPoints = (city: City, site: Site): MapPoint[] => {
+  if (!city || !site) return mapByCitySite.coimbra.all
+  return mapByCitySite[city as CityKey]?.[site as SiteKey] ?? mapByCitySite.coimbra.all
+}

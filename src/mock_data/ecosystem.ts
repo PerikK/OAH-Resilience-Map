@@ -1,4 +1,4 @@
-import type { City, Site } from './types'
+import type { City, Site, CityKey, SiteKey } from './types'
 
 export type EcosystemSlice = {
   name: string
@@ -22,7 +22,7 @@ const shift = (arr: EcosystemSlice[], delta: number): EcosystemSlice[] => {
   ]
 }
 
-export const ecosystemByCitySite: Record<City, Record<Site, EcosystemSlice[]>> = {
+export const ecosystemByCitySite: Record<CityKey, Record<SiteKey, EcosystemSlice[]>> = {
   coimbra: {
     all: base,
     site1: shift(base, 0.05),
@@ -40,5 +40,7 @@ export const ecosystemByCitySite: Record<City, Record<Site, EcosystemSlice[]>> =
   },
 }
 
-export const getEcosystemDistribution = (city: City, site: Site): EcosystemSlice[] =>
-  ecosystemByCitySite[city]?.[site] ?? ecosystemByCitySite.coimbra.all
+export const getEcosystemDistribution = (city: City, site: Site): EcosystemSlice[] => {
+  if (!city || !site) return ecosystemByCitySite.coimbra.all
+  return ecosystemByCitySite[city as CityKey]?.[site as SiteKey] ?? ecosystemByCitySite.coimbra.all
+}

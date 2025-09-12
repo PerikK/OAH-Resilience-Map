@@ -1,4 +1,4 @@
-import type { City, Site } from './types'
+import type { City, Site, CityKey, SiteKey } from './types'
 
 export type ResilienceMonthlyPoint = {
   month: string
@@ -19,7 +19,7 @@ const base: ResilienceMonthlyPoint[] = [
 const tweak = (arr: ResilienceMonthlyPoint[], delta: number): ResilienceMonthlyPoint[] =>
   arr.map(p => ({ ...p, current: +(p.current + delta).toFixed(2), previous: +(p.previous + delta * 0.8).toFixed(2) }))
 
-export const resilienceByCitySite: Record<City, Record<Site, ResilienceMonthlyPoint[]>> = {
+export const resilienceByCitySite: Record<CityKey, Record<SiteKey, ResilienceMonthlyPoint[]>> = {
   coimbra: {
     all: base,
     site1: tweak(base, 0.05),
@@ -37,5 +37,7 @@ export const resilienceByCitySite: Record<City, Record<Site, ResilienceMonthlyPo
   },
 }
 
-export const getResilienceMonthly = (city: City, site: Site): ResilienceMonthlyPoint[] =>
-  resilienceByCitySite[city]?.[site] ?? resilienceByCitySite.coimbra.all
+export const getResilienceMonthly = (city: City, site: Site): ResilienceMonthlyPoint[] => {
+  if (!city || !site) return resilienceByCitySite.coimbra.all
+  return resilienceByCitySite[city as CityKey]?.[site as SiteKey] ?? resilienceByCitySite.coimbra.all
+}

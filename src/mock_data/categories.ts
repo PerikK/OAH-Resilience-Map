@@ -1,4 +1,4 @@
-import type { City, Site } from './types'
+import type { City, Site, CityKey, SiteKey } from './types'
 
 export type CategoryBarPoint = {
   category: string
@@ -23,7 +23,7 @@ const tweak = (arr: CategoryBarPoint[], delta: number): CategoryBarPoint[] =>
     dataset3: Math.max(0, Math.min(100, p.dataset3 + Math.round(delta * 60))),
   }))
 
-export const categoriesByCitySite: Record<City, Record<Site, CategoryBarPoint[]>> = {
+export const categoriesByCitySite: Record<CityKey, Record<SiteKey, CategoryBarPoint[]>> = {
   coimbra: {
     all: base,
     site1: tweak(base, 0.05),
@@ -41,5 +41,7 @@ export const categoriesByCitySite: Record<City, Record<Site, CategoryBarPoint[]>
   },
 }
 
-export const getCategoryBars = (city: City, site: Site): CategoryBarPoint[] =>
-  categoriesByCitySite[city]?.[site] ?? categoriesByCitySite.coimbra.all
+export const getCategoryBars = (city: City, site: Site): CategoryBarPoint[] => {
+  if (!city || !site) return categoriesByCitySite.coimbra.all
+  return categoriesByCitySite[city as CityKey]?.[site as SiteKey] ?? categoriesByCitySite.coimbra.all
+}
