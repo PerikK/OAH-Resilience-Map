@@ -4,14 +4,29 @@ import { useMemo } from 'react'
 import { getEcosystemDistribution } from '../mock_data/ecosystem'
 import { useSelection } from '../context/SelectionContext'
 import { hasDataForSite, getLatestResilienceData } from '../data/resilienceData'
+import { styled } from '@mui/material/styles'
 
  
+
+const EmptyStateContainer = styled(Box)({ 
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: '300px',
+  backgroundColor: '#f9fafb',
+  borderRadius: '8px',
+  border: '1px dashed #d1d5db'
+})
 
 export function EcosystemChart() {
   const { city, site } = useSelection()
   const data = useMemo(() => {
+    if (!city) {
+      return []
+    }
+    
     // Use real data for Coimbra C1
-    if (hasDataForSite(city, site)) {
+    if (city && site && hasDataForSite(city, site)) {
       const realData = getLatestResilienceData()
       if (realData) {
         return [
@@ -42,6 +57,17 @@ export function EcosystemChart() {
     // Fallback to mock data
     return getEcosystemDistribution(city, site)
   }, [city, site])
+  
+  if (!city) {
+    return (
+      <EmptyStateContainer>
+        <Typography variant="body2" sx={{ color: '#6b7280', textAlign: 'center' }}>
+          Please select a city to view ecosystem data
+        </Typography>
+      </EmptyStateContainer>
+    )
+  }
+  
   return (
     <Box sx={{ width: '100%', height: 300, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <ResponsiveContainer width="100%" height="80%">

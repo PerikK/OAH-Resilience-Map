@@ -3,6 +3,7 @@ import { Box, Typography } from '@mui/material'
 import { useMemo } from 'react'
 import { getResilienceMonthly } from '../mock_data/resilience'
 import { useSelection } from '../context/SelectionContext'
+import { styled } from '@mui/material/styles'
 
  
 
@@ -10,9 +11,29 @@ export type ResilienceChartProps = {
   height?: number
 }
 
+const EmptyStateContainer = styled(Box)({ 
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: '#f9fafb',
+  borderRadius: '8px',
+  border: '1px dashed #d1d5db'
+})
+
 export function ResilienceChart({ height = 300 }: ResilienceChartProps) {
   const { city, site } = useSelection()
-  const data = useMemo(() => getResilienceMonthly(city, site), [city, site])
+  const data = useMemo(() => city ? getResilienceMonthly(city, site) : [], [city, site])
+  
+  if (!city) {
+    return (
+      <EmptyStateContainer sx={{ width: '100%', height }}>
+        <Typography variant="body2" sx={{ color: '#6b7280', textAlign: 'center' }}>
+          Please select a city to view resilience data
+        </Typography>
+      </EmptyStateContainer>
+    )
+  }
+  
   return (
     <Box sx={{ width: '100%', height }}>
       <ResponsiveContainer width="100%" height="100%">

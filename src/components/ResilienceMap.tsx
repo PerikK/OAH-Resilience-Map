@@ -32,7 +32,7 @@ const PageFrame = styled(Box)(({ theme }) => ({
 
 const GridLayout = styled(Box)({
   display: 'grid',
-  gridTemplateColumns: '25% 1px 75%',
+  gridTemplateColumns: '45% 1px 55%',
   columnGap: '16px',
   rowGap: '16px',
   marginTop: '16px',

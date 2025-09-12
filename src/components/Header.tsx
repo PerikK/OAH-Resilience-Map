@@ -126,12 +126,7 @@ export function Header({ onTabChange }: HeaderProps) {
     // Load unique cities on component mount
     const uniqueCities = getUniqueCities()
     setCities(uniqueCities)
-    
-    // Set default city if none selected
-    if (!city && uniqueCities.length > 0) {
-      setCity(uniqueCities[0] as City)
-    }
-  }, [city, setCity])
+  }, [])
 
   useEffect(() => {
     // Load sites for selected city
@@ -147,8 +142,50 @@ export function Header({ onTabChange }: HeaderProps) {
   }
   
   const metrics = useMemo(() => {
+    // Return placeholder cards if no city is selected
+    if (!city) {
+      return [
+        {
+          title: 'Water Quality',
+          value: 'Please select a city to view Water Quality data',
+          percentage: 0,
+          subtitle: 'Water Resources & Quality',
+          bgColor: '#6b7280',
+          color: '#6b7280',
+          isEmpty: true
+        },
+        {
+          title: 'Biodiversity',
+          value: 'Please select a city to view Biodiversity data',
+          percentage: 0,
+          subtitle: 'Biodiversity & Habitats',
+          bgColor: '#6b7280',
+          color: '#6b7280',
+          isEmpty: true
+        },
+        {
+          title: 'Air Quality',
+          value: 'Please select a city to view Air Quality data',
+          percentage: 0,
+          subtitle: 'Air Quality Index',
+          bgColor: '#6b7280',
+          color: '#6b7280',
+          isEmpty: true
+        },
+        {
+          title: 'Ecosystem Health',
+          value: 'Please select a city to view Ecosystem Health data',
+          percentage: 0,
+          subtitle: 'Ecosystem Engagement',
+          bgColor: '#6b7280',
+          color: '#6b7280',
+          isEmpty: true
+        }
+      ]
+    }
+    
     // Check if we have real data for the selected site
-    if (hasDataForSite(city, site)) {
+    if (city && site && hasDataForSite(city, site)) {
       const realData = getAggregatedMetrics()
       if (realData) {
         return [
@@ -262,13 +299,16 @@ export function Header({ onTabChange }: HeaderProps) {
             <TextField
               select
               size="small"
-              value={city}
-              onChange={(e) => setCity(e.target.value as City)}
+              value={city || ''}
+              onChange={(e) => setCity(e.target.value === '' ? null : e.target.value as City)}
               sx={{ 
                 backgroundColor: '#f9fafb',
                 '& .MuiInputBase-root': { fontSize: '12px', height: '32px' }
               }}
             >
+              <MenuItem value="" disabled>
+                Please select a city
+              </MenuItem>
               {cities.map((cityName) => (
                 <MenuItem key={cityName} value={cityName}>
                   ● {cityName}
@@ -284,14 +324,20 @@ export function Header({ onTabChange }: HeaderProps) {
             <TextField
               select
               size="small"
-              value={site}
-              onChange={(e) => setSite(e.target.value as Site)}
+              value={site || ''}
+              onChange={(e) => setSite(e.target.value === '' ? null : e.target.value as Site)}
+              disabled={!city}
               sx={{ 
-                backgroundColor: '#f9fafb',
+                backgroundColor: city ? '#f9fafb' : '#f3f4f6',
                 '& .MuiInputBase-root': { fontSize: '12px', height: '32px' }
               }}
             >
-              <MenuItem value="all">All Sites</MenuItem>
+              <MenuItem value="" disabled>
+                {city ? 'Please select a site' : 'Select a city first'}
+              </MenuItem>
+              {city && (
+                <MenuItem value="all">All Sites</MenuItem>
+              )}
               {availableSites.map((siteData) => (
                 <MenuItem key={siteData['Site Nr.']} value={siteData['Site Nr.']}>
                   {siteData['Site Nr.']} - {siteData['Site Name']}
@@ -302,7 +348,7 @@ export function Header({ onTabChange }: HeaderProps) {
         </LeftSidebar>
 
         <MetricsContainer>
-          {metrics.map((metric: Metric, index: number) => (
+          {metrics.map((metric: Metric & { isEmpty?: boolean }, index: number) => (
             <MetricCard key={index}>
               <Box sx={{
                 backgroundColor: metric.bgColor,
@@ -317,13 +363,24 @@ export function Header({ onTabChange }: HeaderProps) {
                 </Typography>
               </Box>
               <Box sx={{ px: 0.5 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '18px', color: '#111827' }}>
+                <Typography 
+                  variant={metric.isEmpty ? "body2" : "h6"} 
+                  sx={{ 
+                    fontWeight: metric.isEmpty ? 'normal' : 'bold', 
+                    fontSize: metric.isEmpty ? '12px' : '18px', 
+                    color: metric.isEmpty ? '#6b7280' : '#111827',
+                    textAlign: metric.isEmpty ? 'center' : 'left',
+                    lineHeight: metric.isEmpty ? 1.3 : 1.2
+                  }}
+                >
                   {metric.value}
                 </Typography>
-                <StyledLinearProgress 
-                  variant="determinate" 
-                  value={metric.percentage} 
-                />
+                {!metric.isEmpty && (
+                  <StyledLinearProgress 
+                    variant="determinate" 
+                    value={metric.percentage} 
+                  />
+                )}
                 <Typography variant="caption" sx={{ fontSize: '10px', color: '#6b7280' }}>
                   {metric.subtitle}
                 </Typography>

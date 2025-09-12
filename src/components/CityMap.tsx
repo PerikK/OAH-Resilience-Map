@@ -51,9 +51,11 @@ export function CityMap() {
       
       if (site === 'all') {
         setSitesToShow(citySites)
-      } else {
+      } else if (site) {
         const selectedSite = getSite(city, site)
         setSitesToShow(selectedSite ? [selectedSite] : citySites)
+      } else {
+        setSitesToShow(citySites)
       }
     }
     
@@ -72,7 +74,17 @@ export function CityMap() {
     )
   }
 
-  if (!city || sitesToShow.length === 0) {
+  if (!city) {
+    return (
+      <LoadingContainer>
+        <Typography variant="body2" sx={{ color: '#6b7280', textAlign: 'center' }}>
+          Please select a city to view the map
+        </Typography>
+      </LoadingContainer>
+    )
+  }
+
+  if (sitesToShow.length === 0) {
     return (
       <LoadingContainer>
         <Typography variant="body2" color="error">

@@ -13,8 +13,8 @@ export type SelectionContextValue = {
 const SelectionContext = createContext<SelectionContextValue | undefined>(undefined)
 
 export function SelectionProvider({ children }: { children: ReactNode }) {
-  const [city, setCity] = useState<City>('coimbra')
-  const [site, setSite] = useState<Site>('all')
+  const [city, setCity] = useState<City>(null)
+  const [site, setSite] = useState<Site>(null)
 
   const value = useMemo(() => ({ city, site, setCity, setSite }), [city, site])
 
