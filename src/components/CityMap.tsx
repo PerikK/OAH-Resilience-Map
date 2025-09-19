@@ -10,7 +10,7 @@ import 'leaflet/dist/leaflet.css'
 const StyledMapContainer = styled(Box)({
   position: 'relative',
   width: '100%',
-  height: '560px',
+  height: '90%',
   borderRadius: '8px',
   overflow: 'hidden',
   '& .leaflet-container': {
@@ -24,7 +24,7 @@ const LoadingContainer = styled(Box)({
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  height: '560px',
+  height: '100%',
   backgroundColor: '#f3f4f6',
   borderRadius: '8px',
 })
