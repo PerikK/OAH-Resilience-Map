@@ -32,7 +32,7 @@ const PageFrame = styled(Box)(({ theme }) => ({
 
 const GridLayout = styled(Box)({
   display: 'grid',
-  gridTemplateColumns: '45% 1px 55%',
+  gridTemplateColumns: '66% 1px 33%',
   columnGap: '16px',
   rowGap: '16px',
   marginTop: '16px',
@@ -43,9 +43,9 @@ const VerticalDivider = styled(Box)({
   backgroundColor: '#e5e7eb',
 })
 
-const RightBottomGrid = styled(Box)({
-  display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
+const RightColumnStack = styled(Box)({
+  display: 'flex',
+  flexDirection: 'column',
   gap: '16px',
 })
 
@@ -56,37 +56,43 @@ export function ResilienceMap() {
         <Header />
         <Box sx={{ p: 2, width: '100%' }}>
           <GridLayout>
-            <ContentBox sx={{ gridColumn: 1, gridRow: '1 / span 2' }}>
-              <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
-                City Map
-              </Typography>
+            {/* Left column - Map (66% width) */}
+            <ContentBox sx={{ gridColumn: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6" sx={{ color: '#4f46e5', fontWeight: 600 }}>
+                  City Map
+                </Typography>
+              </Box>
               <CityMap />
             </ContentBox>
 
-            <ContentBox sx={{ gridColumn: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
-                Current Resilience vs Baseline/Previous Year
-              </Typography>
-              <ResilienceChart height={280} />
-            </ContentBox>
+            {/* Vertical divider */}
+            <VerticalDivider sx={{ gridColumn: 2 }} />
 
-            <VerticalDivider sx={{ gridColumn: 2, gridRow: '1 / span 2' }} />
+            {/* Right column - Charts stacked (33% width) */}
+            <Box sx={{ gridColumn: 3 }}>
+              <RightColumnStack>
+                <ContentBox>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
+                    Current Resilience vs Baseline/Previous Year
+                  </Typography>
+                  <ResilienceChart height={280} />
+                </ContentBox>
 
-            <Box sx={{ gridColumn: 3, gridRow: 2 }}>
-              <RightBottomGrid>
                 <ContentBox>
                   <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
                     Resilience by Category
                   </Typography>
                   <CategoryChart />
                 </ContentBox>
+
                 <ContentBox>
                   <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
                     Ecosystem Engagement
                   </Typography>
                   <EcosystemChart />
                 </ContentBox>
-              </RightBottomGrid>
+              </RightColumnStack>
             </Box>
           </GridLayout>
         </Box>

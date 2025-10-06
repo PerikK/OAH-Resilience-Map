@@ -120,7 +120,7 @@ export function Header({ onTabChange }: HeaderProps) {
   const [activeTab, setActiveTab] = useState('Overview')
   const [cities, setCities] = useState<string[]>([])
   const [availableSites, setAvailableSites] = useState<ResearchSite[]>([])
-  const { city, site, setCity, setSite } = useSelection()
+  const { city, site, startDate, endDate, setCity, setSite, setStartDate, setEndDate } = useSelection()
 
   useEffect(() => {
     // Load unique cities on component mount
@@ -269,7 +269,12 @@ export function Header({ onTabChange }: HeaderProps) {
             <TextField
               size="small"
               type="date"
-              defaultValue="2025-01-01"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              inputProps={{
+                min: '1979-01-01',
+                max: endDate
+              }}
               sx={{ 
                 backgroundColor: '#f9fafb',
                 '& .MuiInputBase-root': { fontSize: '12px', height: '32px' }
@@ -284,7 +289,12 @@ export function Header({ onTabChange }: HeaderProps) {
             <TextField
               size="small"
               type="date"
-              defaultValue="2025-07-31"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              inputProps={{
+                min: startDate || '1979-01-01',
+                max: new Date().toISOString().split('T')[0]
+              }}
               sx={{ 
                 backgroundColor: '#f9fafb',
                 '& .MuiInputBase-root': { fontSize: '12px', height: '32px' }
