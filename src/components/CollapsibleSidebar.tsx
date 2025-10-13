@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Box, TextField, MenuItem, Typography, Checkbox, FormControlLabel, FormGroup } from '@mui/material'
+import { Box, TextField, MenuItem, Typography, Checkbox, FormControlLabel, FormGroup, Tooltip } from '@mui/material'
 import { useSelection } from '../context/SelectionContext'
 import { getUniqueCities, getSitesByCity, type ResearchSite } from '../data/researchSites'
 import type { City, Site } from '../mock_data/types'
@@ -210,46 +210,66 @@ export function CollapsibleSidebar() {
           Health Risk Data
         </Typography>
         <FormGroup>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={selectedHealthRisks.includes('pathogen')}
-                onChange={() => toggleHealthRisk('pathogen')}
-                sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
+            <span>
+              <FormControlLabel
+                disabled={!city || !site || site === 'all'}
+                control={
+                  <Checkbox
+                    checked={selectedHealthRisks.includes('pathogen')}
+                    onChange={() => toggleHealthRisk('pathogen')}
+                    sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+                  />
+                }
+                label={<Typography sx={{ fontSize: '14px' }}>Pathogen Risk</Typography>}
               />
-            }
-            label={<Typography sx={{ fontSize: '14px' }}>Pathogen Risk</Typography>}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={selectedHealthRisks.includes('fecal')}
-                onChange={() => toggleHealthRisk('fecal')}
-                sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+            </span>
+          </Tooltip>
+          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
+            <span>
+              <FormControlLabel
+                disabled={!city || !site || site === 'all'}
+                control={
+                  <Checkbox
+                    checked={selectedHealthRisks.includes('fecal')}
+                    onChange={() => toggleHealthRisk('fecal')}
+                    sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+                  />
+                }
+                label={<Typography sx={{ fontSize: '14px' }}>Fecal Contamination Risk</Typography>}
               />
-            }
-            label={<Typography sx={{ fontSize: '14px' }}>Fecal Contamination Risk</Typography>}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={selectedHealthRisks.includes('arg')}
-                onChange={() => toggleHealthRisk('arg')}
-                sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+            </span>
+          </Tooltip>
+          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
+            <span>
+              <FormControlLabel
+                disabled={!city || !site || site === 'all'}
+                control={
+                  <Checkbox
+                    checked={selectedHealthRisks.includes('arg')}
+                    onChange={() => toggleHealthRisk('arg')}
+                    sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+                  />
+                }
+                label={<Typography sx={{ fontSize: '14px' }}>ARG Risk</Typography>}
               />
-            }
-            label={<Typography sx={{ fontSize: '14px' }}>ARG Risk</Typography>}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={selectedHealthRisks.includes('overall')}
-                onChange={() => toggleHealthRisk('overall')}
-                sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+            </span>
+          </Tooltip>
+          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
+            <span>
+              <FormControlLabel
+                disabled={!city || !site || site === 'all'}
+                control={
+                  <Checkbox
+                    checked={selectedHealthRisks.includes('overall')}
+                    onChange={() => toggleHealthRisk('overall')}
+                    sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+                  />
+                }
+                label={<Typography sx={{ fontSize: '14px' }}>Overall Health Risk Score</Typography>}
               />
-            }
-            label={<Typography sx={{ fontSize: '14px' }}>Overall Health Risk Score</Typography>}
-          />
+            </span>
+          </Tooltip>
         </FormGroup>
       </Box>
 
@@ -261,16 +281,21 @@ export function CollapsibleSidebar() {
         <FormGroup>
           {/* Wind Speed & Direction */}
           <Box sx={{ mb: 2 }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={selectedWeatherMetrics.includes('wind')}
-                  onChange={() => toggleWeatherMetric('wind')}
-                  sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+            <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
+              <span>
+                <FormControlLabel
+                  disabled={!city || !site || site === 'all'}
+                  control={
+                    <Checkbox
+                      checked={selectedWeatherMetrics.includes('wind')}
+                      onChange={() => toggleWeatherMetric('wind')}
+                      sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+                    />
+                  }
+                  label={<Typography sx={{ fontSize: '14px' }}>Wind Speed & Direction</Typography>}
                 />
-              }
-              label={<Typography sx={{ fontSize: '14px' }}>Wind Speed & Direction</Typography>}
-            />
+              </span>
+            </Tooltip>
             {selectedWeatherMetrics.includes('wind') && (
               <Box sx={{ ml: 4, mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                 {[
@@ -299,16 +324,21 @@ export function CollapsibleSidebar() {
 
           {/* Rainfall */}
           <Box sx={{ mb: 2 }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={selectedWeatherMetrics.includes('rainfall')}
-                  onChange={() => toggleWeatherMetric('rainfall')}
-                  sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+            <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
+              <span>
+                <FormControlLabel
+                  disabled={!city || !site || site === 'all'}
+                  control={
+                    <Checkbox
+                      checked={selectedWeatherMetrics.includes('rainfall')}
+                      onChange={() => toggleWeatherMetric('rainfall')}
+                      sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+                    />
+                  }
+                  label={<Typography sx={{ fontSize: '14px' }}>Rainfall</Typography>}
                 />
-              }
-              label={<Typography sx={{ fontSize: '14px' }}>Rainfall</Typography>}
-            />
+              </span>
+            </Tooltip>
             {selectedWeatherMetrics.includes('rainfall') && (
               <Box sx={{ ml: 4, mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                 {[
@@ -337,16 +367,21 @@ export function CollapsibleSidebar() {
 
           {/* Humidity */}
           <Box sx={{ mb: 2 }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={selectedWeatherMetrics.includes('humidity')}
-                  onChange={() => toggleWeatherMetric('humidity')}
-                  sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+            <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
+              <span>
+                <FormControlLabel
+                  disabled={!city || !site || site === 'all'}
+                  control={
+                    <Checkbox
+                      checked={selectedWeatherMetrics.includes('humidity')}
+                      onChange={() => toggleWeatherMetric('humidity')}
+                      sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+                    />
+                  }
+                  label={<Typography sx={{ fontSize: '14px' }}>Humidity</Typography>}
                 />
-              }
-              label={<Typography sx={{ fontSize: '14px' }}>Humidity</Typography>}
-            />
+              </span>
+            </Tooltip>
             {selectedWeatherMetrics.includes('humidity') && (
               <Box sx={{ ml: 4, mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                 {[
