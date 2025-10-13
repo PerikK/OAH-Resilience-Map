@@ -74,14 +74,14 @@ export function CollapsibleSidebar() {
       }}
     >
       {/* Section 1: Dropdowns (1/4 of height) */}
-      <Box sx={{ flex: '0 0 22%', padding: '24px', borderBottom: '1px solid', borderColor: 'divider' }}>
-        <Typography variant="h6" sx={{ mb: 2, color: 'text.primary', fontWeight: 600, fontSize: '16px' }}>
+      <Box sx={{ flex: '0 0 auto', padding: '16px 20px', borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Typography variant="h6" sx={{ mb: 1.5, color: 'text.primary', fontWeight: 600, fontSize: '15px' }}>
           Select Parameters
         </Typography>
 
         {/* City Selection */}
-        <Box sx={{ mb: 2 }}>
-          <Typography sx={{ mb: 1, fontSize: '14px', fontWeight: 600, color: 'text.primary' }}>
+        <Box sx={{ mb: 1.5 }}>
+          <Typography sx={{ mb: 0.5, fontSize: '13px', fontWeight: 600, color: 'text.primary' }}>
             Select an area
           </Typography>
           <TextField
@@ -123,8 +123,8 @@ export function CollapsibleSidebar() {
         </Box>
 
         {/* Site Selection */}
-        <Box sx={{ mb: 2 }}>
-          <Typography sx={{ mb: 1, fontSize: '14px', fontWeight: 600, color: 'text.primary' }}>
+        <Box sx={{ mb: 1.5 }}>
+          <Typography sx={{ mb: 0.5, fontSize: '13px', fontWeight: 600, color: 'text.primary' }}>
             Select Sites
           </Typography>
           <TextField
@@ -166,7 +166,7 @@ export function CollapsibleSidebar() {
 
         {/* Date Range */}
         <Box>
-          <Typography sx={{ mb: 1, fontSize: '14px', fontWeight: 600, color: 'text.primary' }}>
+          <Typography sx={{ mb: 0.5, fontSize: '13px', fontWeight: 600, color: 'text.primary' }}>
             Select date range
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
