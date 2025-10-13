@@ -41,7 +41,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
             line1.setAttribute('y1', '0')
             line1.setAttribute('x2', '6')
             line1.setAttribute('y2', '4')
-            line1.setAttribute('stroke', '#1E40AF')
+            line1.setAttribute('stroke', '#1E40AF') // Change this color for arrowhead
             line1.setAttribute('stroke-width', '1')
             line1.setAttribute('stroke-linecap', 'round')
             
@@ -50,7 +50,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
             line2.setAttribute('y1', '8')
             line2.setAttribute('x2', '6')
             line2.setAttribute('y2', '4')
-            line2.setAttribute('stroke', '#1E40AF')
+            line2.setAttribute('stroke', '#1E40AF') // Change this color for arrowhead
             line2.setAttribute('stroke-width', '1')
             line2.setAttribute('stroke-linecap', 'round')
             
@@ -282,6 +282,94 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
     return indicators
   }
 
+  // Generate rainfall droplets based on precipitation/cloud cover
+  const generateRainfallDroplets = () => {
+    if (!averageValue || parameter !== 'clouds') return []
+    
+    const droplets = []
+    // More droplets for higher cloud cover (proxy for rainfall)
+    const numDroplets = Math.min(Math.ceil(averageValue / 15), 8) // Max 8 droplets
+    
+    for (let i = 0; i < numDroplets; i++) {
+      const angle = (i * 360) / numDroplets + 30 // Offset from wind arrows
+      const distance = 0.25 // 250m from center
+      
+      const pos = calculateArrowEnd(lat, lon, angle, distance)
+      
+      droplets.push({
+        id: `droplet-${i}`,
+        position: [pos.lat, pos.lon] as [number, number],
+      })
+    }
+    
+    return droplets
+  }
+
+  // Generate humidity wavy lines (pairs of parallel horizontal wavy lines)
+  const generateHumidityWaves = () => {
+    if (!averageValue || parameter !== 'humidity') return []
+    
+    const waves = []
+    // More wave pairs for higher humidity
+    const numWavePairs = Math.min(Math.ceil(averageValue / 20), 6) // Max 6 wave pairs
+    
+    for (let i = 0; i < numWavePairs; i++) {
+      const angle = (i * 360) / numWavePairs + 15 // Offset positioning for placement around circle
+      const distance = 0.28 // 280m from center
+      
+      const centerPos = calculateArrowEnd(lat, lon, angle, distance)
+      
+      // Create two parallel HORIZONTAL wavy lines (always east-west)
+      const waveLength = 0.1 // 100m wave length
+      const separation = 0.015 // 15m between the two lines
+      const waveAmplitude = 0.015 // 15m wave height for more pronounced curves
+      const numWavePoints = 12 // More points for smoother curves
+      const numWaveCycles = 2 // Number of complete wave cycles
+      
+      // Generate top wavy line
+      const topWavePoints: [number, number][] = []
+      const topCenter = calculateArrowEnd(centerPos.lat, centerPos.lon, 0, separation / 2)
+      
+      for (let j = 0; j < numWavePoints; j++) {
+        const t = j / (numWavePoints - 1) // 0 to 1
+        const xOffset = (t - 0.5) * waveLength // -waveLength/2 to +waveLength/2
+        const yOffset = Math.sin(t * Math.PI * 2 * numWaveCycles) * waveAmplitude // Multiple wave cycles
+        
+        const pointX = calculateArrowEnd(topCenter.lat, topCenter.lon, 90, xOffset) // Horizontal offset
+        const point = calculateArrowEnd(pointX.lat, pointX.lon, 0, yOffset) // Vertical offset for wave
+        
+        topWavePoints.push([point.lat, point.lon])
+      }
+      
+      // Generate bottom wavy line
+      const bottomWavePoints: [number, number][] = []
+      const bottomCenter = calculateArrowEnd(centerPos.lat, centerPos.lon, 180, separation / 2)
+      
+      for (let j = 0; j < numWavePoints; j++) {
+        const t = j / (numWavePoints - 1) // 0 to 1
+        const xOffset = (t - 0.5) * waveLength
+        const yOffset = Math.sin(t * Math.PI * 2 * numWaveCycles) * waveAmplitude
+        
+        const pointX = calculateArrowEnd(bottomCenter.lat, bottomCenter.lon, 90, xOffset)
+        const point = calculateArrowEnd(pointX.lat, pointX.lon, 0, yOffset)
+        
+        bottomWavePoints.push([point.lat, point.lon])
+      }
+      
+      waves.push({
+        id: `wave-top-${i}`,
+        positions: topWavePoints,
+      })
+      
+      waves.push({
+        id: `wave-bottom-${i}`,
+        positions: bottomWavePoints,
+      })
+    }
+    
+    return waves
+  }
+
   if (!lat || !lon || !date) {
     return null
   }
@@ -289,6 +377,8 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
   const { label, unit } = getParameterLabel()
   const windArrows = windData ? generateWindArrows() : []
   const calmIndicators = windData ? generateCalmIndicators() : []
+  const rainfallDroplets = generateRainfallDroplets()
+  const humidityWaves = generateHumidityWaves()
 
   return (
     <>
@@ -342,15 +432,15 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
         </Marker>
       )}
 
-      {/* Wind direction arrows */}
-      {!isLoading && !error && windArrows.map((arrow) => (
+      {/* Wind direction arrows - only show when wind parameter is selected */}
+      {!isLoading && !error && parameter === 'wind_speed' && windArrows.map((arrow) => (
         <React.Fragment key={arrow.id}>
           <Polyline
             positions={[arrow.start, arrow.end]}
             pathOptions={{
               color: '#1E40AF',
               weight: 3,
-              opacity: 0.6,
+              opacity: 1.0, // Change this for transparency
             }}
             eventHandlers={{
               add: (e) => {
@@ -363,8 +453,8 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
         </React.Fragment>
       ))}
 
-      {/* Calm wind indicators (small dots for wind < 0.5 m/s) */}
-      {!isLoading && !error && calmIndicators.map((indicator) => (
+      {/* Calm wind indicators (small dots for wind < 0.5 m/s) - only show when wind parameter is selected */}
+      {!isLoading && !error && parameter === 'wind_speed' && calmIndicators.map((indicator) => (
         <Circle
           key={indicator.id}
           center={indicator.position}
@@ -378,17 +468,65 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
         />
       ))}
 
-      {/* Show single 1km radius circle with weather data */}
+      {/* Rainfall droplets (for clouds/precipitation) - smaller */}
+      {!isLoading && !error && rainfallDroplets.map((droplet) => (
+        <Marker
+          key={droplet.id}
+          position={droplet.position}
+          icon={L.divIcon({
+            html: `
+              <svg width="10" height="12" viewBox="0 0 10 12" style="filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));">
+                <path d="M5 0 C5 0, 0 5, 0 7.5 C0 10, 2.2 12, 5 12 C7.8 12, 10 10, 10 7.5 C10 5, 5 0, 5 0 Z" 
+                      fill="#3B82F6" 
+                      stroke="#1E40AF" 
+                      stroke-width="0.8"/>
+              </svg>
+            `,
+            className: '',
+            iconSize: [10, 12],
+            iconAnchor: [5, 12],
+          })}
+        />
+      ))}
+
+      {/* Humidity wavy lines - using SVG icons instead of polylines */}
+      {!isLoading && !error && humidityWaves.map((wave) => {
+        // Use the center position of the wave
+        const centerIndex = Math.floor(wave.positions.length / 2)
+        const centerPos = wave.positions[centerIndex]
+        
+        return (
+          <Marker
+            key={wave.id}
+            position={centerPos}
+            icon={L.divIcon({
+              html: `
+                <svg width="40" height="12" viewBox="0 0 40 12" style="overflow: visible;">
+                  <path d="M 2,6 Q 5,2 8,6 T 14,6 T 20,6 T 26,6 T 32,6 T 38,6" 
+                        fill="none" 
+                        stroke="#1E40AF" 
+                        stroke-width="2.5" 
+                        stroke-linecap="round"
+                        stroke-linejoin="round"/>
+                </svg>
+              `,
+              className: '',
+              iconSize: [40, 12],
+              iconAnchor: [20, 6],
+            })}
+          />
+        )
+      })}
+
+      {/* Weather data popup marker at center */}
       {!isLoading && !error && averageValue !== null && areaDataPoints.length > 0 && (
-        <Circle
-          center={[lat, lon]}
-          radius={1000} // 1km in meters
-          pathOptions={{
-            color: getCircleStyle().color,
-            fillColor: getCircleStyle().color,
-            fillOpacity: 0.6,
-            weight: 2,
-          }}
+        <Marker
+          position={[lat, lon]}
+          icon={L.divIcon({
+            html: `<div style="background: #4A90E2; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.3);"></div>`,
+            className: '',
+            iconSize: [12, 12],
+          })}
         >
           <Popup>
             <strong>Weather Data - 1km Radius</strong>
@@ -458,7 +596,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
               )
             })()}
           </Popup>
-        </Circle>
+        </Marker>
       )}
 
       {/* Show loading state */}
