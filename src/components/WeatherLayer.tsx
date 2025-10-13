@@ -148,47 +148,47 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
   }, [lat, lon, date, parameter])
 
   // Get gradient color based on parameter value
-  const getGradientColor = (value: number, param: string) => {
-    if (param === 'temp') {
-      // Temperature: Blue (cold) to Red (hot) (-10°C to 40°C)
-      if (value < 0) return '#1E3A8A' // Very cold - Navy
-      if (value < 10) return '#3B82F6' // Cold - Blue
-      if (value < 20) return '#10B981' // Cool - Green
-      if (value < 25) return '#FDE047' // Mild - Yellow
-      if (value < 30) return '#F59E0B' // Warm - Orange
-      if (value < 35) return '#EF4444' // Hot - Red
-      return '#DC2626' // Very hot - Dark red
-    } else if (param === 'humidity') {
-      // Humidity: Light to dark blue (0-100%)
-      if (value < 20) return '#FEF3C7' // Very dry
-      if (value < 40) return '#7DD3FC' // Dry
-      if (value < 60) return '#3B82F6' // Moderate
-      if (value < 80) return '#1E40AF' // Humid
-      return '#1E3A8A' // Very humid
-    } else if (param === 'wind_speed') {
-      // Wind speed: Light to dark green (0-20 m/s)
-      if (value < 2) return '#E0F2FE' // Calm
-      if (value < 5) return '#86EFAC' // Light breeze
-      if (value < 10) return '#22C55E' // Moderate
-      if (value < 15) return '#15803D' // Strong
-      return '#14532D' // Very strong
-    } else if (param === 'clouds') {
-      // Cloudiness: Light to dark gray (0-100%)
-      if (value < 20) return '#F3F4F6' // Clear
-      if (value < 40) return '#D1D5DB' // Partly cloudy
-      if (value < 60) return '#9CA3AF' // Mostly cloudy
-      if (value < 80) return '#6B7280' // Cloudy
-      return '#374151' // Overcast
-    }
-    return '#666'
-  }
+  // const getGradientColor = (value: number, param: string) => {
+  //   if (param === 'temp') {
+  //     // Temperature: Blue (cold) to Red (hot) (-10°C to 40°C)
+  //     if (value < 0) return '#1E3A8A' // Very cold - Navy
+  //     if (value < 10) return '#3B82F6' // Cold - Blue
+  //     if (value < 20) return '#10B981' // Cool - Green
+  //     if (value < 25) return '#FDE047' // Mild - Yellow
+  //     if (value < 30) return '#F59E0B' // Warm - Orange
+  //     if (value < 35) return '#EF4444' // Hot - Red
+  //     return '#DC2626' // Very hot - Dark red
+  //   } else if (param === 'humidity') {
+  //     // Humidity: Light to dark blue (0-100%)
+  //     if (value < 20) return '#FEF3C7' // Very dry
+  //     if (value < 40) return '#7DD3FC' // Dry
+  //     if (value < 60) return '#3B82F6' // Moderate
+  //     if (value < 80) return '#1E40AF' // Humid
+  //     return '#1E3A8A' // Very humid
+  //   } else if (param === 'wind_speed') {
+  //     // Wind speed: Light to dark green (0-20 m/s)
+  //     if (value < 2) return '#E0F2FE' // Calm
+  //     if (value < 5) return '#86EFAC' // Light breeze
+  //     if (value < 10) return '#22C55E' // Moderate
+  //     if (value < 15) return '#15803D' // Strong
+  //     return '#14532D' // Very strong
+  //   } else if (param === 'clouds') {
+  //     // Cloudiness: Light to dark gray (0-100%)
+  //     if (value < 20) return '#F3F4F6' // Clear
+  //     if (value < 40) return '#D1D5DB' // Partly cloudy
+  //     if (value < 60) return '#9CA3AF' // Mostly cloudy
+  //     if (value < 80) return '#6B7280' // Cloudy
+  //     return '#374151' // Overcast
+  //   }
+  //   return '#666'
+  // }
 
   // Get circle color and opacity based on parameter and average value
-  const getCircleStyle = () => {
-    if (!averageValue) return { color: '#666', fillOpacity: 0.6 }
-    const color = getGradientColor(averageValue, parameter)
-    return { color, fillOpacity: 0.6 }
-  }
+  // const getCircleStyle = () => {
+  //   if (!averageValue) return { color: '#666', fillOpacity: 0.6 }
+  //   const color = getGradientColor(averageValue, parameter)
+  //   return { color, fillOpacity: 0.6 }
+  // }
 
   // Get parameter label and unit
   const getParameterLabel = () => {
