@@ -548,8 +548,8 @@ export function CityMap() {
               center={[selectedSiteCoords.lat, selectedSiteCoords.lon]}
               radius={1000} // 1km in meters
               pathOptions={{
-                color: '#9CA3AF',
-                fillColor: '#F3F4F6',
+                color: '#707070',
+                fillColor: '#FFFBEB',
                 fillOpacity: 0.6,
                 weight: 1,
                 dashArray: '5, 5',
