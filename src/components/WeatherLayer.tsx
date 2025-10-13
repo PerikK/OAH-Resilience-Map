@@ -7,7 +7,7 @@ interface WeatherLayerProps {
   lat: number
   lon: number
   date: string
-  parameter?: 'temp' | 'humidity' | 'wind_speed' | 'clouds'
+  parameter?: 'temp' | 'humidity' | 'wind_speed' | 'clouds' | 'precipitation'
 }
 
 export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLayerProps) {
@@ -89,6 +89,8 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
         return { label: 'Wind Speed', unit: 'm/s' }
       case 'clouds':
         return { label: 'Cloudiness', unit: '%' }
+      case 'precipitation':
+        return { label: 'Precipitation', unit: 'mm' }
       default:
         return { label: 'Value', unit: '' }
     }
@@ -149,7 +151,18 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
     if (!averageValue || parameter !== 'temp') return []
     
     const icons = []
-    const numIcons = 6 // 6 thermometers in bottom-left quadrant
+    // Number of thermometers based on temperature value
+    // Below 0°C: 1 thermometer, then increase by 1 for each 5°C step
+    const temp = averageValue
+    let numIcons = 1
+    if (temp >= 0) numIcons = 2
+    if (temp >= 5) numIcons = 3
+    if (temp >= 10) numIcons = 4
+    if (temp >= 15) numIcons = 5
+    if (temp >= 20) numIcons = 6
+    if (temp >= 25) numIcons = 7
+    if (temp >= 30) numIcons = 8
+    
     const color = getTemperatureColor(averageValue)
     
     for (let i = 0; i < numIcons; i++) {
@@ -236,7 +249,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
 
   // Generate rainfall droplets based on actual precipitation data - TOP LEFT quadrant (135-225°)
   const generateRainfallDroplets = () => {
-    if (parameter !== 'clouds') return [] // Only show when rainfall is selected
+    if (parameter !== 'precipitation' && parameter !== 'clouds') return [] // Only show when rainfall/precipitation is selected
     if (precipitationData === 0) return [] // No droplets if no rain
     
     const droplets = []

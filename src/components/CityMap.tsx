@@ -550,7 +550,7 @@ export function CityMap() {
               pathOptions={{
                 color: '#707070',
                 fillColor: '#FFFBEB',
-                fillOpacity: 0.6,
+                fillOpacity: 0.8,
                 weight: 1,
                 dashArray: '5, 5',
               }}
@@ -562,11 +562,11 @@ export function CityMap() {
             startDate &&
             selectedWeatherMetrics.map((metric) => {
               // Map metric to WeatherLayer parameter
-              let parameter: "temp" | "humidity" | "wind_speed" | "clouds" =
+              let parameter: "temp" | "humidity" | "wind_speed" | "clouds" | "precipitation" =
                 "temp";
               if (metric === "wind") parameter = "wind_speed";
               else if (metric === "humidity") parameter = "humidity";
-              else if (metric === "rainfall") parameter = "clouds"; // Use clouds as proxy for rainfall
+              else if (metric === "rainfall") parameter = "precipitation"; // Use actual precipitation data
               else if (metric === "temperature") parameter = "temp";
 
               return (
