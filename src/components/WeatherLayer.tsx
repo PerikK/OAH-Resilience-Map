@@ -289,7 +289,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
       // Create a small wavy line at this position
       const wavePoints: [number, number][] = []
       const numPoints = 15
-      const waveLength = 0.04 // 40m wave length (shorter)
+      const waveLength = 0.02 // 20m wave length (even shorter)
       
       for (let j = 0; j < numPoints; j++) {
         const t = j / (numPoints - 1)
@@ -459,18 +459,18 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
             position={centerPos}
             icon={L.divIcon({
               html: `
-                <svg width="40" height="12" viewBox="0 0 40 12" style="overflow: visible;">
-                  <path d="M 2,6 Q 5,2 8,6 T 14,6 T 20,6 T 26,6 T 32,6 T 38,6" 
+                <svg width="20" height="10" viewBox="0 0 20 10" style="overflow: visible;">
+                  <path d="M 2,5 Q 4,2 6,5 T 10,5 T 14,5 T 18,5" 
                         fill="none" 
                         stroke="${wave.color}" 
-                        stroke-width="2.5" 
+                        stroke-width="2" 
                         stroke-linecap="round"
                         stroke-linejoin="round"/>
                 </svg>
               `,
               className: '',
-              iconSize: [40, 12],
-              iconAnchor: [20, 6],
+              iconSize: [20, 10],
+              iconAnchor: [10, 5],
             })}
           />
         )
