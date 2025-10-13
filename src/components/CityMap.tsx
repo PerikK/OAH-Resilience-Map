@@ -170,45 +170,90 @@ export function CityMap() {
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Map Type Toggle */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1, gap: 1 }}>
-        <Box
-          onClick={() => setMapType('satellite')}
-          sx={{
-            padding: '6px 16px',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '12px',
-            fontWeight: 500,
-            backgroundColor: mapType === 'satellite' ? '#4A90E2' : 'white',
-            color: mapType === 'satellite' ? 'white' : '#6B7280',
-            border: '1px solid #E5E7EB',
-            transition: 'all 0.2s',
-            '&:hover': {
-              backgroundColor: mapType === 'satellite' ? '#3A7BC8' : '#F3F4F6',
-            },
-          }}
-        >
-          Satellite
+      {/* Map Type Toggle and Health Risk Legend */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1, gap: 2 }}>
+        {/* Health Risk Legend */}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Typography sx={{ fontSize: '12px', fontWeight: 600, color: '#374151' }}>
+            Health Risk:
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <svg width="20" height="24" viewBox="0 0 32 40">
+              <path d="M16 0C7.163 0 0 7.163 0 16c0 8.837 16 24 16 24s16-15.163 16-24C32 7.163 24.837 0 16 0z" fill="#10B981"/>
+              <text x="16" y="20" fontSize="16" fontWeight="bold" textAnchor="middle" fill="white">▼</text>
+            </svg>
+            <Typography sx={{ fontSize: '11px', color: '#6b7280' }}>Low</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <svg width="20" height="24" viewBox="0 0 32 40">
+              <path d="M16 0C7.163 0 0 7.163 0 16c0 8.837 16 24 16 24s16-15.163 16-24C32 7.163 24.837 0 16 0z" fill="#F59E0B"/>
+              <text x="16" y="20" fontSize="16" fontWeight="bold" textAnchor="middle" fill="white">▬</text>
+            </svg>
+            <Typography sx={{ fontSize: '11px', color: '#6b7280' }}>Moderate</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <svg width="20" height="24" viewBox="0 0 32 40">
+              <path d="M16 0C7.163 0 0 7.163 0 16c0 8.837 16 24 16 24s16-15.163 16-24C32 7.163 24.837 0 16 0z" fill="#EF4444"/>
+              <text x="16" y="20" fontSize="16" fontWeight="bold" textAnchor="middle" fill="white">▲</text>
+            </svg>
+            <Typography sx={{ fontSize: '11px', color: '#6b7280' }}>High</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <svg width="20" height="24" viewBox="0 0 32 40">
+              <path d="M16 0C7.163 0 0 7.163 0 16c0 8.837 16 24 16 24s16-15.163 16-24C32 7.163 24.837 0 16 0z" fill="#DC2626"/>
+              <text x="16" y="20" fontSize="16" fontWeight="bold" textAnchor="middle" fill="white">▲</text>
+            </svg>
+            <Typography sx={{ fontSize: '11px', color: '#6b7280' }}>Very High</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <svg width="20" height="24" viewBox="0 0 25 41">
+              <path fill="#2A81CB" stroke="#000" strokeWidth="2" d="M12.5,0.5C6.2,0.5,1,5.7,1,12c0,6.3,11.5,28,11.5,28S24,18.3,24,12C24,5.7,18.8,0.5,12.5,0.5z"/>
+              <circle fill="#FFF" cx="12.5" cy="12" r="5"/>
+            </svg>
+            <Typography sx={{ fontSize: '11px', color: '#6b7280' }}>No Data</Typography>
+          </Box>
         </Box>
-        <Box
-          onClick={() => setMapType('street')}
-          sx={{
-            padding: '6px 16px',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '12px',
-            fontWeight: 500,
-            backgroundColor: mapType === 'street' ? '#4A90E2' : 'white',
-            color: mapType === 'street' ? 'white' : '#6B7280',
-            border: '1px solid #E5E7EB',
-            transition: 'all 0.2s',
-            '&:hover': {
-              backgroundColor: mapType === 'street' ? '#3A7BC8' : '#F3F4F6',
-            },
-          }}
-        >
-          Street
+
+        {/* Map Type Toggle */}
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box
+            onClick={() => setMapType('satellite')}
+            sx={{
+              padding: '6px 16px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: mapType === 'satellite' ? '#4A90E2' : 'white',
+              color: mapType === 'satellite' ? 'white' : '#6B7280',
+              border: '1px solid #E5E7EB',
+              transition: 'all 0.2s',
+              '&:hover': {
+                backgroundColor: mapType === 'satellite' ? '#3A7BC8' : '#F3F4F6',
+              },
+            }}
+          >
+            Satellite
+          </Box>
+          <Box
+            onClick={() => setMapType('street')}
+            sx={{
+              padding: '6px 16px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: mapType === 'street' ? '#4A90E2' : 'white',
+              color: mapType === 'street' ? 'white' : '#6B7280',
+              border: '1px solid #E5E7EB',
+              transition: 'all 0.2s',
+              '&:hover': {
+                backgroundColor: mapType === 'street' ? '#3A7BC8' : '#F3F4F6',
+              },
+            }}
+          >
+            Street
+          </Box>
         </Box>
       </Box>
       <StyledMapContainer sx={{ flex: 1, minHeight: 0 }}>
