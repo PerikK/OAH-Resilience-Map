@@ -172,6 +172,10 @@ export function CollapsibleSidebar() {
                 '& input': {
                   color: 'text.primary',
                 },
+                '& input[type="date"]::-webkit-calendar-picker-indicator': {
+                  filter: 'invert(0.5)',
+                  cursor: 'pointer',
+                },
               }}
             />
             <Typography sx={{ color: 'text.secondary' }}>-</Typography>
@@ -197,6 +201,10 @@ export function CollapsibleSidebar() {
                 },
                 '& input': {
                   color: 'text.primary',
+                },
+                '& input[type="date"]::-webkit-calendar-picker-indicator': {
+                  filter: 'invert(0.5)',
+                  cursor: 'pointer',
                 },
               }}
             />

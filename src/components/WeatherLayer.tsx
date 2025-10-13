@@ -185,7 +185,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
 
   // Get circle color and opacity based on parameter and average value
   const getCircleStyle = () => {
-    if (!averageValue) return { color: '#666', fillOpacity: 0.5 }
+    if (!averageValue) return { color: '#666', fillOpacity: 0.6 }
     const color = getGradientColor(averageValue, parameter)
     return { color, fillOpacity: 0.6 }
   }
@@ -350,7 +350,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
             pathOptions={{
               color: '#1E40AF',
               weight: 3,
-              opacity: 0.8,
+              opacity: 0.6,
             }}
             eventHandlers={{
               add: (e) => {
@@ -386,7 +386,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
           pathOptions={{
             color: getCircleStyle().color,
             fillColor: getCircleStyle().color,
-            fillOpacity: 0.3,
+            fillOpacity: 0.6,
             weight: 2,
           }}
         >

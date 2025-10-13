@@ -7,6 +7,7 @@ import { useSelection } from '../context/SelectionContext'
 import { getCityCoordinates, getSitesByCity, getSite, getUniqueCities, type ResearchSite } from '../data/researchSites'
 import { getHealthRiskForSite } from '../data/healthRiskData'
 import { WeatherLayer } from './WeatherLayer'
+import type { City, Site } from '../mock_data/types'
 import 'leaflet/dist/leaflet.css'
 
 const StyledMapContainer = styled(Box)({
@@ -171,7 +172,7 @@ export function CityMap() {
                   }}
                   eventHandlers={{
                     click: () => {
-                      setCity(cityName as any)
+                      setCity(cityName as City)
                       setSite(null)
                     },
                   }}
@@ -193,7 +194,7 @@ export function CityMap() {
                           '&:hover': { textDecoration: 'underline' }
                         }}
                         onClick={() => {
-                          setCity(cityName as any)
+                          setCity(cityName as City)
                           setSite(null)
                         }}
                       >
@@ -390,7 +391,7 @@ export function CityMap() {
               icon={customIcon}
               eventHandlers={{
                 click: () => {
-                  setSite(siteData['Site Nr.'] as any)
+                  setSite(siteData['Site Nr.'] as Site)
                 },
               }}
             >
@@ -420,7 +421,7 @@ export function CityMap() {
                       '&:hover': { textDecoration: 'underline' }
                     }}
                     onClick={() => {
-                      setSite(siteData['Site Nr.'] as any)
+                      setSite(siteData['Site Nr.'] as Site)
                     }}
                   >
                     Click to select this site →
