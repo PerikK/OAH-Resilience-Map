@@ -1,0 +1,716 @@
+[
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C1",
+    "Site Name": "Exploratório",
+    "Latitude": 40.19787,
+    "Longitude": -8.42865
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C2",
+    "Site Name": "Estação Cbr-B",
+    "Latitude": 40.22483,
+    "Longitude": -8.44135
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C3",
+    "Site Name": "Vale das Flores",
+    "Latitude": 40.19307,
+    "Longitude": -8.41945
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C4",
+    "Site Name": "Eiras",
+    "Latitude": 40.25289,
+    "Longitude": -8.43659
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C5",
+    "Site Name": "Mina Hospital",
+    "Latitude": 40.2186,
+    "Longitude": -8.42733
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C6",
+    "Site Name": "Casa do Sal",
+    "Latitude": 40.21942,
+    "Longitude": -8.43772
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C7",
+    "Site Name": "São Romão",
+    "Latitude": 40.22243,
+    "Longitude": -8.40165
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C8",
+    "Site Name": "Covões",
+    "Latitude": 40.19133,
+    "Longitude": -8.46002
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C9",
+    "Site Name": "Fornos",
+    "Latitude": 40.27702,
+    "Longitude": -8.4272
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C10",
+    "Site Name": "Arregaça",
+    "Latitude": 40.19776,
+    "Longitude": -8.41773
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C11",
+    "Site Name": "Bairro São Miguel",
+    "Latitude": 40.22752,
+    "Longitude": -8.43757
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C12",
+    "Site Name": "Escola Agrária",
+    "Latitude": 40.20386,
+    "Longitude": -8.45302
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C13",
+    "Site Name": "Condeixa",
+    "Latitude": 40.11106,
+    "Longitude": -8.49052
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C14",
+    "Site Name": "Antanhol",
+    "Latitude": 40.16719,
+    "Longitude": -8.47817
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C15",
+    "Site Name": "Copeira",
+    "Latitude": 40.17943,
+    "Longitude": -8.42117
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C16",
+    "Site Name": "Rio Velho",
+    "Latitude": 40.22461,
+    "Longitude": -8.44304
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C17",
+    "Site Name": "Conraria",
+    "Latitude": 40.17422,
+    "Longitude": -8.39363
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C18",
+    "Site Name": "Ponte da Espertina",
+    "Latitude": 40.25621,
+    "Longitude": -8.45312
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C19",
+    "Site Name": "Escravote",
+    "Latitude": 40.24812,
+    "Longitude": -8.41159
+  },
+  {
+    "City": "Coimbra",
+    "Site Nr.": "C20",
+    "Site Name": "Corujeira",
+    "Latitude": 40.21085,
+    "Longitude": -8.47667
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T1",
+    "Site Name": "Ruisseau du Palays",
+    "Latitude": 43.55267,
+    "Longitude": 1.49147
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T2",
+    "Site Name": "Ruisseau de Bonneval aval",
+    "Latitude": 43.53219,
+    "Longitude": 1.46332
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T3",
+    "Site Name": "Ruisseau de Bonneval amont",
+    "Latitude": 43.52756,
+    "Longitude": 1.47439
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T4",
+    "Site Name": "Hers",
+    "Latitude": 43.56499,
+    "Longitude": 1.49464
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T5",
+    "Site Name": "Marcaissonne aval",
+    "Latitude": 43.5678,
+    "Longitude": 1.50937
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T6",
+    "Site Name": "Marcaissonne amont",
+    "Latitude": 43.56755,
+    "Longitude": 1.51974
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T7",
+    "Site Name": "Saune",
+    "Latitude": 43.57873,
+    "Longitude": 1.53609
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T8",
+    "Site Name": "Ruisseau du Grand Port de Mer",
+    "Latitude": 43.58553,
+    "Longitude": 1.52861
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T9",
+    "Site Name": "Ruisseau du Roussimort amont",
+    "Latitude": 43.52152,
+    "Longitude": 1.34273
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T10",
+    "Site Name": "Canal de Saint Martory",
+    "Latitude": 43.5322,
+    "Longitude": 1.32265
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T11",
+    "Site Name": "Fossé de Larramet amont",
+    "Latitude": 43.52992,
+    "Longitude": 1.32597
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T12",
+    "Site Name": "Fossé de Larramet médian",
+    "Latitude": 43.54003,
+    "Longitude": 1.34077
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T13",
+    "Site Name": "Ruisseau du Roussimort aval",
+    "Latitude": 43.5353,
+    "Longitude": 1.37785
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T14",
+    "Site Name": "Canal agricole (depuis la Saudrune)",
+    "Latitude": 43.53855,
+    "Longitude": 1.42074
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T15",
+    "Site Name": "Fossé Mère (ou Ruisseau Le Négogousses)",
+    "Latitude": 43.5713,
+    "Longitude": 1.38535
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T16",
+    "Site Name": "Fossé de Larramet aval",
+    "Latitude": 43.57895,
+    "Longitude": 1.35929
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T17",
+    "Site Name": "Fossé de pluvial avant rejet",
+    "Latitude": 43.5786,
+    "Longitude": 1.35861
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T18",
+    "Site Name": "Ousseau",
+    "Latitude": 43.57882,
+    "Longitude": 1.35262
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T19",
+    "Site Name": "Touch",
+    "Latitude": 43.58253,
+    "Longitude": 1.35047
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T20",
+    "Site Name": "Canal de Moulin",
+    "Latitude": 43.5828,
+    "Longitude": 1.3493
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T22",
+    "Site Name": "Ruisseau de l'Armurié",
+    "Latitude": 43.59608,
+    "Longitude": 1.36657
+  },
+  {
+    "City": "Toulouse",
+    "Site Nr.": "T25",
+    "Site Name": "Sausse",
+    "Latitude": 43.64862,
+    "Longitude": 1.51501
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G1",
+    "Site Name": "Oosterzele1 (O1)",
+    "Latitude": 50.94744,
+    "Longitude": 3.8168
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G2",
+    "Site Name": "Zottegem1 (Zo1)",
+    "Latitude": 50.85943,
+    "Longitude": 3.79794
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G3",
+    "Site Name": "Zottegem2 (Zo2)",
+    "Latitude": 50.87604,
+    "Longitude": 3.75174
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G4",
+    "Site Name": "Zottegem3 (Zo3)",
+    "Latitude": 50.87507,
+    "Longitude": 3.80222
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G21",
+    "Site Name": "Zottegem4 (Zo4)",
+    "Latitude": 50.89162,
+    "Longitude": 3.81558
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G5",
+    "Site Name": "Zwalm1 (Zw1)",
+    "Latitude": 50.87539,
+    "Longitude": 3.74917
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G6",
+    "Site Name": "Zwalm2 (Zw2)",
+    "Latitude": 50.87579,
+    "Longitude": 3.75151
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G7",
+    "Site Name": "Zwalm3 (Zw3)",
+    "Latitude": 50.86216,
+    "Longitude": 3.76577
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G8",
+    "Site Name": "Zwalm4 (Zw4)",
+    "Latitude": 50.87971,
+    "Longitude": 3.73771
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G9",
+    "Site Name": "Zwalm5 (Zw5)",
+    "Latitude": 50.87366,
+    "Longitude": 3.73125
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G10",
+    "Site Name": "Zwalm6 (Zw6)",
+    "Latitude": 50.88344,
+    "Longitude": 3.71431
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G22",
+    "Site Name": "Zwalm7 (Zw7)",
+    "Latitude": 50.88527,
+    "Longitude": 3.69282
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G11",
+    "Site Name": "Zwalm8 (Zw8)",
+    "Latitude": 50.88437,
+    "Longitude": 3.68791
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G12",
+    "Site Name": "Zwalm9 (Zw9)",
+    "Latitude": 50.88541,
+    "Longitude": 3.68606
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G13",
+    "Site Name": "Merelbeke1 (Mr1)",
+    "Latitude": 50.97958,
+    "Longitude": 3.72241
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G14",
+    "Site Name": "Merelbeke2 (Mr2)",
+    "Latitude": 50.99821,
+    "Longitude": 3.73925
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G15",
+    "Site Name": "Melle1 (Ml1)",
+    "Latitude": 50.98975,
+    "Longitude": 3.80615
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G16",
+    "Site Name": "Melle2 (Ml2)",
+    "Latitude": 50.99491,
+    "Longitude": 3.80568
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G17",
+    "Site Name": "Gent1 (G1)",
+    "Latitude": 51.02678,
+    "Longitude": 3.77389
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G18",
+    "Site Name": "Gent2 (G2)",
+    "Latitude": 51.05458,
+    "Longitude": 3.68126
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G19",
+    "Site Name": "Gent3 (G3)",
+    "Latitude": 51.02843,
+    "Longitude": 3.786
+  },
+  {
+    "City": "Ghent",
+    "Site Nr.": "G20",
+    "Site Name": "Gent4 (G4)",
+    "Latitude": 51.0939,
+    "Longitude": 3.71687
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN1",
+    "Site Name": "Capodimonte",
+    "Latitude": 41.13231,
+    "Longitude": 14.80039
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN2",
+    "Site Name": "Cretarossa",
+    "Latitude": 41.12679,
+    "Longitude": 14.80333
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN3",
+    "Site Name": "Ponticelli",
+    "Latitude": 41.13348,
+    "Longitude": 14.78614
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN4",
+    "Site Name": "Serretelle 4",
+    "Latitude": 41.12414,
+    "Longitude": 14.74864
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN5",
+    "Site Name": "Serretelle 5",
+    "Latitude": 41.10154,
+    "Longitude": 14.74298
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN6",
+    "Site Name": "Pezzapiano",
+    "Latitude": 41.14775,
+    "Longitude": 14.78437
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN7",
+    "Site Name": "Margiacca",
+    "Latitude": 41.14905,
+    "Longitude": 14.81407
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN8",
+    "Site Name": "Paduli",
+    "Latitude": 41.15405,
+    "Longitude": 14.8345
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN9",
+    "Site Name": "Vallone Cornacchie",
+    "Latitude": 41.11089,
+    "Longitude": 14.8325
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN10",
+    "Site Name": "Malacagna",
+    "Latitude": 41.14607,
+    "Longitude": 14.76353
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN11",
+    "Site Name": "Masseria Roseto",
+    "Latitude": 41.16124,
+    "Longitude": 14.75972
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN12",
+    "Site Name": "Vallone S. Vitale",
+    "Latitude": 41.13628,
+    "Longitude": 14.73193
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN13",
+    "Site Name": "Vallone la Ripa",
+    "Latitude": 41.11727,
+    "Longitude": 14.73683
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN14",
+    "Site Name": "Rocca - Tufara",
+    "Latitude": 41.06014,
+    "Longitude": 14.70843
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN15",
+    "Site Name": "Corvo Tressanti",
+    "Latitude": 41.06921,
+    "Longitude": 14.70959
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN16",
+    "Site Name": "Ranno",
+    "Latitude": 41.06923,
+    "Longitude": 14.70876
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN17",
+    "Site Name": "Lossauro",
+    "Latitude": 41.13221,
+    "Longitude": 14.7127
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN18",
+    "Site Name": "Jenga",
+    "Latitude": 41.15126,
+    "Longitude": 14.70936
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN19",
+    "Site Name": "Foeniculum",
+    "Latitude": 41.18579,
+    "Longitude": 14.71901
+  },
+  {
+    "City": "Benevento",
+    "Site Nr.": "BN20",
+    "Site Name": "Lenta",
+    "Latitude": 41.21383,
+    "Longitude": 14.68999
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O1",
+    "Site Name": "Gaustadbekken-Skådalen",
+    "Latitude": 59.9561,
+    "Longitude": 10.7153
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O2",
+    "Site Name": "Hoffsbekken",
+    "Latitude": 59.9514,
+    "Longitude": 10.6806
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O3",
+    "Site Name": "Gaustadbekken-Slemdalsveien/RH",
+    "Latitude": 59.9475,
+    "Longitude": 10.7111
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O4",
+    "Site Name": "Makrellbekken - Dronningfossen",
+    "Latitude": 59.9308,
+    "Longitude": 10.6778
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O5",
+    "Site Name": "Hoffselva - Møllhausen",
+    "Latitude": 59.9308,
+    "Longitude": 10.6769
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O6",
+    "Site Name": "Ljanselva- Skullerud",
+    "Latitude": 59.8628,
+    "Longitude": 10.8458
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O7",
+    "Site Name": "Ljanselvas miljøpark",
+    "Latitude": 59.8511,
+    "Longitude": 10.8164
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O8",
+    "Site Name": "Ljanselva – Nedre Ljan Nordstrand",
+    "Latitude": 59.8433,
+    "Longitude": 10.7847
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O9",
+    "Site Name": "Gaustadbekken - Forskningsparken",
+    "Latitude": 59.9425,
+    "Longitude": 10.7181
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O10",
+    "Site Name": "Frognerelva - Vinderen",
+    "Latitude": 59.9414,
+    "Longitude": 10.7097
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O11",
+    "Site Name": "Mærradalsbekken - Radiumhospital",
+    "Latitude": 59.9297,
+    "Longitude": 10.6594
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O12",
+    "Site Name": "Makrellbekken – Ring3",
+    "Latitude": 59.9356,
+    "Longitude": 10.6736
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O13",
+    "Site Name": "Mærradalsbekken – Huseby skole",
+    "Latitude": 59.945,
+    "Longitude": 10.6503
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O14",
+    "Site Name": "Hovinbekken - Krokliveien",
+    "Latitude": 59.9392,
+    "Longitude": 10.8214
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O16",
+    "Site Name": "Alna - Kværnerfossene",
+    "Latitude": 59.9044,
+    "Longitude": 10.7944
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O18",
+    "Site Name": "Alna – v Tveita / plantasjen",
+    "Latitude": 59.9219,
+    "Longitude": 10.8369
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O19",
+    "Site Name": "Alna - Grorud",
+    "Latitude": 59.9525,
+    "Longitude": 10.9017
+  },
+  {
+    "City": "Oslo",
+    "Site Nr.": "O20",
+    "Site Name": "Makrellbekken - Njård",
+    "Latitude": 59.9432,
+    "Longitude": 10.6736
+  }
+]

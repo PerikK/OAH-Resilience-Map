@@ -1,14 +1,11 @@
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 import { Box, Typography } from '@mui/material'
 import { useMemo } from 'react'
-import { getCategoryBars } from '../mock_data/categories'
+import { getHealthRiskForSite } from '../data/healthRiskData'
 import { useSelection } from '../context/SelectionContext'
-import { hasDataForSite, getLatestResilienceData } from '../data/resilienceData'
 import { styled } from '@mui/material/styles'
 
- 
-
-const colors = ['#4f46e5', '#7c3aed', '#8b5cf6']
+const colors = ['#DC2626', '#EA580C', '#D97706']
 
 const EmptyStateContainer = styled(Box)({ 
   display: 'flex',
@@ -21,54 +18,39 @@ const EmptyStateContainer = styled(Box)({
 })
 
 export function CategoryChart() {
-  const { city, site } = useSelection()
-  const data = useMemo(() => {
-    if (!city) {
-      return []
-    }
-    
-    // Use real data for Coimbra C1
-    if (city && site && hasDataForSite(city, site)) {
-      const realData = getLatestResilienceData()
-      if (realData) {
-        return [
-          {
-            category: 'Water Quality',
-            dataset1: realData['Water Resources & Quality'],
-            dataset2: realData['Water Quality'],
-            dataset3: realData['Riverbank Protection']
-          },
-          {
-            category: 'Biodiversity',
-            dataset1: realData['Biodiversity & Habitats'],
-            dataset2: realData['Biodiversity'],
-            dataset3: realData['Natural Habitat']
-          },
-          {
-            category: 'Environment',
-            dataset1: realData['Air Quality'],
-            dataset2: realData['Climate Adaptation'],
-            dataset3: realData['Sustainable Land Use & Agriculture']
-          },
-          {
-            category: 'Engagement',
-            dataset1: realData['Ecosystem Engagement (%)'],
-            dataset2: realData['Maintained (%)'],
-            dataset3: realData['Waste Reduction']
-          }
-        ]
-      }
-    }
-    
-    // Fallback to mock data
-    return getCategoryBars(city, site)
-  }, [city, site])
+  const { site } = useSelection()
   
-  if (!city) {
+  const data = useMemo(() => {
+    if (!site || site === 'all') return []
+    
+    const healthData = getHealthRiskForSite(site)
+    if (!healthData) return []
+    
+    return [
+      {
+        category: 'Pathogen',
+        value: healthData.scaled_Pathogen_Risk * 100,
+      },
+      {
+        category: 'Fecal',
+        value: healthData.scaled_Fecal_Risk * 100,
+      },
+      {
+        category: 'ARG',
+        value: healthData.scaled_ARG_Risk * 100,
+      },
+      {
+        category: 'Overall',
+        value: healthData.health_risk_score * 100,
+      },
+    ]
+  }, [site])
+  
+  if (data.length === 0) {
     return (
       <EmptyStateContainer>
         <Typography variant="body2" sx={{ color: '#6b7280', textAlign: 'center' }}>
-          Please select a city to view category data
+          Select a specific site to view health risk breakdown
         </Typography>
       </EmptyStateContainer>
     )
@@ -76,21 +58,6 @@ export function CategoryChart() {
   
   return (
     <Box sx={{ width: '100%', height: 350 }}>
-      <Box sx={{ display: 'flex', gap: 2, mb: 2, justifyContent: 'center' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ width: 12, height: 12, backgroundColor: colors[0], borderRadius: '50%' }} />
-          <Typography variant="caption">Dataset 1</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ width: 12, height: 12, backgroundColor: colors[1], borderRadius: '50%' }} />
-          <Typography variant="caption">Dataset 2</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ width: 12, height: 12, backgroundColor: colors[2], borderRadius: '50%' }} />
-          <Typography variant="caption">Dataset 3</Typography>
-        </Box>
-      </Box>
-      
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
@@ -106,9 +73,7 @@ export function CategoryChart() {
             tick={{ fontSize: 12, fill: '#6b7280' }}
             width={75}
           />
-          <Bar dataKey="dataset1" fill={colors[0]} radius={[0, 4, 4, 0]} />
-          <Bar dataKey="dataset2" fill={colors[1]} radius={[0, 4, 4, 0]} />
-          <Bar dataKey="dataset3" fill={colors[2]} radius={[0, 4, 4, 0]} />
+          <Bar dataKey="value" fill={colors[0]} radius={[0, 4, 4, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </Box>

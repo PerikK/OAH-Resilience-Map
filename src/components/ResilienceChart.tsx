@@ -1,11 +1,9 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts'
 import { Box, Typography } from '@mui/material'
 import { useMemo } from 'react'
-import { getResilienceMonthly } from '../mock_data/resilience'
+import { getHealthRiskForSite } from '../data/healthRiskData'
 import { useSelection } from '../context/SelectionContext'
 import { styled } from '@mui/material/styles'
-
- 
 
 export type ResilienceChartProps = {
   height?: number
@@ -21,14 +19,27 @@ const EmptyStateContainer = styled(Box)({
 })
 
 export function ResilienceChart({ height = 300 }: ResilienceChartProps) {
-  const { city, site } = useSelection()
-  const data = useMemo(() => city ? getResilienceMonthly(city, site) : [], [city, site])
+  const { site } = useSelection()
   
-  if (!city) {
+  const data = useMemo(() => {
+    if (!site || site === 'all') return []
+    
+    const healthData = getHealthRiskForSite(site)
+    if (!healthData) return []
+    
+    return [
+      { name: 'Pathogen', value: healthData.scaled_Pathogen_Risk * 100 },
+      { name: 'Fecal', value: healthData.scaled_Fecal_Risk * 100 },
+      { name: 'ARG', value: healthData.scaled_ARG_Risk * 100 },
+      { name: 'Overall', value: healthData.health_risk_score * 100 },
+    ]
+  }, [site])
+  
+  if (data.length === 0) {
     return (
       <EmptyStateContainer sx={{ width: '100%', height }}>
         <Typography variant="body2" sx={{ color: '#6b7280', textAlign: 'center' }}>
-          Please select a city to view resilience data
+          Select a specific site to view health risk scores
         </Typography>
       </EmptyStateContainer>
     )
@@ -37,50 +48,28 @@ export function ResilienceChart({ height = 300 }: ResilienceChartProps) {
   return (
     <Box sx={{ width: '100%', height }}>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+        <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#ede9fe" />
           <XAxis 
-            dataKey="month" 
+            dataKey="name" 
             axisLine={false}
             tickLine={false}
             tick={{ fontSize: 12, fill: '#6b7280' }}
           />
           <YAxis 
-            domain={[0, 1.25]}
+            domain={[0, 100]}
             axisLine={false}
             tickLine={false}
             tick={{ fontSize: 12, fill: '#6b7280' }}
-            tickFormatter={(value) => value.toFixed(2)}
-            label={{ value: 'Resilience Index', angle: -90, position: 'insideLeft', offset: 10, style: { fill: '#6b7280', fontSize: 12 } }}
+            label={{ value: 'Risk Score (%)', angle: -90, position: 'insideLeft', offset: 10, style: { fill: '#6b7280', fontSize: 12 } }}
           />
-          <Legend 
-            verticalAlign="top" 
-            height={36}
-            iconType="circle"
-            align="right"
-            wrapperStyle={{ paddingBottom: '20px', color: '#4f46e5' }}
+          <Bar 
+            dataKey="value" 
+            fill="#DC2626" 
+            radius={[4, 4, 0, 0]}
           />
-          <Line 
-            type="monotone" 
-            dataKey="current" 
-            stroke="#4f46e5" 
-            strokeWidth={2}
-            dot={{ fill: '#4f46e5', strokeWidth: 2, r: 4 }}
-            name="Current"
-          />
-          <Line 
-            type="monotone" 
-            dataKey="previous" 
-            stroke="#8b5cf6" 
-            strokeWidth={2}
-            dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }}
-            name="Previous"
-          />
-        </LineChart>
+        </BarChart>
       </ResponsiveContainer>
-      <Typography variant="caption" sx={{ color: '#6b7280', mt: 1, display: 'block', textAlign: 'center' }}>
-        Months
-      </Typography>
     </Box>
   )
 }

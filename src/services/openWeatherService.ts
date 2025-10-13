@@ -223,16 +223,6 @@ function generatePolarGridPoints(centerLat: number, centerLon: number, radiusKm:
   return points
 }
 
-export interface AreaWeatherPoint {
-  lat: number
-  lon: number
-  weatherData: OneCallTimemachineResponse
-  distance: number
-  angle: number | null
-  id: string
-  timestamp: number
-}
-
 export interface AreaAirPollutionPoint {
   lat: number
   lon: number
@@ -241,53 +231,6 @@ export interface AreaAirPollutionPoint {
   angle: number | null
   id: string
   timestamp: number
-}
-
-/**
- * Fetch historical weather data for multiple points in an area
- * Uses One Call API 3.0 timemachine endpoint
- * 
- * @param centerLat - Center latitude
- * @param centerLon - Center longitude
- * @param date - Date string in YYYY-MM-DD format or Unix timestamp
- * @param radiusKm - Radius in kilometers (default: 10)
- * @returns Array of weather data points
- */
-export async function fetchAreaHistoricalWeather(
-  centerLat: number,
-  centerLon: number,
-  date: string | number,
-  radiusKm: number = 10
-): Promise<AreaWeatherPoint[]> {
-  const gridPoints = generatePolarGridPoints(centerLat, centerLon, radiusKm)
-
-  // Fetch data for all points in parallel, preserving metadata
-  const promises = gridPoints.map((point) =>
-    fetchHistoricalWeather(point.lat, point.lon, date)
-      .then((result) => {
-        if (result) {
-          return {
-            lat: point.lat,
-            lon: point.lon,
-            weatherData: result,
-            distance: point.distance,
-            angle: point.angle,
-            id: point.id,
-            timestamp: Date.now(),
-          }
-        }
-        return null
-      })
-      .catch((err) => {
-        console.warn(`Failed to fetch weather data for ${point.lat}, ${point.lon}:`, err)
-        return null
-      })
-  )
-
-  const results = await Promise.all(promises)
-
-  // Filter out failed requests
-  return results.filter((result): result is AreaWeatherPoint => result !== null)
 }
 
 /**

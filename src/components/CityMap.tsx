@@ -3,7 +3,7 @@ import { styled } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
 import L from "leaflet";
-import { useSelection } from "../context/SelectionContext";
+import { useSelection, type City, type Site } from "../context/SelectionContext";
 import {
   getCityCoordinates,
   getSitesByCity,
@@ -13,7 +13,6 @@ import {
 } from "../data/researchSites";
 import { getHealthRiskForSite } from "../data/healthRiskData";
 import { WeatherLayer } from "./WeatherLayer";
-import type { City, Site } from "../mock_data/types";
 import "leaflet/dist/leaflet.css";
 
 const StyledMapContainer = styled(Box)({

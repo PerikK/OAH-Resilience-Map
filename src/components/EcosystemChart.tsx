@@ -1,12 +1,9 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { Box, Typography } from '@mui/material'
 import { useMemo } from 'react'
-import { getEcosystemDistribution } from '../mock_data/ecosystem'
+import { getHealthRiskForSite } from '../data/healthRiskData'
 import { useSelection } from '../context/SelectionContext'
-import { hasDataForSite, getLatestResilienceData } from '../data/resilienceData'
 import { styled } from '@mui/material/styles'
-
- 
 
 const EmptyStateContainer = styled(Box)({ 
   display: 'flex',
@@ -19,50 +16,38 @@ const EmptyStateContainer = styled(Box)({
 })
 
 export function EcosystemChart() {
-  const { city, site } = useSelection()
-  const data = useMemo(() => {
-    if (!city) {
-      return []
-    }
-    
-    // Use real data for Coimbra C1
-    if (city && site && hasDataForSite(city, site)) {
-      const realData = getLatestResilienceData()
-      if (realData) {
-        return [
-          {
-            name: 'Ecosystem Engagement',
-            value: Math.round(realData['Ecosystem Engagement (%)']),
-            color: '#4f46e5'
-          },
-          {
-            name: 'Maintained Areas',
-            value: Math.round(realData['Maintained (%)']),
-            color: '#7c3aed'
-          },
-          {
-            name: 'Natural Habitat',
-            value: Math.round(realData['Natural Habitat']),
-            color: '#059669'
-          },
-          {
-            name: 'Biodiversity',
-            value: Math.round(realData['Biodiversity']),
-            color: '#dc2626'
-          }
-        ]
-      }
-    }
-    
-    // Fallback to mock data
-    return getEcosystemDistribution(city, site)
-  }, [city, site])
+  const { site } = useSelection()
   
-  if (!city) {
+  const data = useMemo(() => {
+    if (!site || site === 'all') return []
+    
+    const healthData = getHealthRiskForSite(site)
+    if (!healthData) return []
+    
+    return [
+      {
+        name: 'Pathogen Risk',
+        value: Math.round(healthData.scaled_Pathogen_Risk * 100),
+        color: '#DC2626'
+      },
+      {
+        name: 'Fecal Risk',
+        value: Math.round(healthData.scaled_Fecal_Risk * 100),
+        color: '#EA580C'
+      },
+      {
+        name: 'ARG Risk',
+        value: Math.round(healthData.scaled_ARG_Risk * 100),
+        color: '#D97706'
+      },
+    ]
+  }, [site])
+  
+  if (data.length === 0) {
     return (
       <EmptyStateContainer>
         <Typography variant="body2" sx={{ color: '#6b7280', textAlign: 'center' }}>
-          Please select a city to view ecosystem data
+          Select a specific site to view health risk distribution
         </Typography>
       </EmptyStateContainer>
     )

@@ -1,6 +1,6 @@
 import { Card, CardContent, Typography, LinearProgress, Box } from '@mui/material'
 import { useMemo } from 'react'
-import { getMetrics, type Metric } from '../mock_data/metrics'
+import { getHealthRiskForSite } from '../data/healthRiskData'
 import { useSelection } from '../context/SelectionContext'
 import { styled } from '@mui/material/styles'
 
@@ -66,8 +66,59 @@ function MetricCardComponent({
 }
 
 export function MetricsCards() {
-  const { city, site } = useSelection()
-  const metrics = useMemo(() => getMetrics(city, site), [city, site])
+  const { site } = useSelection()
+  
+  const metrics = useMemo(() => {
+    if (!site || site === 'all') return []
+    
+    const healthData = getHealthRiskForSite(site)
+    if (!healthData) return []
+    
+    return [
+      {
+        title: 'Pathogen Risk',
+        value: `${(healthData.scaled_Pathogen_Risk * 100).toFixed(1)}%`,
+        percentage: healthData.scaled_Pathogen_Risk * 100,
+        subtitle: 'Scaled Risk Score',
+        color: '#DC2626',
+        bgColor: '#DC2626',
+      },
+      {
+        title: 'Fecal Contamination',
+        value: `${(healthData.scaled_Fecal_Risk * 100).toFixed(1)}%`,
+        percentage: healthData.scaled_Fecal_Risk * 100,
+        subtitle: 'Scaled Risk Score',
+        color: '#EA580C',
+        bgColor: '#EA580C',
+      },
+      {
+        title: 'ARG Risk',
+        value: `${(healthData.scaled_ARG_Risk * 100).toFixed(1)}%`,
+        percentage: healthData.scaled_ARG_Risk * 100,
+        subtitle: 'Scaled Risk Score',
+        color: '#D97706',
+        bgColor: '#D97706',
+      },
+      {
+        title: 'Overall Health Risk',
+        value: `${(healthData.health_risk_score * 100).toFixed(1)}%`,
+        percentage: healthData.health_risk_score * 100,
+        subtitle: 'Combined Score',
+        color: '#7C3AED',
+        bgColor: '#7C3AED',
+      },
+    ]
+  }, [site])
+
+  if (metrics.length === 0) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 4 }}>
+        <Typography variant="body1" color="text.secondary">
+          Select a specific site to view health risk metrics
+        </Typography>
+      </Box>
+    )
+  }
 
   return (
     <Box
@@ -77,11 +128,11 @@ export function MetricsCards() {
         gridTemplateColumns: {
           xs: '1fr',
           sm: 'repeat(2, 1fr)',
-          md: 'repeat(5, 1fr)',
+          md: 'repeat(4, 1fr)',
         },
       }}
     >
-      {metrics.map((metric: Metric, index: number) => (
+      {metrics.map((metric, index) => (
         <Box key={index}>
           <MetricCardComponent {...metric} />
         </Box>

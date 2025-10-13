@@ -31,13 +31,3 @@ export const healthRiskData: HealthRiskData[] = parseCSV(healthRiskCSV)
 export function getHealthRiskForSite(siteNr: string): HealthRiskData | null {
   return healthRiskData.find(data => data.Sample === siteNr) || null
 }
-
-// Get all health risk data for a city
-export function getHealthRiskForCity(cityPrefix: string): HealthRiskData[] {
-  return healthRiskData.filter(data => data.Sample.startsWith(cityPrefix))
-}
-
-// Check if health risk data exists for a site
-export function hasHealthRiskData(siteNr: string): boolean {
-  return healthRiskData.some(data => data.Sample === siteNr)
-}

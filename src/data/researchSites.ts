@@ -1,4 +1,4 @@
-import researchSitesData from '../mock_data/Research_Sites_All.json'
+import researchSitesData from './Research_Sites_All.json'
 
 export interface ResearchSite {
   City: string

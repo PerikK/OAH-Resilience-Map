@@ -1,7 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useMemo } from 'react'
 import type { ReactNode } from 'react'
-import type { City, Site } from '../mock_data/types'
+
+// Type definitions for city and site selection
+export type City = string | null
+export type Site = string | null
 
 export type HealthRiskMetric = 'pathogen' | 'fecal' | 'arg' | 'overall'
 export type WeatherMetric = 'wind' | 'rainfall' | 'humidity' | 'temperature'

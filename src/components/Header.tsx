@@ -2,11 +2,9 @@ import { useMemo, useState, useEffect } from 'react'
 import { Box, Typography, TextField, MenuItem, Button, LinearProgress } from '@mui/material'
 import top_left_logo from '../assets/top_left_logo.svg'
 import { styled } from '@mui/material/styles'
-import { useSelection } from '../context/SelectionContext'
-import { getMetrics, type Metric } from '../mock_data/metrics'
+import { useSelection, type City, type Site } from '../context/SelectionContext'
+import { getHealthRiskForSite } from '../data/healthRiskData'
 import { getUniqueCities, getSitesByCity, type ResearchSite } from '../data/researchSites'
-import { hasDataForSite, getAggregatedMetrics } from '../data/resilienceData'
-import type { City, Site } from '../mock_data/types'
 
 const HeaderContainer = styled(Box)(({ theme }) => ({
   backgroundColor: 'white',
@@ -167,66 +165,73 @@ export function Header({ onTabChange }: HeaderProps) {
           title: 'Air Quality',
           value: 'Please select a city to view Air Quality data',
           percentage: 0,
-          subtitle: 'Air Quality Index',
-          bgColor: '#6b7280',
-          color: '#6b7280',
-          isEmpty: true
-        },
+        }
+      ]
+    }
+    
+    if (!site || site === 'all') {
+      return [
         {
-          title: 'Ecosystem Health',
-          value: 'Please select a city to view Ecosystem Health data',
+          title: 'Select a site',
+          value: '--',
           percentage: 0,
-          subtitle: 'Ecosystem Engagement',
-          bgColor: '#6b7280',
+          subtitle: 'No data available',
+          bgColor: '#e5e7eb',
           color: '#6b7280',
           isEmpty: true
         }
       ]
     }
     
-    // Check if we have real data for the selected site
-    if (city && site && hasDataForSite(city, site)) {
-      const realData = getAggregatedMetrics()
-      if (realData) {
-        return [
-          {
-            title: 'Water Quality',
-            value: `${realData.waterQuality}%`,
-            percentage: realData.waterQuality,
-            subtitle: 'Water Resources & Quality',
-            bgColor: '#1e40af',
-            color: '#1e40af'
-          },
-          {
-            title: 'Biodiversity',
-            value: `${realData.biodiversity}%`,
-            percentage: realData.biodiversity,
-            subtitle: 'Biodiversity & Habitats',
-            bgColor: '#7c3aed',
-            color: '#7c3aed'
-          },
-          {
-            title: 'Air Quality',
-            value: `${realData.airQuality}%`,
-            percentage: realData.airQuality,
-            subtitle: 'Air Quality Index',
-            bgColor: '#059669',
-            color: '#059669'
-          },
-          {
-            title: 'Ecosystem Health',
-            value: `${realData.ecosystemEngagement}%`,
-            percentage: realData.ecosystemEngagement,
-            subtitle: 'Ecosystem Engagement',
-            bgColor: '#dc2626',
-            color: '#dc2626'
-          }
-        ]
-      }
+    const healthData = site ? getHealthRiskForSite(site) : null
+    if (!healthData) {
+      return [
+        {
+          title: 'No data',
+          value: '--',
+          percentage: 0,
+          subtitle: 'Site not found',
+          bgColor: '#e5e7eb',
+          color: '#6b7280',
+          isEmpty: true
+        }
+      ]
     }
     
-    // Fallback to mock data
-    return getMetrics(city, site)
+    return [
+      {
+        title: 'Pathogen Risk',
+        value: `${(healthData.scaled_Pathogen_Risk * 100).toFixed(1)}%`,
+        percentage: healthData.scaled_Pathogen_Risk * 100,
+        subtitle: 'Scaled Risk Score',
+        bgColor: '#DC2626',
+        color: '#DC2626'
+      },
+      {
+        title: 'Fecal Risk',
+        value: `${(healthData.scaled_Fecal_Risk * 100).toFixed(1)}%`,
+        percentage: healthData.scaled_Fecal_Risk * 100,
+        subtitle: 'Scaled Risk Score',
+        bgColor: '#EA580C',
+        color: '#EA580C'
+      },
+      {
+        title: 'ARG Risk',
+        value: `${(healthData.scaled_ARG_Risk * 100).toFixed(1)}%`,
+        percentage: healthData.scaled_ARG_Risk * 100,
+        subtitle: 'Scaled Risk Score',
+        bgColor: '#D97706',
+        color: '#D97706'
+      },
+      {
+        title: 'Overall Risk',
+        value: `${(healthData.health_risk_score * 100).toFixed(1)}%`,
+        percentage: healthData.health_risk_score * 100,
+        subtitle: 'Combined Score',
+        bgColor: '#7C3AED',
+        color: '#7C3AED'
+      }
+    ]
   }, [city, site])
 
   return (
@@ -358,7 +363,7 @@ export function Header({ onTabChange }: HeaderProps) {
         </LeftSidebar>
 
         <MetricsContainer>
-          {metrics.map((metric: Metric & { isEmpty?: boolean }, index: number) => (
+          {metrics.map((metric, index: number) => (
             <MetricCard key={index}>
               <Box sx={{
                 backgroundColor: metric.bgColor,
@@ -374,18 +379,18 @@ export function Header({ onTabChange }: HeaderProps) {
               </Box>
               <Box sx={{ px: 0.5 }}>
                 <Typography 
-                  variant={metric.isEmpty ? "body2" : "h6"} 
+                  variant={'isEmpty' in metric && metric.isEmpty ? "body2" : "h6"} 
                   sx={{ 
-                    fontWeight: metric.isEmpty ? 'normal' : 'bold', 
-                    fontSize: metric.isEmpty ? '12px' : '18px', 
-                    color: metric.isEmpty ? '#6b7280' : '#111827',
-                    textAlign: metric.isEmpty ? 'center' : 'left',
-                    lineHeight: metric.isEmpty ? 1.3 : 1.2
+                    fontWeight: ('isEmpty' in metric && metric.isEmpty) ? 'normal' : 'bold', 
+                    fontSize: ('isEmpty' in metric && metric.isEmpty) ? '12px' : '18px', 
+                    color: ('isEmpty' in metric && metric.isEmpty) ? '#6b7280' : '#111827',
+                    textAlign: ('isEmpty' in metric && metric.isEmpty) ? 'center' : 'left',
+                    lineHeight: ('isEmpty' in metric && metric.isEmpty) ? 1.3 : 1.2
                   }}
                 >
                   {metric.value}
                 </Typography>
-                {!metric.isEmpty && (
+                {!('isEmpty' in metric && metric.isEmpty) && (
                   <StyledLinearProgress 
                     variant="determinate" 
                     value={metric.percentage} 

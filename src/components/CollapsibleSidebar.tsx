@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Box, TextField, MenuItem, Typography, Checkbox, FormControlLabel, FormGroup, Tooltip, Button } from '@mui/material'
-import { useSelection } from '../context/SelectionContext'
+import { useSelection, type City, type Site } from '../context/SelectionContext'
 import { getUniqueCities, getSitesByCity, type ResearchSite } from '../data/researchSites'
-import type { City, Site } from '../mock_data/types'
 
 export function CollapsibleSidebar() {
   const [cities, setCities] = useState<string[]>([])
