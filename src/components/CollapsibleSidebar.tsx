@@ -25,7 +25,7 @@ export function CollapsibleSidebar() {
   } = useSelection()
 
   const allHealthRisks: ('pathogen' | 'fecal' | 'arg' | 'overall')[] = ['pathogen', 'fecal', 'arg', 'overall']
-  const allWeatherMetrics: ('wind' | 'rainfall' | 'humidity')[] = ['wind', 'rainfall', 'humidity']
+  const allWeatherMetrics: ('wind' | 'rainfall' | 'humidity' | 'temperature')[] = ['wind', 'rainfall', 'humidity', 'temperature']
 
   const handleSelectAllHealthRisks = () => {
     setSelectedHealthRisks(allHealthRisks)
@@ -526,6 +526,63 @@ export function CollapsibleSidebar() {
                   { color: '#3B82F6', label: '40-60%' },
                   { color: '#1E40AF', label: '60-80%' },
                   { color: '#1E3A8A', label: '80-100%' },
+                ].map((item, index) => (
+                  <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        backgroundColor: item.color,
+                        borderRadius: '2px',
+                        border: '1px solid #ddd',
+                      }}
+                    />
+                    <Typography sx={{ fontSize: '10px', color: '#6b7280' }}>{item.label}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+
+          {/* Temperature */}
+          <Box sx={{ mb: 2 }}>
+            <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
+              <span>
+                <FormControlLabel
+                  disabled={!city || !site || site === 'all'}
+                  control={
+                    <Checkbox
+                      checked={selectedWeatherMetrics.includes('temperature')}
+                      onChange={() => toggleWeatherMetric('temperature')}
+                      sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+                    />
+                  }
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <svg width="12" height="16" viewBox="0 0 12 16">
+                        <rect x="4" y="1" width="4" height="8" fill="none" stroke="#DC2626" strokeWidth="1"/>
+                        <circle cx="6" cy="12" r="3" fill="#DC2626" stroke="#DC2626" strokeWidth="1"/>
+                        <line x1="6" y1="9" x2="6" y2="12" stroke="#DC2626" strokeWidth="2"/>
+                      </svg>
+                      <Typography sx={{ fontSize: '14px' }}>Temperature</Typography>
+                    </Box>
+                  }
+                />
+              </span>
+            </Tooltip>
+            {selectedWeatherMetrics.includes('temperature') && (
+              <Box sx={{ ml: 4, mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {[
+                  { color: '#0C4A6E', label: '<-10°C' },
+                  { color: '#075985', label: '-10 to -5°C' },
+                  { color: '#0369A1', label: '-5 to 0°C' },
+                  { color: '#0EA5E9', label: '0-5°C' },
+                  { color: '#38BDF8', label: '5-10°C' },
+                  { color: '#10B981', label: '10-20°C' },
+                  { color: '#FDE047', label: '20-25°C' },
+                  { color: '#F59E0B', label: '25-30°C' },
+                  { color: '#EF4444', label: '30-35°C' },
+                  { color: '#DC2626', label: '>35°C' },
                 ].map((item, index) => (
                   <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Box

@@ -87,6 +87,8 @@ export function WeatherDataTable() {
         return 'Rainfall'
       case 'humidity':
         return 'Humidity'
+      case 'temperature':
+        return 'Temperature'
       default:
         return metric
     }
@@ -108,6 +110,10 @@ export function WeatherDataTable() {
         const avgHumidity = calculateAverage(hourly.relative_humidity_2m)
         return `${avgHumidity.toFixed(1)}%`
       }
+      case 'temperature': {
+        const avgTemp = calculateAverage(hourly.temperature_2m)
+        return `${avgTemp.toFixed(1)}°C`
+      }
       default:
         return 'N/A'
     }
@@ -121,6 +127,8 @@ export function WeatherDataTable() {
         return 'mm'
       case 'humidity':
         return '%'
+      case 'temperature':
+        return '°C'
       default:
         return ''
     }

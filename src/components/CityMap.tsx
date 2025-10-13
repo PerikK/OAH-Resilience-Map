@@ -568,6 +568,7 @@ export function CityMap() {
               if (metric === "wind") parameter = "wind_speed";
               else if (metric === "humidity") parameter = "humidity";
               else if (metric === "rainfall") parameter = "clouds"; // Use clouds as proxy for rainfall
+              else if (metric === "temperature") parameter = "temp";
 
               return (
                 <WeatherLayer

@@ -188,6 +188,44 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
     return '#14532D' // Very strong
   }
 
+  // Get temperature color based on value
+  const getTemperatureColor = (temp: number) => {
+    if (temp < -10) return '#0C4A6E' // Very cold - Dark blue
+    if (temp < -5) return '#075985' // Freezing - Navy blue
+    if (temp < 0) return '#0369A1' // Below freezing - Blue
+    if (temp < 5) return '#0EA5E9' // Cold - Light blue
+    if (temp < 10) return '#38BDF8' // Cool - Sky blue
+    if (temp < 20) return '#10B981' // Mild - Green
+    if (temp < 25) return '#FDE047' // Pleasant - Yellow
+    if (temp < 30) return '#F59E0B' // Warm - Orange
+    if (temp < 35) return '#EF4444' // Hot - Red
+    return '#DC2626' // Very hot - Dark red
+  }
+
+  // Generate temperature thermometer icons
+  const generateTemperatureIcons = () => {
+    if (!averageValue || parameter !== 'temp') return []
+    
+    const icons = []
+    const numIcons = 6 // 6 thermometers in a circle pattern
+    const color = getTemperatureColor(averageValue)
+    
+    for (let i = 0; i < numIcons; i++) {
+      const angle = (i * 360) / numIcons
+      const distance = 0.3 // 300m from center
+      
+      const pos = calculateArrowEnd(lat, lon, angle, distance)
+      
+      icons.push({
+        id: `temp-${i}`,
+        position: [pos.lat, pos.lon] as [number, number],
+        color: color,
+      })
+    }
+    
+    return icons
+  }
+
   // Generate wind arrows based on wind speed and direction
   const generateWindArrows = () => {
     if (!windData || windData.speed < 0.5) return [] // Don't show arrows for very light wind
@@ -278,65 +316,51 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
     return droplets
   }
 
+  // Get humidity color based on value
+  const getHumidityColor = (humidity: number) => {
+    if (humidity < 20) return '#FEF3C7' // Very dry - Light yellow
+    if (humidity < 40) return '#7DD3FC' // Dry - Light blue
+    if (humidity < 60) return '#3B82F6' // Moderate - Blue
+    if (humidity < 80) return '#1E40AF' // Humid - Dark blue
+    return '#1E3A8A' // Very humid - Navy
+  }
+
   // Generate humidity wavy lines (pairs of parallel horizontal wavy lines)
   const generateHumidityWaves = () => {
     if (!averageValue || parameter !== 'humidity') return []
     
     const waves = []
-    // More wave pairs for higher humidity
-    const numWavePairs = Math.min(Math.ceil(averageValue / 20), 6) // Max 6 wave pairs
+    const numWaves = 4 // 4 wavy lines around the circle
+    const color = getHumidityColor(averageValue)
     
-    for (let i = 0; i < numWavePairs; i++) {
-      const angle = (i * 360) / numWavePairs + 15 // Offset positioning for placement around circle
-      const distance = 0.28 // 280m from center
+    for (let i = 0; i < numWaves; i++) {
+      const angle = (i * 360) / numWaves
+      const distance = 0.3 // 300m from center
       
       const centerPos = calculateArrowEnd(lat, lon, angle, distance)
       
-      // Create two parallel HORIZONTAL wavy lines (always east-west)
-      const waveLength = 0.1 // 100m wave length
-      const separation = 0.015 // 15m between the two lines
-      const waveAmplitude = 0.015 // 15m wave height for more pronounced curves
-      const numWavePoints = 12 // More points for smoother curves
-      const numWaveCycles = 2 // Number of complete wave cycles
+      // Create a small wavy line at this position
+      const wavePoints: [number, number][] = []
+      const numPoints = 15
+      const waveLength = 0.08 // 80m wave length
       
-      // Generate top wavy line
-      const topWavePoints: [number, number][] = []
-      const topCenter = calculateArrowEnd(centerPos.lat, centerPos.lon, 0, separation / 2)
-      
-      for (let j = 0; j < numWavePoints; j++) {
-        const t = j / (numWavePoints - 1) // 0 to 1
-        const xOffset = (t - 0.5) * waveLength // -waveLength/2 to +waveLength/2
-        const yOffset = Math.sin(t * Math.PI * 2 * numWaveCycles) * waveAmplitude // Multiple wave cycles
+      for (let j = 0; j < numPoints; j++) {
+        const t = j / (numPoints - 1)
+        const waveAngle = angle + 90 // Perpendicular to radius
+        const offset = Math.sin(t * Math.PI * 3) * 0.02 // 20m amplitude
+        const alongWave = (t - 0.5) * waveLength
         
-        const pointX = calculateArrowEnd(topCenter.lat, topCenter.lon, 90, xOffset) // Horizontal offset
-        const point = calculateArrowEnd(pointX.lat, pointX.lon, 0, yOffset) // Vertical offset for wave
+        const pointAngle = waveAngle
+        const pointDistance = alongWave
         
-        topWavePoints.push([point.lat, point.lon])
-      }
-      
-      // Generate bottom wavy line
-      const bottomWavePoints: [number, number][] = []
-      const bottomCenter = calculateArrowEnd(centerPos.lat, centerPos.lon, 180, separation / 2)
-      
-      for (let j = 0; j < numWavePoints; j++) {
-        const t = j / (numWavePoints - 1) // 0 to 1
-        const xOffset = (t - 0.5) * waveLength
-        const yOffset = Math.sin(t * Math.PI * 2 * numWaveCycles) * waveAmplitude
-        
-        const pointX = calculateArrowEnd(bottomCenter.lat, bottomCenter.lon, 90, xOffset)
-        const point = calculateArrowEnd(pointX.lat, pointX.lon, 0, yOffset)
-        
-        bottomWavePoints.push([point.lat, point.lon])
+        const wavePoint = calculateArrowEnd(centerPos.lat, centerPos.lon, pointAngle, pointDistance + offset)
+        wavePoints.push([wavePoint.lat, wavePoint.lon])
       }
       
       waves.push({
-        id: `wave-top-${i}`,
-        positions: topWavePoints,
-      })
-      
-      waves.push({
-        id: `wave-bottom-${i}`,
-        positions: bottomWavePoints,
+        id: `wave-${i}`,
+        positions: wavePoints,
+        color: color,
       })
     }
     
@@ -352,6 +376,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
   const calmIndicators = windData ? generateCalmIndicators() : []
   const rainfallDroplets = generateRainfallDroplets()
   const humidityWaves = generateHumidityWaves()
+  const temperatureIcons = generateTemperatureIcons()
 
   return (
     <>
@@ -490,7 +515,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
                 <svg width="40" height="12" viewBox="0 0 40 12" style="overflow: visible;">
                   <path d="M 2,6 Q 5,2 8,6 T 14,6 T 20,6 T 26,6 T 32,6 T 38,6" 
                         fill="none" 
-                        stroke="#1E40AF" 
+                        stroke="${wave.color}" 
                         stroke-width="2.5" 
                         stroke-linecap="round"
                         stroke-linejoin="round"/>
@@ -503,6 +528,26 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
           />
         )
       })}
+
+      {/* Temperature thermometer icons */}
+      {!isLoading && !error && temperatureIcons.map((icon) => (
+        <Marker
+          key={icon.id}
+          position={icon.position}
+          icon={L.divIcon({
+            html: `
+              <svg width="20" height="28" viewBox="0 0 20 28">
+                <rect x="7" y="2" width="6" height="14" rx="3" fill="none" stroke="${icon.color}" stroke-width="2"/>
+                <circle cx="10" cy="21" r="5" fill="${icon.color}" stroke="${icon.color}" stroke-width="2"/>
+                <line x1="10" y1="16" x2="10" y2="21" stroke="${icon.color}" stroke-width="3"/>
+              </svg>
+            `,
+            className: '',
+            iconSize: [20, 28],
+            iconAnchor: [10, 14],
+          })}
+        />
+      ))}
 
       {/* Weather data popup marker at center */}
       {!isLoading && !error && averageValue !== null && areaDataPoints.length > 0 && (

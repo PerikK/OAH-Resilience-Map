@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import type { City, Site } from '../mock_data/types'
 
 export type HealthRiskMetric = 'pathogen' | 'fecal' | 'arg' | 'overall'
-export type WeatherMetric = 'wind' | 'rainfall' | 'humidity'
+export type WeatherMetric = 'wind' | 'rainfall' | 'humidity' | 'temperature'
 
 export type SelectionContextValue = {
   city: City
