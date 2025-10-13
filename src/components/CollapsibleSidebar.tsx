@@ -42,8 +42,9 @@ export function CollapsibleSidebar() {
         top: '60px',
         bottom: 0,
         width: '400px',
-        backgroundColor: 'white',
-        borderLeft: '1px solid #E5E7EB',
+        backgroundColor: 'background.paper',
+        borderLeft: '1px solid',
+        borderColor: 'divider',
         boxShadow: '-2px 0 8px rgba(0,0,0,0.05)',
         zIndex: 998,
         overflowY: 'auto',
@@ -52,14 +53,14 @@ export function CollapsibleSidebar() {
       }}
     >
       {/* Section 1: Dropdowns (1/4 of height) */}
-      <Box sx={{ flex: '0 0 22%', padding: '24px', borderBottom: '1px solid #E5E7EB' }}>
-        <Typography variant="h6" sx={{ mb: 2, color: '#1F2937', fontWeight: 600, fontSize: '16px' }}>
+      <Box sx={{ flex: '0 0 22%', padding: '24px', borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Typography variant="h6" sx={{ mb: 2, color: 'text.primary', fontWeight: 600, fontSize: '16px' }}>
           Select Parameters
         </Typography>
 
         {/* City Selection */}
         <Box sx={{ mb: 2 }}>
-          <Typography sx={{ mb: 1, fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+          <Typography sx={{ mb: 1, fontSize: '14px', fontWeight: 600, color: 'text.primary' }}>
             Select an area
           </Typography>
           <TextField
@@ -74,16 +75,20 @@ export function CollapsibleSidebar() {
             sx={{
               width: '280px',
               '& .MuiOutlinedInput-root': {
-                backgroundColor: 'white',
+                backgroundColor: 'background.default',
+                color: 'text.primary',
                 '& fieldset': {
-                  borderColor: '#D1D5DB',
+                  borderColor: 'divider',
                 },
                 '&:hover fieldset': {
-                  borderColor: '#4A90E2',
+                  borderColor: 'primary.main',
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: '#4A90E2',
+                  borderColor: 'primary.main',
                 },
+              },
+              '& .MuiSelect-icon': {
+                color: 'text.primary',
               },
             }}
           >
@@ -98,7 +103,7 @@ export function CollapsibleSidebar() {
 
         {/* Site Selection */}
         <Box sx={{ mb: 2 }}>
-          <Typography sx={{ mb: 1, fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+          <Typography sx={{ mb: 1, fontSize: '14px', fontWeight: 600, color: 'text.primary' }}>
             Select Sites
           </Typography>
           <TextField
@@ -111,16 +116,20 @@ export function CollapsibleSidebar() {
             sx={{
               width: '280px',
               '& .MuiOutlinedInput-root': {
-                backgroundColor: 'white',
+                backgroundColor: 'background.default',
+                color: 'text.primary',
                 '& fieldset': {
-                  borderColor: '#D1D5DB',
+                  borderColor: 'divider',
                 },
                 '&:hover fieldset': {
-                  borderColor: '#4A90E2',
+                  borderColor: 'primary.main',
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: '#4A90E2',
+                  borderColor: 'primary.main',
                 },
+              },
+              '& .MuiSelect-icon': {
+                color: 'text.primary',
               },
             }}
           >
@@ -136,7 +145,7 @@ export function CollapsibleSidebar() {
 
         {/* Date Range */}
         <Box>
-          <Typography sx={{ mb: 1, fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+          <Typography sx={{ mb: 1, fontSize: '14px', fontWeight: 600, color: 'text.primary' }}>
             Select date range
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
@@ -148,20 +157,24 @@ export function CollapsibleSidebar() {
               sx={{
                 flex: 1,
                 '& .MuiOutlinedInput-root': {
-                  backgroundColor: 'white',
+                  backgroundColor: 'background.default',
+                  color: 'text.primary',
                   '& fieldset': {
-                    borderColor: '#D1D5DB',
+                    borderColor: 'divider',
                   },
                   '&:hover fieldset': {
-                    borderColor: '#4A90E2',
+                    borderColor: 'primary.main',
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: '#4A90E2',
+                    borderColor: 'primary.main',
                   },
+                },
+                '& input': {
+                  color: 'text.primary',
                 },
               }}
             />
-            <Typography sx={{ color: '#6B7280' }}>-</Typography>
+            <Typography sx={{ color: 'text.secondary' }}>-</Typography>
             <TextField
               type="date"
               size="small"
@@ -170,16 +183,20 @@ export function CollapsibleSidebar() {
               sx={{
                 flex: 1,
                 '& .MuiOutlinedInput-root': {
-                  backgroundColor: 'white',
+                  backgroundColor: 'background.default',
+                  color: 'text.primary',
                   '& fieldset': {
-                    borderColor: '#D1D5DB',
+                    borderColor: 'divider',
                   },
                   '&:hover fieldset': {
-                    borderColor: '#4A90E2',
+                    borderColor: 'primary.main',
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: '#4A90E2',
+                    borderColor: 'primary.main',
                   },
+                },
+                '& input': {
+                  color: 'text.primary',
                 },
               }}
             />
@@ -188,8 +205,8 @@ export function CollapsibleSidebar() {
       </Box>
 
       {/* Section 2: Health Risk Selectors (reduced height) */}
-      <Box sx={{ flex: '0 0 26%', padding: '24px', borderBottom: '1px solid #E5E7EB', overflowY: 'auto' }}>
-        <Typography variant="h6" sx={{ mb: 2, color: '#1F2937', fontWeight: 600, fontSize: '16px' }}>
+      <Box sx={{ flex: '0 0 26%', padding: '24px', borderBottom: '1px solid', borderColor: 'divider', overflowY: 'auto' }}>
+        <Typography variant="h6" sx={{ mb: 2, color: 'text.primary', fontWeight: 600, fontSize: '16px' }}>
           Health Risk Data
         </Typography>
         <FormGroup>
@@ -238,7 +255,7 @@ export function CollapsibleSidebar() {
 
       {/* Section 3: Weather Selectors (expanded height) */}
       <Box sx={{ flex: '0 0 52%', padding: '24px', overflowY: 'auto' }}>
-        <Typography variant="h6" sx={{ mb: 2, color: '#1F2937', fontWeight: 600, fontSize: '16px' }}>
+        <Typography variant="h6" sx={{ mb: 2, color: 'text.primary', fontWeight: 600, fontSize: '16px' }}>
           Weather Data
         </Typography>
         <FormGroup>

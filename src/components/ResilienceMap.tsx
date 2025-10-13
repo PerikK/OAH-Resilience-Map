@@ -18,7 +18,7 @@ export function ResilienceMap() {
   return (
     <Box
       sx={{
-        backgroundColor: '#FFFFFF',
+        backgroundColor: 'background.default',
         minHeight: '100vh',
         width: '100vw',
         paddingTop: '60px', // Account for fixed TopBar
@@ -55,7 +55,7 @@ export function ResilienceMap() {
             sx={{
               flex: 1,
               padding: '24px',
-              backgroundColor: '#F9FAFB',
+              backgroundColor: 'background.default',
               overflowY: 'auto',
             }}
           >

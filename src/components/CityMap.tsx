@@ -1,10 +1,10 @@
 import { Box, Typography, CircularProgress } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { useEffect, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet'
 import L from 'leaflet'
 import { useSelection } from '../context/SelectionContext'
-import { getCityCoordinates, getSitesByCity, getSite, type ResearchSite } from '../data/researchSites'
+import { getCityCoordinates, getSitesByCity, getSite, getUniqueCities, type ResearchSite } from '../data/researchSites'
 import { getHealthRiskForSite } from '../data/healthRiskData'
 import { WeatherLayer } from './WeatherLayer'
 import 'leaflet/dist/leaflet.css'
@@ -41,7 +41,7 @@ L.Icon.Default.mergeOptions({
 })
 
 export function CityMap() {
-  const { city, site, startDate, selectedWeatherMetrics } = useSelection()
+  const { city, site, startDate, selectedWeatherMetrics, setCity, setSite } = useSelection()
   const [loading, setLoading] = useState(true)
   const [sitesToShow, setSitesToShow] = useState<ResearchSite[]>([])
   const [selectedSiteCoords, setSelectedSiteCoords] = useState<{ lat: number; lon: number } | null>(null)
@@ -90,19 +90,123 @@ export function CityMap() {
 
   // Show Europe-centered map when no city is selected
   if (!city) {
+    const cities = getUniqueCities()
+    
     return (
-      <StyledMapContainer>
-        <MapContainer
-          center={[50.0, 10.0]} // Center of Europe
-          zoom={4}
-          style={{ height: '100%', width: '100%' }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-        </MapContainer>
-      </StyledMapContainer>
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        {/* Map Type Toggle */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1, gap: 1 }}>
+          <Box
+            onClick={() => setMapType('satellite')}
+            sx={{
+              padding: '6px 16px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: mapType === 'satellite' ? '#4A90E2' : 'white',
+              color: mapType === 'satellite' ? 'white' : '#6B7280',
+              border: '1px solid #E5E7EB',
+              transition: 'all 0.2s',
+              '&:hover': {
+                backgroundColor: mapType === 'satellite' ? '#3A7BC8' : '#F3F4F6',
+              },
+            }}
+          >
+            Satellite
+          </Box>
+          <Box
+            onClick={() => setMapType('street')}
+            sx={{
+              padding: '6px 16px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: mapType === 'street' ? '#4A90E2' : 'white',
+              color: mapType === 'street' ? 'white' : '#6B7280',
+              border: '1px solid #E5E7EB',
+              transition: 'all 0.2s',
+              '&:hover': {
+                backgroundColor: mapType === 'street' ? '#3A7BC8' : '#F3F4F6',
+              },
+            }}
+          >
+            Street
+          </Box>
+        </Box>
+        <StyledMapContainer sx={{ flex: 1, minHeight: 0 }}>
+          <MapContainer
+            center={[47.0, 2.0]} // Center of Europe (France)
+            zoom={4}
+            style={{ height: '100%', width: '100%' }}
+          >
+            {mapType === 'satellite' ? (
+              <TileLayer
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+              />
+            ) : (
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+            )}
+            
+            {/* City circles - clickable to select city */}
+            {cities.map((cityName) => {
+              const cityCoords = getCityCoordinates(cityName)
+              const citySites = getSitesByCity(cityName)
+              
+              return (
+                <Circle
+                  key={cityName}
+                  center={[cityCoords.lat, cityCoords.lng]}
+                  radius={35000} // 15km radius
+                  pathOptions={{
+                    color: '#000',
+                    fillColor: '#10B981',
+                    fillOpacity: 0.7,
+                    weight: 2,
+                  }}
+                  eventHandlers={{
+                    click: () => {
+                      setCity(cityName as any)
+                      setSite(null)
+                    },
+                  }}
+                >
+                  <Popup>
+                    <Box sx={{ minWidth: 150 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontSize: '14px' }}>
+                        {cityName}
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontSize: '12px', mb: 1 }}>
+                        {citySites.length} research site{citySites.length !== 1 ? 's' : ''}
+                      </Typography>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          fontSize: '11px', 
+                          color: '#4A90E2', 
+                          cursor: 'pointer',
+                          '&:hover': { textDecoration: 'underline' }
+                        }}
+                        onClick={() => {
+                          setCity(cityName as any)
+                          setSite(null)
+                        }}
+                      >
+                        Click to select →
+                      </Typography>
+                    </Box>
+                  </Popup>
+                </Circle>
+              )
+            })}
+          </MapContainer>
+        </StyledMapContainer>
+      </Box>
     )
   }
 
@@ -284,6 +388,11 @@ export function CityMap() {
               key={siteData['Site Nr.']} 
               position={[siteData.Latitude, siteData.Longitude]}
               icon={customIcon}
+              eventHandlers={{
+                click: () => {
+                  setSite(siteData['Site Nr.'] as any)
+                },
+              }}
             >
               <Popup>
                 <Box sx={{ minWidth: 200 }}>
@@ -297,10 +406,25 @@ export function CityMap() {
                     <strong>Coordinates:</strong> {siteData.Latitude.toFixed(5)}, {siteData.Longitude.toFixed(5)}
                   </Typography>
                   {healthData && (
-                    <Typography variant="body2" sx={{ mt: 2, pt: 1, borderTop: '1px solid #E5E7EB' }}>
+                    <Typography variant="body2" sx={{ mt: 1, pt: 1, borderTop: '1px solid #E5E7EB' }}>
                       <strong>Health Risk Score:</strong> {healthData.health_risk_score.toFixed(3)}
                     </Typography>
                   )}
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      mt: 2,
+                      fontSize: '11px', 
+                      color: '#4A90E2', 
+                      cursor: 'pointer',
+                      '&:hover': { textDecoration: 'underline' }
+                    }}
+                    onClick={() => {
+                      setSite(siteData['Site Nr.'] as any)
+                    }}
+                  >
+                    Click to select this site →
+                  </Typography>
                 </Box>
               </Popup>
             </Marker>

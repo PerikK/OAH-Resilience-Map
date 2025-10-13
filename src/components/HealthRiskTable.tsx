@@ -16,8 +16,8 @@ export function HealthRiskTable() {
 
   if (!healthData || !siteData) {
     return (
-      <Box sx={{ padding: 3, backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
-        <Typography sx={{ color: '#6B7280', textAlign: 'center' }}>
+      <Box sx={{ padding: 3, backgroundColor: 'background.paper', borderRadius: '8px', border: '1px solid', borderColor: 'divider' }}>
+        <Typography sx={{ color: 'text.secondary', textAlign: 'center' }}>
           No health risk data available for {site}
         </Typography>
       </Box>
@@ -89,41 +89,41 @@ export function HealthRiskTable() {
   }
 
   return (
-    <Box sx={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
-      <Box sx={{ padding: 3, borderBottom: '1px solid #E5E7EB' }}>
-        <Typography variant="h6" sx={{ color: '#1F2937', fontWeight: 600 }}>
+    <Box sx={{ backgroundColor: 'background.paper', borderRadius: '8px', border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
+      <Box sx={{ padding: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
           Health Risk Data
         </Typography>
-        <Typography variant="body2" sx={{ color: '#6B7280', mt: 0.5 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
           {siteData['Site Nr.']} - {siteData['Site Name']}, {city}
         </Typography>
       </Box>
 
-      <TableContainer>
-        <Table>
+      <TableContainer sx={{ backgroundColor: 'background.paper' }}>
+        <Table sx={{ backgroundColor: 'background.paper' }}>
           <TableHead>
-            <TableRow sx={{ backgroundColor: '#F9FAFB' }}>
-              <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Risk Metric</TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#374151' }} align="right">
+            <TableRow sx={{ backgroundColor: 'action.hover' }}>
+              <TableCell sx={{ fontWeight: 600, color: 'text.primary', borderColor: 'divider' }}>Risk Metric</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: 'text.primary', borderColor: 'divider' }} align="right">
                 Score
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#374151' }} align="center">
+              <TableCell sx={{ fontWeight: 600, color: 'text.primary', borderColor: 'divider' }} align="center">
                 Risk Level
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#374151', width: '40px' }} align="center"></TableCell>
+              <TableCell sx={{ fontWeight: 600, color: 'text.primary', borderColor: 'divider', width: '40px' }} align="center"></TableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
+          <TableBody sx={{ backgroundColor: 'background.paper' }}>
             {selectedHealthRisks.map((metric) => {
               const value = getRiskValue(metric)
               const color = getRiskColor(value)
               return (
-                <TableRow key={metric} hover>
-                  <TableCell>{getRiskLabel(metric)}</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600 }}>
+                <TableRow key={metric} hover sx={{ backgroundColor: 'background.paper', '&:hover': { backgroundColor: 'action.hover' } }}>
+                  <TableCell sx={{ borderColor: 'divider', color: 'text.primary' }}>{getRiskLabel(metric)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, borderColor: 'divider', color: 'text.primary' }}>
                     {value.toFixed(3)}
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell align="center" sx={{ borderColor: 'divider' }}>
                     <Box
                       sx={{
                         display: 'inline-block',
@@ -138,7 +138,7 @@ export function HealthRiskTable() {
                       {value < 0.25 ? 'Low' : value < 0.5 ? 'Moderate' : value < 0.75 ? 'High' : 'Very High'}
                     </Box>
                   </TableCell>
-                  <TableCell align="center" sx={{ padding: '8px' }}>
+                  <TableCell align="center" sx={{ padding: '8px', borderColor: 'divider' }}>
                     {getRiskSymbol(value)}
                   </TableCell>
                 </TableRow>

@@ -47,9 +47,10 @@ export function WeatherDataTable() {
       <Box
         sx={{
           padding: 3,
-          backgroundColor: 'white',
+          backgroundColor: 'background.paper',
           borderRadius: '8px',
-          border: '1px solid #E5E7EB',
+          border: '1px solid',
+          borderColor: 'divider',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -63,8 +64,8 @@ export function WeatherDataTable() {
 
   if (!weatherData) {
     return (
-      <Box sx={{ padding: 3, backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
-        <Typography sx={{ color: '#6B7280', textAlign: 'center' }}>
+      <Box sx={{ padding: 3, backgroundColor: 'background.paper', borderRadius: '8px', border: '1px solid', borderColor: 'divider' }}>
+        <Typography sx={{ color: 'text.secondary', textAlign: 'center' }}>
           No weather data available for {site} on {startDate}
         </Typography>
       </Box>
@@ -126,37 +127,37 @@ export function WeatherDataTable() {
   }
 
   return (
-    <Box sx={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
-      <Box sx={{ padding: 3, borderBottom: '1px solid #E5E7EB' }}>
-        <Typography variant="h6" sx={{ color: '#1F2937', fontWeight: 600 }}>
+    <Box sx={{ backgroundColor: 'background.paper', borderRadius: '8px', border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
+      <Box sx={{ padding: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
           Weather Data
         </Typography>
-        <Typography variant="body2" sx={{ color: '#6B7280', mt: 0.5 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
           {siteData['Site Nr.']} - {siteData['Site Name']}, {city} | {startDate}
         </Typography>
       </Box>
 
-      <TableContainer>
-        <Table>
+      <TableContainer sx={{ backgroundColor: 'background.paper' }}>
+        <Table sx={{ backgroundColor: 'background.paper' }}>
           <TableHead>
-            <TableRow sx={{ backgroundColor: '#F9FAFB' }}>
-              <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Metric</TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#374151' }} align="right">
+            <TableRow sx={{ backgroundColor: 'action.hover' }}>
+              <TableCell sx={{ fontWeight: 600, color: 'text.primary', borderColor: 'divider' }}>Metric</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: 'text.primary', borderColor: 'divider' }} align="right">
                 Value
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#374151' }} align="center">
+              <TableCell sx={{ fontWeight: 600, color: 'text.primary', borderColor: 'divider' }} align="center">
                 Unit
               </TableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
+          <TableBody sx={{ backgroundColor: 'background.paper' }}>
             {selectedWeatherMetrics.map((metric) => (
-              <TableRow key={metric} hover>
-                <TableCell>{getMetricLabel(metric)}</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>
+              <TableRow key={metric} hover sx={{ backgroundColor: 'background.paper', '&:hover': { backgroundColor: 'action.hover' } }}>
+                <TableCell sx={{ borderColor: 'divider', color: 'text.primary' }}>{getMetricLabel(metric)}</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, borderColor: 'divider', color: 'text.primary' }}>
                   {getMetricValue(metric)}
                 </TableCell>
-                <TableCell align="center" sx={{ color: '#6B7280', fontSize: '14px' }}>
+                <TableCell align="center" sx={{ color: 'text.secondary', fontSize: '14px', borderColor: 'divider' }}>
                   {getMetricUnit(metric)}
                 </TableCell>
               </TableRow>
