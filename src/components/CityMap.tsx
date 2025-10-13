@@ -183,7 +183,7 @@ export function CityMap() {
                   pathOptions={{
                     color: "#000",
                     fillColor: "#10B981",
-                    fillOpacity: 0.7,
+                    fillOpacity: 0.9,
                     weight: 2,
                   }}
                   eventHandlers={{
@@ -550,7 +550,7 @@ export function CityMap() {
               pathOptions={{
                 color: '#9CA3AF',
                 fillColor: '#F3F4F6',
-                fillOpacity: 0.3,
+                fillOpacity: 0.6,
                 weight: 1,
                 dashArray: '5, 5',
               }}

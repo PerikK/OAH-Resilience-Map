@@ -144,17 +144,19 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
     return '#DC2626' // Very hot - Dark red
   }
 
-  // Generate temperature thermometer icons
+  // Generate temperature thermometer icons - BOTTOM LEFT quadrant (225-315°)
   const generateTemperatureIcons = () => {
     if (!averageValue || parameter !== 'temp') return []
     
     const icons = []
-    const numIcons = 6 // 6 thermometers in a circle pattern
+    const numIcons = 6 // 6 thermometers in bottom-left quadrant
     const color = getTemperatureColor(averageValue)
     
     for (let i = 0; i < numIcons; i++) {
-      const angle = (i * 360) / numIcons
-      const distance = 0.3 // 300m from center
+      // Constrain to bottom-left quadrant: 225° to 315°
+      const angle = 225 + (i * 90) / numIcons
+      // Vary distance: from 0.25km (250m) to 0.9km (900m), avoiding center 250m
+      const distance = 0.25 + (i / (numIcons - 1)) * 0.65
       
       const pos = calculateArrowEnd(lat, lon, angle, distance)
       
@@ -168,7 +170,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
     return icons
   }
 
-  // Generate wind arrows based on wind speed and direction
+  // Generate wind arrows based on wind speed and direction - TOP RIGHT quadrant (45-135°)
   const generateWindArrows = () => {
     if (!windData || windData.speed < 0.5) return [] // Don't show arrows for very light wind
     
@@ -177,10 +179,12 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
     const arrowLength = 0.3 // 300m arrows
     const arrowColor = getWindColor(windData.speed)
     
-    // Create arrows in a grid pattern within the circle
+    // Create arrows in top-right quadrant (45-135°)
     for (let i = 0; i < numArrows; i++) {
-      const angle = (i * 360) / numArrows
-      const distance = 0.3 // 300m from center
+      // Constrain to top-right quadrant: 45° to 135°
+      const angle = 45 + (i * 90) / numArrows
+      // Vary distance: from 0.25km (250m) to 0.9km (900m), avoiding center 250m
+      const distance = 0.25 + (i / Math.max(1, numArrows - 1)) * 0.65
       
       // Calculate position around the circle
       const centerPos = calculateArrowEnd(lat, lon, angle, distance)
@@ -206,16 +210,18 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
     return arrows
   }
 
-  // Generate calm wind indicators (small dots) for very light wind
+  // Generate calm wind indicators (small dots) for very light wind - TOP RIGHT quadrant (45-135°)
   const generateCalmIndicators = () => {
     if (!windData || windData.speed >= 0.5) return []
     
     const indicators = []
-    const numDots = 6 // 6 small dots in a circle pattern
+    const numDots = 6 // 6 small dots in top-right quadrant
     
     for (let i = 0; i < numDots; i++) {
-      const angle = (i * 360) / numDots
-      const distance = 0.3 // 300m from center
+      // Constrain to top-right quadrant: 45° to 135°
+      const angle = 45 + (i * 90) / numDots
+      // Vary distance: from 0.25km (250m) to 0.9km (900m), avoiding center 250m
+      const distance = 0.25 + (i / (numDots - 1)) * 0.65
       
       const pos = calculateArrowEnd(lat, lon, angle, distance)
       
@@ -228,7 +234,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
     return indicators
   }
 
-  // Generate rainfall droplets based on actual precipitation data
+  // Generate rainfall droplets based on actual precipitation data - TOP LEFT quadrant (135-225°)
   const generateRainfallDroplets = () => {
     if (parameter !== 'clouds') return [] // Only show when rainfall is selected
     if (precipitationData === 0) return [] // No droplets if no rain
@@ -238,8 +244,10 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
     const numDroplets = Math.min(Math.ceil(precipitationData / 2), 8)
     
     for (let i = 0; i < numDroplets; i++) {
-      const angle = (i * 360) / numDroplets + 30 // Offset from wind arrows
-      const distance = 0.25 // 250m from center
+      // Constrain to top-left quadrant: 135° to 225°
+      const angle = 135 + (i * 90) / numDroplets
+      // Vary distance: from 0.25km (250m) to 0.9km (900m), avoiding center 250m
+      const distance = 0.25 + (i / Math.max(1, numDroplets - 1)) * 0.65
       
       const pos = calculateArrowEnd(lat, lon, angle, distance)
       
@@ -261,24 +269,27 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
     return '#1E3A8A' // Very humid - Navy
   }
 
-  // Generate humidity wavy lines (pairs of parallel horizontal wavy lines)
+  // Generate humidity wavy lines - BOTTOM RIGHT quadrant (315-45°)
   const generateHumidityWaves = () => {
     if (!averageValue || parameter !== 'humidity') return []
     
     const waves = []
-    const numWaves = 4 // 4 wavy lines around the circle
+    const numWaves = 4 // 4 wavy lines in bottom-right quadrant
     const color = getHumidityColor(averageValue)
     
     for (let i = 0; i < numWaves; i++) {
-      const angle = (i * 360) / numWaves
-      const distance = 0.3 // 300m from center
+      // Constrain to bottom-right quadrant: 315° to 45° (wraps around 0°)
+      let angle = 315 + (i * 90) / numWaves
+      if (angle >= 360) angle -= 360 // Handle wrap-around
+      // Vary distance: from 0.25km (250m) to 0.9km (900m), avoiding center 250m
+      const distance = 0.25 + (i / (numWaves - 1)) * 0.65
       
       const centerPos = calculateArrowEnd(lat, lon, angle, distance)
       
       // Create a small wavy line at this position
       const wavePoints: [number, number][] = []
       const numPoints = 15
-      const waveLength = 0.08 // 80m wave length
+      const waveLength = 0.04 // 40m wave length (shorter)
       
       for (let j = 0; j < numPoints; j++) {
         const t = j / (numPoints - 1)
