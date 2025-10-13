@@ -521,7 +521,7 @@ export function CityMap() {
                         {healthData.health_risk_score.toFixed(3)}
                       </Typography>
                     )}
-                    <Typography
+                    {/* <Typography
                       variant="body2"
                       sx={{
                         mt: 2,
@@ -535,7 +535,7 @@ export function CityMap() {
                       }}
                     >
                       Click to select this site →
-                    </Typography>
+                    </Typography> */}
                   </Box>
                 </Popup>
               </Marker>

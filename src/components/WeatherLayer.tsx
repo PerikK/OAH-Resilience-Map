@@ -514,11 +514,11 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
             Lat: {lat.toFixed(4)}, Lon: {lon.toFixed(4)}
             <br />
             <br />
-            <strong>
+            {/* <strong>
               {label}: {averageValue.toFixed(2)} {unit}
-            </strong>
-            <br />
-            <br />
+            </strong> */}
+            {/* <br />
+            <br /> */}
             {(() => {
               const hourly = areaDataPoints[0].weatherData.hourly
               const hourIndex = 12
@@ -557,7 +557,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
                   <br />
                   <small>Time: {hourly.time[hourIndex]}</small>
                   <br />
-                  {windData && windData.speed >= 0.5 && (
+                  {/* {windData && windData.speed >= 0.5 && (
                     <>
                       <small style={{ color: '#1E40AF' }}>→ Blue arrows show wind direction</small>
                       <br />
@@ -568,8 +568,8 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
                       <small style={{ color: '#94A3B8' }}>○ Gray dots indicate calm wind</small>
                       <br />
                     </>
-                  )}
-                  <small style={{ color: '#10B981' }}>✓ Free API - No key required</small>
+                  )} */}
+                  {/* <small style={{ color: '#10B981' }}>✓ Free API - No key required</small> */}
                 </>
               )
             })()}
