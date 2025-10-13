@@ -1,103 +1,82 @@
-import { Box, Typography } from '@mui/material'
-import { styled } from '@mui/material/styles'
-import { Header } from './Header'
+import { Box } from '@mui/material'
+import { TopBar } from './TopBar'
+import { CollapsibleSidebar } from './CollapsibleSidebar'
 import { CityMap } from './CityMap'
-import { ResilienceChart } from './ResilienceChart'
-import { CategoryChart } from './CategoryChart'
-import { EcosystemChart } from './EcosystemChart'
-
-const StyledContainer = styled(Box)(({ theme }) => ({
-  backgroundColor: '#f8fafc',
-  minHeight: '100vh',
-  padding: theme.spacing(0),
-  width: '100vw',
-  maxWidth: '100vw',
-}))
-
-const ContentBox = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(3),
-  backgroundColor: 'white',
-  margin: 0,
-  borderRadius: theme.spacing(1),
-  border: '1px solid #e9d5ff',
-  boxShadow: 'none',
-}))
-
-const PageFrame = styled(Box)(({ theme }) => ({
-  margin: theme.spacing(2),
-  borderRadius: theme.spacing(1),
-  border: '1px solid #e9d5ff',
-  backgroundColor: 'white',
-}))
-
-const GridLayout = styled(Box)({
-  display: 'grid',
-  gridTemplateColumns: '66% 1px 33%',
-  columnGap: '16px',
-  rowGap: '16px',
-  marginTop: '16px',
-})
-
-const VerticalDivider = styled(Box)({
-  width: '1px',
-  backgroundColor: '#e5e7eb',
-})
-
-const RightColumnStack = styled(Box)({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '16px',
-})
+import { HealthRiskTable } from './HealthRiskTable'
+import { WeatherDataTable } from './WeatherDataTable'
+import { useSelection } from '../context/SelectionContext'
 
 export function ResilienceMap() {
+  const { city, site, selectedHealthRisks, selectedWeatherMetrics } = useSelection()
+  
+  // Determine if we have data to show (map should shrink)
+  const hasData = city && site && site !== 'all' && (selectedHealthRisks.length > 0 || selectedWeatherMetrics.length > 0)
+  
+  // Map height: 80vh when no data, 50vh when data is available (to show tables)
+  const mapHeight = hasData ? '50vh' : '80vh'
+
   return (
-    <StyledContainer>
-      <PageFrame>
-        <Header />
-        <Box sx={{ p: 2, width: '100%' }}>
-          <GridLayout>
-            {/* Left column - Map (66% width) */}
-            <ContentBox sx={{ gridColumn: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ color: '#4f46e5', fontWeight: 600 }}>
-                  City Map
-                </Typography>
-              </Box>
-              <CityMap />
-            </ContentBox>
+    <Box
+      sx={{
+        backgroundColor: '#FFFFFF',
+        minHeight: '100vh',
+        width: '100vw',
+        paddingTop: '60px', // Account for fixed TopBar
+      }}
+    >
+      <TopBar />
+      <CollapsibleSidebar />
 
-            {/* Vertical divider */}
-            <VerticalDivider sx={{ gridColumn: 2 }} />
-
-            {/* Right column - Charts stacked (33% width) */}
-            <Box sx={{ gridColumn: 3 }}>
-              <RightColumnStack>
-                <ContentBox>
-                  <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
-                    Current Resilience vs Baseline/Previous Year
-                  </Typography>
-                  <ResilienceChart height={280} />
-                </ContentBox>
-
-                <ContentBox>
-                  <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
-                    Resilience by Category
-                  </Typography>
-                  <CategoryChart />
-                </ContentBox>
-
-                <ContentBox>
-                  <Typography variant="h6" gutterBottom sx={{ color: '#4f46e5', fontWeight: 600 }}>
-                    Ecosystem Engagement
-                  </Typography>
-                  <EcosystemChart />
-                </ContentBox>
-              </RightColumnStack>
-            </Box>
-          </GridLayout>
+      {/* Main Content Area */}
+      <Box
+        sx={{
+          marginLeft: '40px', // Left margin
+          marginRight: '400px', // Account for right sidebar
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 'calc(100vh - 60px)',
+        }}
+      >
+        {/* Map Container */}
+        <Box
+          sx={{
+            height: mapHeight,
+            transition: 'height 0.5s ease-in-out',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          <CityMap />
         </Box>
-      </PageFrame>
-    </StyledContainer>
+
+        {/* Data Tables Area - Only show when we have data */}
+        {hasData && (
+          <Box
+            sx={{
+              flex: 1,
+              padding: '24px',
+              backgroundColor: '#F9FAFB',
+              overflowY: 'auto',
+            }}
+          >
+            {/* Tables Grid */}
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
+                gap: 3,
+              }}
+            >
+              {/* Health Risk Table */}
+              <HealthRiskTable />
+
+              {/* Weather Data Table */}
+              <WeatherDataTable />
+            </Box>
+          </Box>
+        )}
+      </Box>
+    </Box>
   )
 }
 

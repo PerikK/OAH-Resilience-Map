@@ -1,7 +1,47 @@
-// OpenWeather API service for historical air pollution data
+// OpenWeather API service for historical weather data using One Call API 3.0
 
 const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
 
+export interface WeatherCondition {
+  id: number
+  main: string
+  description: string
+  icon: string
+}
+
+export interface WeatherData {
+  dt: number
+  sunrise?: number
+  sunset?: number
+  temp: number
+  feels_like: number
+  pressure: number
+  humidity: number
+  dew_point: number
+  uvi?: number
+  clouds: number
+  visibility: number
+  wind_speed: number
+  wind_deg: number
+  wind_gust?: number
+  weather: WeatherCondition[]
+  rain?: {
+    '1h': number
+  }
+  snow?: {
+    '1h': number
+  }
+}
+
+export interface OneCallTimemachineResponse {
+  lat: number
+  lon: number
+  timezone: string
+  timezone_offset: number
+  data: WeatherData[]
+}
+
+// Legacy interfaces for backward compatibility with air pollution data
 export interface AirPollutionComponents {
   co: number
   no: number
@@ -27,6 +67,49 @@ export interface HistoricalAirPollutionResponse {
     lat: number
   }
   list: AirPollutionData[]
+}
+
+/**
+ * Fetch historical weather data for a specific location and timestamp
+ * Uses OpenWeather One Call API 3.0 timemachine endpoint
+ * 
+ * @param lat - Latitude
+ * @param lon - Longitude
+ * @param date - Date string in YYYY-MM-DD format or Unix timestamp
+ * @returns Historical weather data
+ */
+export async function fetchHistoricalWeather(
+  lat: number,
+  lon: number,
+  date: string | number
+): Promise<OneCallTimemachineResponse | null> {
+  if (!lat || !lon || !date) return null
+
+  try {
+    // Convert date string to Unix timestamp if needed
+    let timestamp: number
+    if (typeof date === 'string') {
+      timestamp = Math.floor(new Date(date).getTime() / 1000)
+    } else {
+      timestamp = date
+    }
+
+    // One Call API 3.0 timemachine endpoint
+    const response = await fetch(
+      `https://api.openweathermap.org/data/3.0/onecall/timemachine?lat=${lat}&lon=${lon}&dt=${timestamp}&appid=${OPENWEATHER_API_KEY}&units=metric`
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Failed to fetch historical weather data (${response.status}): ${errorText}`)
+    }
+
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error('Error fetching historical weather data:', error)
+    return null
+  }
 }
 
 /**
@@ -140,6 +223,16 @@ function generatePolarGridPoints(centerLat: number, centerLon: number, radiusKm:
   return points
 }
 
+export interface AreaWeatherPoint {
+  lat: number
+  lon: number
+  weatherData: OneCallTimemachineResponse
+  distance: number
+  angle: number | null
+  id: string
+  timestamp: number
+}
+
 export interface AreaAirPollutionPoint {
   lat: number
   lon: number
@@ -148,6 +241,53 @@ export interface AreaAirPollutionPoint {
   angle: number | null
   id: string
   timestamp: number
+}
+
+/**
+ * Fetch historical weather data for multiple points in an area
+ * Uses One Call API 3.0 timemachine endpoint
+ * 
+ * @param centerLat - Center latitude
+ * @param centerLon - Center longitude
+ * @param date - Date string in YYYY-MM-DD format or Unix timestamp
+ * @param radiusKm - Radius in kilometers (default: 10)
+ * @returns Array of weather data points
+ */
+export async function fetchAreaHistoricalWeather(
+  centerLat: number,
+  centerLon: number,
+  date: string | number,
+  radiusKm: number = 10
+): Promise<AreaWeatherPoint[]> {
+  const gridPoints = generatePolarGridPoints(centerLat, centerLon, radiusKm)
+
+  // Fetch data for all points in parallel, preserving metadata
+  const promises = gridPoints.map((point) =>
+    fetchHistoricalWeather(point.lat, point.lon, date)
+      .then((result) => {
+        if (result) {
+          return {
+            lat: point.lat,
+            lon: point.lon,
+            weatherData: result,
+            distance: point.distance,
+            angle: point.angle,
+            id: point.id,
+            timestamp: Date.now(),
+          }
+        }
+        return null
+      })
+      .catch((err) => {
+        console.warn(`Failed to fetch weather data for ${point.lat}, ${point.lon}:`, err)
+        return null
+      })
+  )
+
+  const results = await Promise.all(promises)
+
+  // Filter out failed requests
+  return results.filter((result): result is AreaWeatherPoint => result !== null)
 }
 
 /**

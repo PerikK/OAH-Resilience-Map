@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test ECMWF Air Quality API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .health-btn {
+            background: #2196F3;
+        }
+        .health-btn:hover {
+            background: #0b7dda;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            color: #4CAF50;
+        }
+        .error {
+            color: #f44336;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Test ECMWF Air Quality API</h1>
+
+        <div class="form-group">
+            <button class="health-btn" onclick="testHealth()">Test Health Check</button>
+            <button class="health-btn" onclick="getVariables()">Get Available Variables</button>
+        </div>
+
+        <hr style="margin: 20px 0;">
+
+        <h2>Fetch Air Quality Data</h2>
+        
+        <div class="form-group">
+            <label>Variable:</label>
+            <select id="variable">
+                <option value="carbon_monoxide">Carbon Monoxide (CO)</option>
+                <option value="nitrogen_dioxide">Nitrogen Dioxide (NO₂)</option>
+                <option value="nitrogen_monoxide">Nitrogen Monoxide (NO)</option>
+                <option value="sulphur_dioxide">Sulphur Dioxide (SO₂)</option>
+                <option value="ozone">Ozone (O₃)</option>
+                <option value="particulate_matter_10um">Particulate Matter 10μm (PM10)</option>
+                <option value="particulate_matter_2.5um">Particulate Matter 2.5μm (PM2.5)</option>
+                <option value="particulate_matter_1um">Particulate Matter 1μm (PM1)</option>
+                <option value="dust_aerosol_optical_depth_550nm">Dust AOD 550nm</option>
+                <option value="total_aerosol_optical_depth_550nm">Total AOD 550nm</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Start Date:</label>
+            <input type="date" id="startDate" value="2024-01-01">
+        </div>
+
+        <div class="form-group">
+            <label>End Date:</label>
+            <input type="date" id="endDate" value="2024-01-01">
+        </div>
+
+        <div class="form-group">
+            <label>Area (Coimbra region - [North, West, South, East]):</label>
+            <input type="text" id="area" value="41, -9, 40, -8" placeholder="41, -9, 40, -8">
+        </div>
+
+        <button onclick="fetchAirQuality()" id="fetchBtn">Fetch Air Quality Data</button>
+
+        <div id="response"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:4000';
+
+        async function testHealth() {
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = 'Testing health endpoint...';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/health`);
+                const data = await response.json();
+                
+                responseDiv.innerHTML = `<span class="success">✓ Server is running!</span>\n\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                responseDiv.innerHTML = `<span class="error">✗ Error: ${error.message}</span>\n\nMake sure the backend server is running on port 4000.`;
+            }
+        }
+
+        async function getVariables() {
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = 'Fetching available variables...';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/variables`);
+                const data = await response.json();
+                
+                responseDiv.innerHTML = `<span class="success">✓ Available Variables:</span>\n\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                responseDiv.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+            }
+        }
+
+        async function fetchAirQuality() {
+            const responseDiv = document.getElementById('response');
+            const fetchBtn = document.getElementById('fetchBtn');
+            
+            // Get form values
+            const variable = document.getElementById('variable').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const areaStr = document.getElementById('area').value;
+            
+            // Parse area
+            const area = areaStr.split(',').map(v => parseFloat(v.trim()));
+            
+            if (area.length !== 4 || area.some(isNaN)) {
+                responseDiv.innerHTML = '<span class="error">✗ Invalid area format. Use: North, West, South, East</span>';
+                return;
+            }
+
+            const payload = {
+                variable: [variable],
+                start_date: startDate,
+                end_date: endDate,
+                area: area
+            };
+
+            responseDiv.innerHTML = `Fetching air quality data...\n\nRequest:\n${JSON.stringify(payload, null, 2)}\n\nThis may take 30-60 seconds...`;
+            fetchBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/api/airquality`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(JSON.stringify(errorData, null, 2));
+                }
+
+                // Get the blob (NetCDF file)
+                const blob = await response.blob();
+                const size = (blob.size / 1024).toFixed(2);
+
+                responseDiv.innerHTML = `<span class="success">✓ Success!</span>\n\nReceived NetCDF file:\n- Size: ${size} KB\n- Type: ${blob.type}\n\nThe file has been downloaded. Check your Downloads folder.`;
+
+                // Download the file
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `airquality_${startDate}_${endDate}.nc`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+            } catch (error) {
+                responseDiv.innerHTML = `<span class="error">✗ Error:</span>\n\n${error.message}`;
+            } finally {
+                fetchBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

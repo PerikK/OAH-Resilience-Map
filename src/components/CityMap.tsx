@@ -1,11 +1,12 @@
-import { Box, Typography, CircularProgress, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel } from '@mui/material'
+import { Box, Typography, CircularProgress } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
-import { useSelection, type PollutantParameter } from '../context/SelectionContext'
+import { useSelection } from '../context/SelectionContext'
 import { getCityCoordinates, getSitesByCity, getSite, type ResearchSite } from '../data/researchSites'
-import { AirQualityLayer } from './AirQualityLayer'
+import { getHealthRiskForSite } from '../data/healthRiskData'
+import { WeatherLayer } from './WeatherLayer'
 import 'leaflet/dist/leaflet.css'
 
 const StyledMapContainer = styled(Box)({
@@ -40,10 +41,11 @@ L.Icon.Default.mergeOptions({
 })
 
 export function CityMap() {
-  const { city, site, startDate, pollutant, setPollutant } = useSelection()
+  const { city, site, startDate, selectedWeatherMetrics } = useSelection()
   const [loading, setLoading] = useState(true)
   const [sitesToShow, setSitesToShow] = useState<ResearchSite[]>([])
   const [selectedSiteCoords, setSelectedSiteCoords] = useState<{ lat: number; lon: number } | null>(null)
+  const [mapType, setMapType] = useState<'satellite' | 'street'>('satellite')
 
   useEffect(() => {
     setLoading(true)
@@ -86,13 +88,21 @@ export function CityMap() {
     )
   }
 
+  // Show Europe-centered map when no city is selected
   if (!city) {
     return (
-      <LoadingContainer>
-        <Typography variant="body2" sx={{ color: '#6b7280', textAlign: 'center' }}>
-          Please select a city to view the map
-        </Typography>
-      </LoadingContainer>
+      <StyledMapContainer>
+        <MapContainer
+          center={[50.0, 10.0]} // Center of Europe
+          zoom={4}
+          style={{ height: '100%', width: '100%' }}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+        </MapContainer>
+      </StyledMapContainer>
     )
   }
 
@@ -107,148 +117,169 @@ export function CityMap() {
   }
 
   const cityCoords = getCityCoordinates(city)
-
-  // Get legend colors based on selected pollutant
-  const getLegendItems = () => {
-    if (pollutant === 'pm2_5') {
-      return [
-        { color: '#FEF9C3', label: '0-12 μg/m³ (Good)' },
-        { color: '#FDE047', label: '12-35 μg/m³ (Moderate)' },
-        { color: '#EAB308', label: '35-55 μg/m³ (Unhealthy)' },
-        { color: '#F59E0B', label: '55-75 μg/m³ (Very Unhealthy)' },
-        { color: '#DC2626', label: '75+ μg/m³ (Hazardous)' },
-      ]
-    } else if (pollutant === 'pm10') {
-      return [
-        { color: '#FEF3C7', label: '0-20 μg/m³ (Good)' },
-        { color: '#D97706', label: '20-50 μg/m³ (Moderate)' },
-        { color: '#92400E', label: '50-100 μg/m³ (Unhealthy)' },
-        { color: '#78350F', label: '100-150 μg/m³ (Very Unhealthy)' },
-        { color: '#451A03', label: '150+ μg/m³ (Hazardous)' },
-      ]
-    } else if (pollutant === 'o3') {
-      return [
-        { color: '#E0F2FE', label: '0-50 μg/m³ (Good)' },
-        { color: '#7DD3FC', label: '50-100 μg/m³ (Moderate)' },
-        { color: '#3B82F6', label: '100-150 μg/m³ (Unhealthy)' },
-        { color: '#1E40AF', label: '150-200 μg/m³ (Very Unhealthy)' },
-        { color: '#1E3A8A', label: '200+ μg/m³ (Hazardous)' },
-      ]
-    } else {
-      // AQI
-      return [
-        { color: '#00E400', label: '1 - Good' },
-        { color: '#FFFF00', label: '2 - Fair' },
-        { color: '#FF7E00', label: '3 - Moderate' },
-        { color: '#FF0000', label: '4 - Poor' },
-        { color: '#8F3F97', label: '5 - Very Poor' },
-      ]
+  
+  // Get map center - use selected site if available, otherwise city center
+  const getMapCenter = (): [number, number] => {
+    if (site && site !== 'all') {
+      const selectedSite = getSite(city, site)
+      if (selectedSite) {
+        return [selectedSite.Latitude, selectedSite.Longitude]
+      }
     }
+    return [cityCoords.lat, cityCoords.lng]
+  }
+
+  // Create custom icon with health risk symbol
+  const createHealthRiskIcon = (siteNr: string) => {
+    const healthData = getHealthRiskForSite(siteNr)
+    if (!healthData) {
+      // Return default Leaflet icon instead of undefined
+      return new L.Icon.Default()
+    }
+
+    const value = healthData.health_risk_score
+    let color = '#10B981' // Green - Low risk
+    let symbol = '▼' // Down triangle
+    
+    if (value >= 0.75) {
+      color = '#DC2626' // Dark red - Very high risk
+      symbol = '▲' // Up triangle
+    } else if (value >= 0.5) {
+      color = '#EF4444' // Red - High risk
+      symbol = '▲' // Up triangle
+    } else if (value >= 0.25) {
+      color = '#F59E0B' // Orange - Moderate risk
+      symbol = '▬' // Dash
+    }
+
+    const svgIcon = `
+      <svg width="32" height="40" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 0C7.163 0 0 7.163 0 16c0 8.837 16 24 16 24s16-15.163 16-24C32 7.163 24.837 0 16 0z" fill="${color}"/>
+        <text x="16" y="20" font-size="16" font-weight="bold" text-anchor="middle" fill="white">${symbol}</text>
+      </svg>
+    `
+
+    return new L.DivIcon({
+      html: svgIcon,
+      className: 'health-risk-marker',
+      iconSize: [32, 40],
+      iconAnchor: [16, 40],
+      popupAnchor: [0, -40],
+    })
   }
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Pollutant selector and legend */}
-      <Box sx={{ display: 'flex', gap: 3, mb: 2, alignItems: 'flex-start', flexShrink: 0 }}>
-        <FormControl component="fieldset" size="small">
-          <FormLabel component="legend" sx={{ fontSize: '12px', fontWeight: 600, color: '#4f46e5', mb: 1 }}>
-            Air Pollutant
-          </FormLabel>
-          <RadioGroup
-            row
-            value={pollutant}
-            onChange={(e) => setPollutant(e.target.value as PollutantParameter)}
-            sx={{ gap: 2 }}
-          >
-            <FormControlLabel
-              value="pm2_5"
-              control={<Radio size="small" sx={{ '&.Mui-checked': { color: '#4f46e5' } }} />}
-              label={<Typography sx={{ fontSize: '12px' }}>PM2.5</Typography>}
-            />
-            <FormControlLabel
-              value="pm10"
-              control={<Radio size="small" sx={{ '&.Mui-checked': { color: '#4f46e5' } }} />}
-              label={<Typography sx={{ fontSize: '12px' }}>PM10</Typography>}
-            />
-            <FormControlLabel
-              value="o3"
-              control={<Radio size="small" sx={{ '&.Mui-checked': { color: '#4f46e5' } }} />}
-              label={<Typography sx={{ fontSize: '12px' }}>Ozone (O₃)</Typography>}
-            />
-            <FormControlLabel
-              value="aqi"
-              control={<Radio size="small" sx={{ '&.Mui-checked': { color: '#4f46e5' } }} />}
-              label={<Typography sx={{ fontSize: '12px' }}>AQI</Typography>}
-            />
-          </RadioGroup>
-        </FormControl>
-
-        {/* Legend */}
-        <Box sx={{ flex: 1 }}>
-          <Typography sx={{ fontSize: '12px', fontWeight: 600, color: '#4f46e5', mb: 1 }}>
-            Legend
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            {getLegendItems().map((item, index) => (
-              <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box
-                  sx={{
-                    width: 16,
-                    height: 16,
-                    backgroundColor: item.color,
-                    borderRadius: '3px',
-                    border: '1px solid #ddd',
-                  }}
-                />
-                <Typography sx={{ fontSize: '11px', color: '#6b7280' }}>{item.label}</Typography>
-              </Box>
-            ))}
-          </Box>
+      {/* Map Type Toggle */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1, gap: 1 }}>
+        <Box
+          onClick={() => setMapType('satellite')}
+          sx={{
+            padding: '6px 16px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: 500,
+            backgroundColor: mapType === 'satellite' ? '#4A90E2' : 'white',
+            color: mapType === 'satellite' ? 'white' : '#6B7280',
+            border: '1px solid #E5E7EB',
+            transition: 'all 0.2s',
+            '&:hover': {
+              backgroundColor: mapType === 'satellite' ? '#3A7BC8' : '#F3F4F6',
+            },
+          }}
+        >
+          Satellite
+        </Box>
+        <Box
+          onClick={() => setMapType('street')}
+          sx={{
+            padding: '6px 16px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: 500,
+            backgroundColor: mapType === 'street' ? '#4A90E2' : 'white',
+            color: mapType === 'street' ? 'white' : '#6B7280',
+            border: '1px solid #E5E7EB',
+            transition: 'all 0.2s',
+            '&:hover': {
+              backgroundColor: mapType === 'street' ? '#3A7BC8' : '#F3F4F6',
+            },
+          }}
+        >
+          Street
         </Box>
       </Box>
-
       <StyledMapContainer sx={{ flex: 1, minHeight: 0 }}>
       <MapContainer
-        center={[cityCoords.lat, cityCoords.lng]}
-        zoom={11}
+        center={getMapCenter()}
+        zoom={site && site !== 'all' ? 14 : 9}
         style={{ height: '100%', width: '100%' }}
         key={`${city}-${site}`}
       >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        
-        {sitesToShow.map((siteData) => (
-          <Marker 
-            key={siteData['Site Nr.']} 
-            position={[siteData.Latitude, siteData.Longitude]}
-          >
-            <Popup>
-              <Box sx={{ minWidth: 200 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                  {siteData['Site Nr.']} - {siteData['Site Name']}
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <strong>City:</strong> {siteData.City}
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <strong>Coordinates:</strong> {siteData.Latitude.toFixed(5)}, {siteData.Longitude.toFixed(5)}
-                </Typography>
-              </Box>
-            </Popup>
-          </Marker>
-        ))}
-        
-        {/* Air Quality Layer - shows current pollution data */}
-        {selectedSiteCoords && startDate && (
-          <AirQualityLayer
-            lat={selectedSiteCoords.lat}
-            lon={selectedSiteCoords.lon}
-            date={startDate}
-            parameter={pollutant}
+        {mapType === 'satellite' ? (
+          <TileLayer
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+          />
+        ) : (
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
         )}
+        
+        {sitesToShow.map((siteData) => {
+          const healthData = getHealthRiskForSite(siteData['Site Nr.'])
+          const customIcon = createHealthRiskIcon(siteData['Site Nr.'])
+          
+          return (
+            <Marker 
+              key={siteData['Site Nr.']} 
+              position={[siteData.Latitude, siteData.Longitude]}
+              icon={customIcon}
+            >
+              <Popup>
+                <Box sx={{ minWidth: 200 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    {siteData['Site Nr.']} - {siteData['Site Name']}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>City:</strong> {siteData.City}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>Coordinates:</strong> {siteData.Latitude.toFixed(5)}, {siteData.Longitude.toFixed(5)}
+                  </Typography>
+                  {healthData && (
+                    <Typography variant="body2" sx={{ mt: 2, pt: 1, borderTop: '1px solid #E5E7EB' }}>
+                      <strong>Health Risk Score:</strong> {healthData.health_risk_score.toFixed(3)}
+                    </Typography>
+                  )}
+                </Box>
+              </Popup>
+            </Marker>
+          )
+        })}
+        
+        {/* Weather Layers - show selected weather data */}
+        {selectedSiteCoords && startDate && selectedWeatherMetrics.map((metric) => {
+          // Map metric to WeatherLayer parameter
+          let parameter: 'temp' | 'humidity' | 'wind_speed' | 'clouds' = 'temp'
+          if (metric === 'wind') parameter = 'wind_speed'
+          else if (metric === 'humidity') parameter = 'humidity'
+          else if (metric === 'rainfall') parameter = 'clouds' // Use clouds as proxy for rainfall
+          
+          return (
+            <WeatherLayer
+              key={metric}
+              lat={selectedSiteCoords.lat}
+              lon={selectedSiteCoords.lon}
+              date={startDate}
+              parameter={parameter}
+            />
+          )
+        })}
       </MapContainer>
     </StyledMapContainer>
     </Box>
