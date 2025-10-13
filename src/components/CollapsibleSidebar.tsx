@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Box, TextField, MenuItem, Typography, Checkbox, FormControlLabel, FormGroup, Tooltip } from '@mui/material'
+import { Box, TextField, MenuItem, Typography, Checkbox, FormControlLabel, FormGroup, Tooltip, Button } from '@mui/material'
 import { useSelection } from '../context/SelectionContext'
 import { getUniqueCities, getSitesByCity, type ResearchSite } from '../data/researchSites'
 import type { City, Site } from '../mock_data/types'
@@ -18,9 +18,30 @@ export function CollapsibleSidebar() {
     setSite,
     setStartDate,
     setEndDate,
+    setSelectedHealthRisks,
+    setSelectedWeatherMetrics,
     toggleHealthRisk,
     toggleWeatherMetric,
   } = useSelection()
+
+  const allHealthRisks: ('pathogen' | 'fecal' | 'arg' | 'overall')[] = ['pathogen', 'fecal', 'arg', 'overall']
+  const allWeatherMetrics: ('wind' | 'rainfall' | 'humidity')[] = ['wind', 'rainfall', 'humidity']
+
+  const handleSelectAllHealthRisks = () => {
+    setSelectedHealthRisks(allHealthRisks)
+  }
+
+  const handleClearAllHealthRisks = () => {
+    setSelectedHealthRisks([])
+  }
+
+  const handleSelectAllWeather = () => {
+    setSelectedWeatherMetrics(allWeatherMetrics)
+  }
+
+  const handleClearAllWeather = () => {
+    setSelectedWeatherMetrics([])
+  }
 
   useEffect(() => {
     const uniqueCities = getUniqueCities()
@@ -214,9 +235,45 @@ export function CollapsibleSidebar() {
 
       {/* Section 2: Health Risk Selectors (reduced height) */}
       <Box sx={{ flex: '0 0 26%', padding: '24px', borderBottom: '1px solid', borderColor: 'divider', overflowY: 'auto' }}>
-        <Typography variant="h6" sx={{ mb: 2, color: 'text.primary', fontWeight: 600, fontSize: '16px' }}>
-          Health Risk Data
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600, fontSize: '16px' }}>
+            Health Risk Data
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              size="small"
+              variant="text"
+              onClick={handleSelectAllHealthRisks}
+              disabled={!city || !site || site === 'all'}
+              sx={{ 
+                fontSize: '11px', 
+                textTransform: 'none',
+                minWidth: 'auto',
+                padding: '2px 8px',
+                color: '#4A90E2',
+                '&:hover': { backgroundColor: 'rgba(74, 144, 226, 0.08)' }
+              }}
+            >
+              Select All
+            </Button>
+            <Button
+              size="small"
+              variant="text"
+              onClick={handleClearAllHealthRisks}
+              disabled={!city || !site || site === 'all'}
+              sx={{ 
+                fontSize: '11px', 
+                textTransform: 'none',
+                minWidth: 'auto',
+                padding: '2px 8px',
+                color: '#6B7280',
+                '&:hover': { backgroundColor: 'rgba(107, 114, 128, 0.08)' }
+              }}
+            >
+              Clear All
+            </Button>
+          </Box>
+        </Box>
         <FormGroup>
           <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
             <span>
@@ -283,9 +340,45 @@ export function CollapsibleSidebar() {
 
       {/* Section 3: Weather Selectors (expanded height) */}
       <Box sx={{ flex: '0 0 52%', padding: '24px', overflowY: 'auto' }}>
-        <Typography variant="h6" sx={{ mb: 2, color: 'text.primary', fontWeight: 600, fontSize: '16px' }}>
-          Weather Data
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600, fontSize: '16px' }}>
+            Weather Data
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              size="small"
+              variant="text"
+              onClick={handleSelectAllWeather}
+              disabled={!city || !site || site === 'all'}
+              sx={{ 
+                fontSize: '11px', 
+                textTransform: 'none',
+                minWidth: 'auto',
+                padding: '2px 8px',
+                color: '#4A90E2',
+                '&:hover': { backgroundColor: 'rgba(74, 144, 226, 0.08)' }
+              }}
+            >
+              Select All
+            </Button>
+            <Button
+              size="small"
+              variant="text"
+              onClick={handleClearAllWeather}
+              disabled={!city || !site || site === 'all'}
+              sx={{ 
+                fontSize: '11px', 
+                textTransform: 'none',
+                minWidth: 'auto',
+                padding: '2px 8px',
+                color: '#6B7280',
+                '&:hover': { backgroundColor: 'rgba(107, 114, 128, 0.08)' }
+              }}
+            >
+              Clear All
+            </Button>
+          </Box>
+        </Box>
         <FormGroup>
           {/* Wind Speed & Direction */}
           <Box sx={{ mb: 2 }}>
@@ -300,7 +393,20 @@ export function CollapsibleSidebar() {
                       sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
                     />
                   }
-                  label={<Typography sx={{ fontSize: '14px' }}>Wind Speed & Direction</Typography>}
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <svg width="16" height="16" viewBox="0 0 16 16">
+                        <defs>
+                          <marker id="legend-arrow" markerWidth="4" markerHeight="4" refX="3" refY="2" orient="auto">
+                            <line x1="0" y1="0" x2="3" y2="2" stroke="#1E40AF" strokeWidth="0.8" strokeLinecap="round"/>
+                            <line x1="0" y1="4" x2="3" y2="2" stroke="#1E40AF" strokeWidth="0.8" strokeLinecap="round"/>
+                          </marker>
+                        </defs>
+                        <line x1="2" y1="8" x2="14" y2="8" stroke="#1E40AF" strokeWidth="2" markerEnd="url(#legend-arrow)"/>
+                      </svg>
+                      <Typography sx={{ fontSize: '14px' }}>Wind Speed & Direction</Typography>
+                    </Box>
+                  }
                 />
               </span>
             </Tooltip>
@@ -343,7 +449,17 @@ export function CollapsibleSidebar() {
                       sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
                     />
                   }
-                  label={<Typography sx={{ fontSize: '14px' }}>Rainfall</Typography>}
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <svg width="10" height="12" viewBox="0 0 10 12">
+                        <path d="M5 0 C5 0, 0 5, 0 7.5 C0 10, 2.2 12, 5 12 C7.8 12, 10 10, 10 7.5 C10 5, 5 0, 5 0 Z" 
+                              fill="#3B82F6" 
+                              stroke="#1E40AF" 
+                              strokeWidth="0.8"/>
+                      </svg>
+                      <Typography sx={{ fontSize: '14px' }}>Rainfall</Typography>
+                    </Box>
+                  }
                 />
               </span>
             </Tooltip>
@@ -386,7 +502,19 @@ export function CollapsibleSidebar() {
                       sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
                     />
                   }
-                  label={<Typography sx={{ fontSize: '14px' }}>Humidity</Typography>}
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <svg width="24" height="10" viewBox="0 0 24 10">
+                        <path d="M 1,5 Q 2.5,2 4,5 T 7,5 T 10,5 T 13,5 T 16,5 T 19,5 T 22,5" 
+                              fill="none" 
+                              stroke="#1E40AF" 
+                              strokeWidth="2" 
+                              strokeLinecap="round"
+                              strokeLinejoin="round"/>
+                      </svg>
+                      <Typography sx={{ fontSize: '14px' }}>Humidity</Typography>
+                    </Box>
+                  }
                 />
               </span>
             </Tooltip>
