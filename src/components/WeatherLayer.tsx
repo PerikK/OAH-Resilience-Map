@@ -16,6 +16,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
   const [averageValue, setAverageValue] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [windData, setWindData] = useState<{ speed: number; direction: number } | null>(null)
+  const [precipitationData, setPrecipitationData] = useState<number>(0) // Total precipitation in mm
 
   // Add SVG arrowhead marker definition to the map and keep it updated
   useEffect(() => {
@@ -136,6 +137,17 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
         const windSpeed = getHourlyValue(hourly.wind_speed_10m, 12) || 0
         const windDirection = getHourlyValue(hourly.wind_direction_10m, 12) || 0
         setWindData({ speed: windSpeed, direction: windDirection })
+
+        // Get precipitation data (sum of all hourly precipitation)
+        const totalPrecipitation = hourly.precipitation?.reduce((acc: number, val: number) => acc + val, 0) || 0
+        setPrecipitationData(totalPrecipitation)
+
+        console.log('=== WEATHER SYMBOLS DATA ===')
+        console.log('Wind Speed:', windSpeed, 'm/s')
+        console.log('Wind Direction:', windDirection, '° (0=N, 90=E, 180=S, 270=W)')
+        console.log('Total Precipitation:', totalPrecipitation, 'mm')
+        console.log('Humidity:', parameter === 'humidity' ? value : 'N/A', '%')
+        console.log('============================')
       } catch (error) {
         console.error('Failed to fetch weather data:', error)
         setError(error instanceof Error ? error.message : 'Failed to fetch weather data')
@@ -209,7 +221,9 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
   // Helper function to calculate arrow end point based on wind direction
   const calculateArrowEnd = (centerLat: number, centerLon: number, direction: number, lengthKm: number) => {
     const R = 6371 // Earth's radius in km
-    const bearing = (direction * Math.PI) / 180
+    // Convert compass bearing (0° = North, clockwise) to mathematical bearing (0° = East, counterclockwise)
+    const mathBearing = 90 - direction
+    const bearing = (mathBearing * Math.PI) / 180
     const lat1 = (centerLat * Math.PI) / 180
     const lon1 = (centerLon * Math.PI) / 180
 
@@ -244,11 +258,24 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
       const angle = (i * 360) / numArrows
       const distance = 0.3 // 300m from center
       
-      // Calculate arrow start position
-      const startPos = calculateArrowEnd(lat, lon, angle, distance)
+      // Calculate position around the circle
+      const centerPos = calculateArrowEnd(lat, lon, angle, distance)
       
-      // Calculate arrow end position (pointing in wind direction)
-      const endPos = calculateArrowEnd(startPos.lat, startPos.lon, windData.direction, arrowLength)
+      // Wind direction is where wind comes FROM (e.g., 168° = from SSE)
+      // Arrow should point FROM that direction (168°) TO opposite direction (168° + 180°)
+      
+      // DEBUG: Log the directions
+      if (i === 0) {
+        const windToDirection = (windData.direction + 180) % 360
+        console.log('Wind FROM:', windData.direction, '° | Wind TO:', windToDirection, '°')
+      }
+      
+      // Start point: in the direction the wind is coming from
+      const startPos = calculateArrowEnd(centerPos.lat, centerPos.lon, windData.direction, arrowLength / 2)
+      
+      // End point: in the opposite direction (where wind is blowing to)
+      const windToDirection = (windData.direction + 180) % 360
+      const endPos = calculateArrowEnd(centerPos.lat, centerPos.lon, windToDirection, arrowLength / 2)
       
       arrows.push({
         id: `arrow-${i}`,
@@ -282,13 +309,14 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
     return indicators
   }
 
-  // Generate rainfall droplets based on precipitation/cloud cover
+  // Generate rainfall droplets based on actual precipitation data
   const generateRainfallDroplets = () => {
-    if (!averageValue || parameter !== 'clouds') return []
+    if (parameter !== 'clouds') return [] // Only show when rainfall is selected
+    if (precipitationData === 0) return [] // No droplets if no rain
     
     const droplets = []
-    // More droplets for higher cloud cover (proxy for rainfall)
-    const numDroplets = Math.min(Math.ceil(averageValue / 15), 8) // Max 8 droplets
+    // More droplets for higher precipitation (1 droplet per 2mm of rain, max 8)
+    const numDroplets = Math.min(Math.ceil(precipitationData / 2), 8)
     
     for (let i = 0; i < numDroplets; i++) {
       const angle = (i * 360) / numDroplets + 30 // Offset from wind arrows
