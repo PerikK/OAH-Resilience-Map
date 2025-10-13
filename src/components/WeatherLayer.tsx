@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Circle, Marker, Popup, Polyline } from 'react-leaflet'
+import { useState, useEffect } from 'react'
+import { Circle, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import { fetchAreaHistoricalWeather, getHourlyValue, getWeatherDescription, type AreaWeatherPoint } from '../services/openMeteoService'
 
@@ -17,72 +17,6 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
   const [error, setError] = useState<string | null>(null)
   const [windData, setWindData] = useState<{ speed: number; direction: number } | null>(null)
   const [precipitationData, setPrecipitationData] = useState<number>(0) // Total precipitation in mm
-
-  // Add SVG arrowhead marker definition to the map and keep it updated
-  useEffect(() => {
-    const addArrowheadMarker = () => {
-      const mapContainer = document.querySelector('.leaflet-container')
-      if (mapContainer) {
-        const svgs = mapContainer.querySelectorAll('svg.leaflet-zoom-animated')
-        svgs.forEach(svg => {
-          if (!svg.querySelector('#arrowhead')) {
-            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
-            const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker')
-            marker.setAttribute('id', 'arrowhead')
-            marker.setAttribute('markerWidth', '8')
-            marker.setAttribute('markerHeight', '8')
-            marker.setAttribute('refX', '6')
-            marker.setAttribute('refY', '4')
-            marker.setAttribute('orient', 'auto')
-            marker.setAttribute('markerUnits', 'strokeWidth')
-            
-            // Create two lines forming a ">" shape
-            const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line')
-            line1.setAttribute('x1', '0')
-            line1.setAttribute('y1', '0')
-            line1.setAttribute('x2', '6')
-            line1.setAttribute('y2', '4')
-            line1.setAttribute('stroke', '#1E40AF') // Change this color for arrowhead
-            line1.setAttribute('stroke-width', '1')
-            line1.setAttribute('stroke-linecap', 'round')
-            
-            const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line')
-            line2.setAttribute('x1', '0')
-            line2.setAttribute('y1', '8')
-            line2.setAttribute('x2', '6')
-            line2.setAttribute('y2', '4')
-            line2.setAttribute('stroke', '#1E40AF') // Change this color for arrowhead
-            line2.setAttribute('stroke-width', '1')
-            line2.setAttribute('stroke-linecap', 'round')
-            
-            marker.appendChild(line1)
-            marker.appendChild(line2)
-            defs.appendChild(marker)
-            svg.insertBefore(defs, svg.firstChild)
-          }
-        })
-      }
-    }
-
-    // Add marker initially
-    addArrowheadMarker()
-
-    // Re-add marker after short delays to catch any re-renders
-    const timer1 = setTimeout(addArrowheadMarker, 100)
-    const timer2 = setTimeout(() => {
-      addArrowheadMarker()
-      // Also reapply markers to all polylines
-      const paths = document.querySelectorAll('.leaflet-interactive[stroke="#1E40AF"]')
-      paths.forEach(path => {
-        path.setAttribute('marker-end', 'url(#arrowhead)')
-      })
-    }, 200)
-    
-    return () => {
-      clearTimeout(timer1)
-      clearTimeout(timer2)
-    }
-  }, [windData, areaDataPoints])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -245,6 +179,15 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
     }
   }
 
+  // Get wind arrow color based on speed
+  const getWindColor = (speed: number) => {
+    if (speed < 2) return '#E0F2FE' // Calm
+    if (speed < 5) return '#86EFAC' // Light breeze
+    if (speed < 10) return '#22C55E' // Moderate
+    if (speed < 15) return '#15803D' // Strong
+    return '#14532D' // Very strong
+  }
+
   // Generate wind arrows based on wind speed and direction
   const generateWindArrows = () => {
     if (!windData || windData.speed < 0.5) return [] // Don't show arrows for very light wind
@@ -252,6 +195,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
     const arrows = []
     const numArrows = Math.min(Math.ceil(windData.speed / 2), 8) // More arrows for stronger wind, max 8
     const arrowLength = 0.3 // 300m arrows
+    const arrowColor = getWindColor(windData.speed)
     
     // Create arrows in a grid pattern within the circle
     for (let i = 0; i < numArrows; i++) {
@@ -281,6 +225,7 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
         id: `arrow-${i}`,
         start: [startPos.lat, startPos.lon] as [number, number],
         end: [endPos.lat, endPos.lon] as [number, number],
+        color: arrowColor,
       })
     }
     
@@ -461,25 +406,38 @@ export function WeatherLayer({ lat, lon, date, parameter = 'temp' }: WeatherLaye
       )}
 
       {/* Wind direction arrows - only show when wind parameter is selected */}
-      {!isLoading && !error && parameter === 'wind_speed' && windArrows.map((arrow) => (
-        <React.Fragment key={arrow.id}>
-          <Polyline
-            positions={[arrow.start, arrow.end]}
-            pathOptions={{
-              color: '#1E40AF',
-              weight: 3,
-              opacity: 1.0, // Change this for transparency
-            }}
-            eventHandlers={{
-              add: (e) => {
-                const polyline = e.target
-                // Add arrowhead using SVG marker
-                polyline._path.setAttribute('marker-end', 'url(#arrowhead)')
-              }
-            }}
+      {!isLoading && !error && parameter === 'wind_speed' && windArrows.map((arrow) => {
+        // Calculate the center point and angle for the arrow
+        const centerLat = (arrow.start[0] + arrow.end[0]) / 2
+        const centerLon = (arrow.start[1] + arrow.end[1]) / 2
+        
+        // Calculate rotation angle from start to end
+        const dy = arrow.end[0] - arrow.start[0]
+        const dx = arrow.end[1] - arrow.start[1]
+        const rotation = Math.atan2(dy, dx) * (180 / Math.PI)
+        
+        return (
+          <Marker
+            key={arrow.id}
+            position={[centerLat, centerLon]}
+            icon={L.divIcon({
+              html: `
+                <svg width="30" height="30" viewBox="0 0 30 30" style="transform: rotate(${rotation}deg);">
+                  <path d="M 5,15 L 25,15 L 20,10 M 25,15 L 20,20" 
+                        fill="none" 
+                        stroke="${arrow.color}" 
+                        stroke-width="3" 
+                        stroke-linecap="round"
+                        stroke-linejoin="round"/>
+                </svg>
+              `,
+              className: '',
+              iconSize: [30, 30],
+              iconAnchor: [15, 15],
+            })}
           />
-        </React.Fragment>
-      ))}
+        )
+      })}
 
       {/* Calm wind indicators (small dots for wind < 0.5 m/s) - only show when wind parameter is selected */}
       {!isLoading && !error && parameter === 'wind_speed' && calmIndicators.map((indicator) => (
