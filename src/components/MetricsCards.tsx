@@ -1,6 +1,6 @@
 import { Card, CardContent, Typography, LinearProgress, Box } from '@mui/material'
 import { useMemo } from 'react'
-import { getLatestResilienceData, hasResilienceData } from '../data/resilienceData'
+import { getHealthRiskForSite } from '../data/healthRiskData'
 import { useSelection } from '../context/SelectionContext'
 import { styled } from '@mui/material/styles'
 
