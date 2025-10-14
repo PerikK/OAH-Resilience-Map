@@ -42,6 +42,13 @@ export function CollapsibleSidebar() {
     setSelectedWeatherMetrics([])
   }
 
+  const handleClearSelections = () => {
+    setCity(null)
+    setSite(null)
+    setStartDate('2024-01-01')
+    setEndDate(new Date().toISOString().split('T')[0])
+  }
+
   useEffect(() => {
     const uniqueCities = getUniqueCities()
     setCities(uniqueCities)
@@ -74,9 +81,35 @@ export function CollapsibleSidebar() {
     >
       {/* Section 1: Dropdowns (1/4 of height) */}
       <Box sx={{ flex: '0 0 auto', padding: '16px 20px', borderBottom: '1px solid', borderColor: 'divider' }}>
-        <Typography variant="h6" sx={{ mb: 1.5, color: 'text.primary', fontWeight: 600, fontSize: '15px' }}>
-          Select Parameters
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600, fontSize: '15px' }}>
+            Select Parameters
+          </Typography>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={handleClearSelections}
+            disabled={!city && !site}
+            sx={{ 
+              fontSize: '11px', 
+              textTransform: 'none',
+              minWidth: 'auto',
+              padding: '4px 12px',
+              borderColor: '#DC2626',
+              color: '#DC2626',
+              '&:hover': { 
+                backgroundColor: 'rgba(220, 38, 38, 0.08)',
+                borderColor: '#DC2626'
+              },
+              '&:disabled': {
+                borderColor: '#E5E7EB',
+                color: '#9CA3AF'
+              }
+            }}
+          >
+            Clear Selections
+          </Button>
+        </Box>
 
         {/* City Selection */}
         <Box sx={{ mb: 1.5 }}>
