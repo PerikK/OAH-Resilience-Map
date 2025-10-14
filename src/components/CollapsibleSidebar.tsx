@@ -63,6 +63,10 @@ export function CollapsibleSidebar() {
     setSite(null)
     setStartDate('2024-01-01')
     setEndDate(new Date().toISOString().split('T')[0])
+    // Clear all data selections
+    setSelectedHealthRisks([])
+    setSelectedResilienceMetrics([])
+    setSelectedWeatherMetrics([])
   }
 
   useEffect(() => {
@@ -105,7 +109,7 @@ export function CollapsibleSidebar() {
             size="small"
             variant="outlined"
             onClick={handleClearSelections}
-            disabled={!city && !site}
+            disabled={!city && !site && selectedHealthRisks.length === 0 && selectedResilienceMetrics.length === 0 && selectedWeatherMetrics.length === 0}
             sx={{ 
               fontSize: '11px', 
               textTransform: 'none',

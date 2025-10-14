@@ -7,10 +7,10 @@ import { WeatherDataTable } from './WeatherDataTable'
 import { useSelection } from '../context/SelectionContext'
 
 export function ResilienceMap() {
-  const { city, site, selectedHealthRisks, selectedWeatherMetrics } = useSelection()
+  const { city, site, selectedHealthRisks, selectedWeatherMetrics, selectedResilienceMetrics } = useSelection()
   
   // Determine if we have data to show (map should shrink)
-  const hasData = city && site && site !== 'all' && (selectedHealthRisks.length > 0 || selectedWeatherMetrics.length > 0)
+  const hasData = city && site && site !== 'all' && (selectedHealthRisks.length > 0 || selectedWeatherMetrics.length > 0 || selectedResilienceMetrics.length > 0)
   
   // Map height: 80vh when no data, 50vh when data is available (to show tables)
   const mapHeight = hasData ? '50vh' : '80vh'
