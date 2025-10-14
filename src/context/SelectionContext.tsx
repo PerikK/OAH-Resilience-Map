@@ -8,6 +8,7 @@ export type Site = string | null
 
 export type HealthRiskMetric = 'pathogen' | 'fecal' | 'arg' | 'overall'
 export type WeatherMetric = 'wind' | 'rainfall' | 'humidity' | 'temperature'
+export type ResilienceMetric = 'waterQuality' | 'biodiversity' | 'riverbankProtection' | 'airQuality' | 'landUse' | 'wasteReduction'
 
 export type SelectionContextValue = {
   city: City
@@ -16,14 +17,17 @@ export type SelectionContextValue = {
   endDate: string
   selectedHealthRisks: HealthRiskMetric[]
   selectedWeatherMetrics: WeatherMetric[]
+  selectedResilienceMetrics: ResilienceMetric[]
   setCity: (c: City) => void
   setSite: (s: Site) => void
   setStartDate: (d: string) => void
   setEndDate: (d: string) => void
   setSelectedHealthRisks: (risks: HealthRiskMetric[]) => void
   setSelectedWeatherMetrics: (metrics: WeatherMetric[]) => void
+  setSelectedResilienceMetrics: (metrics: ResilienceMetric[]) => void
   toggleHealthRisk: (risk: HealthRiskMetric) => void
   toggleWeatherMetric: (metric: WeatherMetric) => void
+  toggleResilienceMetric: (metric: ResilienceMetric) => void
 }
 
 const SelectionContext = createContext<SelectionContextValue | undefined>(undefined)
@@ -35,6 +39,7 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
   const [endDate, setEndDate] = useState<string>('2025-07-31')
   const [selectedHealthRisks, setSelectedHealthRisks] = useState<HealthRiskMetric[]>([])
   const [selectedWeatherMetrics, setSelectedWeatherMetrics] = useState<WeatherMetric[]>([])
+  const [selectedResilienceMetrics, setSelectedResilienceMetrics] = useState<ResilienceMetric[]>([])
 
   const toggleHealthRisk = (risk: HealthRiskMetric) => {
     setSelectedHealthRisks(prev =>
@@ -48,6 +53,12 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  const toggleResilienceMetric = (metric: ResilienceMetric) => {
+    setSelectedResilienceMetrics(prev =>
+      prev.includes(metric) ? prev.filter(m => m !== metric) : [...prev, metric]
+    )
+  }
+
   const value = useMemo(
     () => ({
       city,
@@ -56,16 +67,19 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
       endDate,
       selectedHealthRisks,
       selectedWeatherMetrics,
+      selectedResilienceMetrics,
       setCity,
       setSite,
       setStartDate,
       setEndDate,
       setSelectedHealthRisks,
       setSelectedWeatherMetrics,
+      setSelectedResilienceMetrics,
       toggleHealthRisk,
       toggleWeatherMetric,
+      toggleResilienceMetric,
     }),
-    [city, site, startDate, endDate, selectedHealthRisks, selectedWeatherMetrics]
+    [city, site, startDate, endDate, selectedHealthRisks, selectedWeatherMetrics, selectedResilienceMetrics]
   )
 
   return <SelectionContext.Provider value={value}>{children}</SelectionContext.Provider>

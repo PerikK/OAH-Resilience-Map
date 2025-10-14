@@ -2,23 +2,25 @@ import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead
 import { useSelection } from '../context/SelectionContext'
 import { getHealthRiskForSite } from '../data/healthRiskData'
 import { getSite } from '../data/researchSites'
+import { getLatestResilienceData } from '../data/resilienceData'
 
 export function HealthRiskTable() {
-  const { city, site, selectedHealthRisks } = useSelection()
+  const { city, site, selectedHealthRisks, selectedResilienceMetrics } = useSelection()
 
-  // Don't show table if no site selected or no health risks selected
-  if (!city || !site || site === 'all' || selectedHealthRisks.length === 0) {
+  // Don't show table if no site selected or no metrics selected
+  if (!city || !site || site === 'all' || (selectedHealthRisks.length === 0 && selectedResilienceMetrics.length === 0)) {
     return null
   }
 
   const healthData = getHealthRiskForSite(site)
+  const resilienceData = getLatestResilienceData(site)
   const siteData = getSite(city, site)
 
-  if (!healthData || !siteData) {
+  if (!siteData) {
     return (
       <Box sx={{ padding: 3, backgroundColor: 'background.paper', borderRadius: '8px', border: '1px solid', borderColor: 'divider' }}>
         <Typography sx={{ color: 'text.secondary', textAlign: 'center' }}>
-          No health risk data available for {site}
+          No data available for {site}
         </Typography>
       </Box>
     )
@@ -39,7 +41,27 @@ export function HealthRiskTable() {
     }
   }
 
-  const getRiskValue = (metric: string): number => {
+  const getResilienceLabel = (metric: string): string => {
+    switch (metric) {
+      case 'waterQuality':
+        return 'Water Resources & Quality'
+      case 'biodiversity':
+        return 'Biodiversity & Habitats'
+      case 'riverbankProtection':
+        return 'Riverbank Protection'
+      case 'airQuality':
+        return 'Air Quality'
+      case 'landUse':
+        return 'Sustainable Land Use & Agriculture'
+      case 'wasteReduction':
+        return 'Waste Reduction'
+      default:
+        return metric
+    }
+  }
+
+  const getRiskValue = (metric: string): number | null => {
+    if (!healthData) return null
     switch (metric) {
       case 'pathogen':
         return healthData.scaled_Pathogen_Risk
@@ -50,7 +72,27 @@ export function HealthRiskTable() {
       case 'overall':
         return healthData.health_risk_score
       default:
-        return 0
+        return null
+    }
+  }
+
+  const getResilienceValue = (metric: string): number | null => {
+    if (!resilienceData) return null
+    switch (metric) {
+      case 'waterQuality':
+        return resilienceData['Water Resources & Quality']
+      case 'biodiversity':
+        return resilienceData['Biodiversity & Habitats']
+      case 'riverbankProtection':
+        return resilienceData['Riverbank Protection']
+      case 'airQuality':
+        return resilienceData['Air Quality']
+      case 'landUse':
+        return resilienceData['Sustainable Land Use & Agriculture']
+      case 'wasteReduction':
+        return resilienceData['Waste Reduction']
+      default:
+        return null
     }
   }
 
@@ -92,7 +134,7 @@ export function HealthRiskTable() {
     <Box sx={{ backgroundColor: 'background.paper', borderRadius: '8px', border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
       <Box sx={{ padding: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
         <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
-          Health Risk Data
+          Site Data
         </Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
           {siteData['Site Nr.']} - {siteData['Site Name']}, {city}
@@ -103,19 +145,21 @@ export function HealthRiskTable() {
         <Table sx={{ backgroundColor: 'background.paper' }}>
           <TableHead>
             <TableRow sx={{ backgroundColor: 'action.hover' }}>
-              <TableCell sx={{ fontWeight: 600, color: 'text.primary', borderColor: 'divider' }}>Risk Metric</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: 'text.primary', borderColor: 'divider' }}>Metric</TableCell>
               <TableCell sx={{ fontWeight: 600, color: 'text.primary', borderColor: 'divider' }} align="right">
-                Score
+                Value
               </TableCell>
               <TableCell sx={{ fontWeight: 600, color: 'text.primary', borderColor: 'divider' }} align="center">
-                Risk Level
+                Level
               </TableCell>
               <TableCell sx={{ fontWeight: 600, color: 'text.primary', borderColor: 'divider', width: '40px' }} align="center"></TableCell>
             </TableRow>
           </TableHead>
           <TableBody sx={{ backgroundColor: 'background.paper' }}>
+            {/* Health Risk Metrics */}
             {selectedHealthRisks.map((metric) => {
               const value = getRiskValue(metric)
+              if (value === null) return null
               const color = getRiskColor(value)
               return (
                 <TableRow key={metric} hover sx={{ backgroundColor: 'background.paper', '&:hover': { backgroundColor: 'action.hover' } }}>
@@ -140,6 +184,52 @@ export function HealthRiskTable() {
                   </TableCell>
                   <TableCell align="center" sx={{ padding: '8px', borderColor: 'divider' }}>
                     {getRiskSymbol(value)}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+            
+            {/* Resilience Metrics */}
+            {selectedResilienceMetrics.map((metric) => {
+              const value = getResilienceValue(metric)
+              if (value === null) {
+                return (
+                  <TableRow key={metric} hover sx={{ backgroundColor: 'background.paper', '&:hover': { backgroundColor: 'action.hover' } }}>
+                    <TableCell sx={{ borderColor: 'divider', color: 'text.primary' }}>{getResilienceLabel(metric)}</TableCell>
+                    <TableCell align="right" colSpan={3} sx={{ borderColor: 'divider', color: 'text.secondary', fontStyle: 'italic' }}>
+                      No data available for this site
+                    </TableCell>
+                  </TableRow>
+                )
+              }
+              // Resilience values are 0-100 scale
+              const normalizedValue = value / 100
+              const color = normalizedValue < 0.25 ? '#EF4444' : normalizedValue < 0.5 ? '#F59E0B' : normalizedValue < 0.75 ? '#10B981' : '#059669'
+              return (
+                <TableRow key={metric} hover sx={{ backgroundColor: 'background.paper', '&:hover': { backgroundColor: 'action.hover' } }}>
+                  <TableCell sx={{ borderColor: 'divider', color: 'text.primary' }}>{getResilienceLabel(metric)}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, borderColor: 'divider', color: 'text.primary' }}>
+                    {value.toFixed(1)}
+                  </TableCell>
+                  <TableCell align="center" sx={{ borderColor: 'divider' }}>
+                    <Box
+                      sx={{
+                        display: 'inline-block',
+                        padding: '4px 12px',
+                        borderRadius: '12px',
+                        backgroundColor: `${color}20`,
+                        color: color,
+                        fontSize: '12px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {normalizedValue < 0.25 ? 'Very Low' : normalizedValue < 0.5 ? 'Low' : normalizedValue < 0.75 ? 'Good' : 'Excellent'}
+                    </Box>
+                  </TableCell>
+                  <TableCell align="center" sx={{ padding: '8px', borderColor: 'divider' }}>
+                    <svg width="16" height="16" viewBox="0 0 16 16">
+                      <circle cx="8" cy="8" r="6" fill={color} />
+                    </svg>
                   </TableCell>
                 </TableRow>
               )

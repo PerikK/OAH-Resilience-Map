@@ -12,6 +12,7 @@ import {
   type ResearchSite,
 } from "../data/researchSites";
 import { getHealthRiskForSite } from "../data/healthRiskData";
+import { getLatestResilienceData } from "../data/resilienceData";
 import { WeatherLayer } from "./WeatherLayer";
 import "leaflet/dist/leaflet.css";
 
@@ -48,6 +49,176 @@ L.Icon.Default.mergeOptions({
   shadowUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
+
+// Component to show site circle with comprehensive popup
+interface WeatherData {
+  temperature: number;
+  humidity: number;
+  windSpeed: number;
+  windDirection: number;
+  precipitation: number;
+}
+
+function SiteCircleWithPopup({ lat, lon, city, site, startDate }: { lat: number; lon: number; city: string; site: string; startDate: string }) {
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        setLoading(true);
+        const { fetchAreaHistoricalWeather, getHourlyValue } = await import('../services/openMeteoService');
+        const data = await fetchAreaHistoricalWeather(lat, lon, startDate, 1);
+        
+        if (data && data.length > 0) {
+          const hourly = data[0].weatherData.hourly;
+          const hourIndex = 12; // Noon data
+          
+          setWeatherData({
+            temperature: getHourlyValue(hourly.temperature_2m, hourIndex) || 0,
+            humidity: getHourlyValue(hourly.relative_humidity_2m, hourIndex) || 0,
+            windSpeed: getHourlyValue(hourly.wind_speed_10m, hourIndex) || 0,
+            windDirection: getHourlyValue(hourly.wind_direction_10m, hourIndex) || 0,
+            precipitation: hourly.precipitation?.reduce((acc: number, val: number) => acc + val, 0) || 0,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch weather data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (startDate) {
+      fetchWeather();
+    }
+  }, [lat, lon, startDate]);
+
+  const siteData = getSite(city, site);
+  const healthData = getHealthRiskForSite(site);
+  const resilienceData = getLatestResilienceData(site);
+
+  return (
+    <Circle
+      center={[lat, lon]}
+      radius={1000}
+      pathOptions={{
+        color: '#707070',
+        fillColor: '#FFFBEB',
+        fillOpacity: 0.8,
+        weight: 1,
+        dashArray: '5, 5',
+      }}
+    >
+      <Popup maxWidth={600} minWidth={500}>
+        <Box sx={{ p: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontSize: '16px' }}>
+            {siteData?.['Site Nr.']} - {siteData?.['Site Name']}
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#666', mb: 2, fontSize: '12px' }}>
+            {city} • Lat: {lat.toFixed(5)}, Lon: {lon.toFixed(5)}
+          </Typography>
+          
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 2 }}>
+            {/* Health Risk Data Column */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: '#DC2626', fontSize: '13px' }}>
+                Health Risk Data
+              </Typography>
+              {healthData ? (
+                <Box sx={{ fontSize: '11px' }}>
+                  <Box sx={{ mb: 0.5 }}>
+                    <strong>Pathogen Risk:</strong> {healthData.scaled_Pathogen_Risk.toFixed(3)}
+                  </Box>
+                  <Box sx={{ mb: 0.5 }}>
+                    <strong>Fecal Risk:</strong> {healthData.scaled_Fecal_Risk.toFixed(3)}
+                  </Box>
+                  <Box sx={{ mb: 0.5 }}>
+                    <strong>ARG Risk:</strong> {healthData.scaled_ARG_Risk.toFixed(3)}
+                  </Box>
+                  <Box sx={{ mb: 0.5 }}>
+                    <strong>Overall Score:</strong> {healthData.health_risk_score.toFixed(3)}
+                  </Box>
+                </Box>
+              ) : (
+                <Typography sx={{ fontSize: '11px', fontStyle: 'italic', color: '#999' }}>
+                  No data available
+                </Typography>
+              )}
+            </Box>
+
+            {/* Resilience Data Column */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: '#10B981', fontSize: '13px' }}>
+                Resilience Data
+              </Typography>
+              {resilienceData ? (
+                <Box sx={{ fontSize: '11px' }}>
+                  <Box sx={{ mb: 0.5 }}>
+                    <strong>Water Quality:</strong> {resilienceData['Water Resources & Quality'].toFixed(1)}
+                  </Box>
+                  <Box sx={{ mb: 0.5 }}>
+                    <strong>Biodiversity:</strong> {resilienceData['Biodiversity & Habitats'].toFixed(1)}
+                  </Box>
+                  <Box sx={{ mb: 0.5 }}>
+                    <strong>Riverbank:</strong> {resilienceData['Riverbank Protection'].toFixed(1)}
+                  </Box>
+                  <Box sx={{ mb: 0.5 }}>
+                    <strong>Air Quality:</strong> {resilienceData['Air Quality'].toFixed(1)}
+                  </Box>
+                  <Box sx={{ mb: 0.5 }}>
+                    <strong>Land Use:</strong> {resilienceData['Sustainable Land Use & Agriculture'].toFixed(1)}
+                  </Box>
+                  <Box sx={{ mb: 0.5 }}>
+                    <strong>Waste:</strong> {resilienceData['Waste Reduction'].toFixed(1)}
+                  </Box>
+                </Box>
+              ) : (
+                <Typography sx={{ fontSize: '11px', fontStyle: 'italic', color: '#999' }}>
+                  No data available
+                </Typography>
+              )}
+            </Box>
+
+            {/* Weather Data Column */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: '#3B82F6', fontSize: '13px' }}>
+                Weather Data
+              </Typography>
+              <Typography sx={{ fontSize: '11px', color: '#666', mb: 1 }}>
+                Date: {startDate}
+              </Typography>
+              {loading ? (
+                <Typography sx={{ fontSize: '11px', fontStyle: 'italic', color: '#999' }}>
+                  Loading...
+                </Typography>
+              ) : weatherData ? (
+                <Box sx={{ fontSize: '11px' }}>
+                  <Box sx={{ mb: 0.5 }}>
+                    <strong>Temperature:</strong> {weatherData.temperature.toFixed(1)}°C
+                  </Box>
+                  <Box sx={{ mb: 0.5 }}>
+                    <strong>Humidity:</strong> {weatherData.humidity.toFixed(0)}%
+                  </Box>
+                  <Box sx={{ mb: 0.5 }}>
+                    <strong>Wind:</strong> {weatherData.windSpeed.toFixed(1)} m/s
+                  </Box>
+                  <Box sx={{ mb: 0.5 }}>
+                    <strong>Precipitation:</strong> {weatherData.precipitation.toFixed(1)} mm
+                  </Box>
+                </Box>
+              ) : (
+                <Typography sx={{ fontSize: '11px', fontStyle: 'italic', color: '#999' }}>
+                  No data available
+                </Typography>
+              )}
+            </Box>
+          </Box>
+        </Box>
+      </Popup>
+    </Circle>
+  );
+}
 
 export function CityMap() {
   const { city, site, startDate, selectedWeatherMetrics, setCity, setSite } =
@@ -543,17 +714,13 @@ export function CityMap() {
           })}
 
           {/* Site radius circle - always show when site is selected */}
-          {selectedSiteCoords && (
-            <Circle
-              center={[selectedSiteCoords.lat, selectedSiteCoords.lon]}
-              radius={1000} // 1km in meters
-              pathOptions={{
-                color: '#707070',
-                fillColor: '#FFFBEB',
-                fillOpacity: 0.8,
-                weight: 1,
-                dashArray: '5, 5',
-              }}
+          {selectedSiteCoords && site && site !== 'all' && (
+            <SiteCircleWithPopup
+              lat={selectedSiteCoords.lat}
+              lon={selectedSiteCoords.lon}
+              city={city!}
+              site={site}
+              startDate={startDate}
             />
           )}
 

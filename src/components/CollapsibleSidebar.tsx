@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Box, TextField, MenuItem, Typography, Checkbox, FormControlLabel, FormGroup, Tooltip, Button } from '@mui/material'
+import { Box, TextField, MenuItem, Typography, Checkbox, FormControlLabel, FormGroup, Tooltip, Button, Accordion, AccordionSummary, AccordionDetails } from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useSelection, type City, type Site } from '../context/SelectionContext'
 import { getUniqueCities, getSitesByCity, type ResearchSite } from '../data/researchSites'
 
 export function CollapsibleSidebar() {
   const [cities, setCities] = useState<string[]>([])
   const [availableSites, setAvailableSites] = useState<ResearchSite[]>([])
+  const [expandedHealthRisk, setExpandedHealthRisk] = useState(false)
+  const [expandedResilience, setExpandedResilience] = useState(false)
+  const [expandedWeather, setExpandedWeather] = useState(false)
   const {
     city,
     site,
@@ -13,18 +17,22 @@ export function CollapsibleSidebar() {
     endDate,
     selectedHealthRisks,
     selectedWeatherMetrics,
+    selectedResilienceMetrics,
     setCity,
     setSite,
     setStartDate,
     setEndDate,
     setSelectedHealthRisks,
     setSelectedWeatherMetrics,
+    setSelectedResilienceMetrics,
     toggleHealthRisk,
     toggleWeatherMetric,
+    toggleResilienceMetric,
   } = useSelection()
 
   const allHealthRisks: ('pathogen' | 'fecal' | 'arg' | 'overall')[] = ['pathogen', 'fecal', 'arg', 'overall']
   const allWeatherMetrics: ('wind' | 'rainfall' | 'humidity' | 'temperature')[] = ['wind', 'rainfall', 'humidity', 'temperature']
+  const allResilienceMetrics: ('waterQuality' | 'biodiversity' | 'riverbankProtection' | 'airQuality' | 'landUse' | 'wasteReduction')[] = ['waterQuality', 'biodiversity', 'riverbankProtection', 'airQuality', 'landUse', 'wasteReduction']
 
   const handleSelectAllHealthRisks = () => {
     setSelectedHealthRisks(allHealthRisks)
@@ -40,6 +48,14 @@ export function CollapsibleSidebar() {
 
   const handleClearAllWeather = () => {
     setSelectedWeatherMetrics([])
+  }
+
+  const handleSelectAllResilience = () => {
+    setSelectedResilienceMetrics(allResilienceMetrics)
+  }
+
+  const handleClearAllResilience = () => {
+    setSelectedResilienceMetrics([])
   }
 
   const handleClearSelections = () => {
@@ -265,48 +281,80 @@ export function CollapsibleSidebar() {
         </Box>
       </Box>
 
-      {/* Section 2: Health Risk Selectors (reduced height) */}
-      <Box sx={{ flex: '0 0 26%', padding: '24px', borderBottom: '1px solid', borderColor: 'divider', overflowY: 'auto' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600, fontSize: '16px' }}>
-            Health Risk Data
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              size="small"
-              variant="text"
-              onClick={handleSelectAllHealthRisks}
-              disabled={!city || !site || site === 'all'}
-              sx={{ 
-                fontSize: '11px', 
-                textTransform: 'none',
-                minWidth: 'auto',
-                padding: '2px 8px',
-                color: '#4A90E2',
-                '&:hover': { backgroundColor: 'rgba(74, 144, 226, 0.08)' }
-              }}
-            >
-              Select All
-            </Button>
-            <Button
-              size="small"
-              variant="text"
-              onClick={handleClearAllHealthRisks}
-              disabled={!city || !site || site === 'all'}
-              sx={{ 
-                fontSize: '11px', 
-                textTransform: 'none',
-                minWidth: 'auto',
-                padding: '2px 8px',
-                color: '#6B7280',
-                '&:hover': { backgroundColor: 'rgba(107, 114, 128, 0.08)' }
-              }}
-            >
-              Clear All
-            </Button>
-          </Box>
-        </Box>
-        <FormGroup>
+      {/* Data Selection Accordions */}
+      <Box sx={{ flex: 1, overflowY: 'auto', padding: '8px 12px' }}>
+        {/* Health Risk Data Accordion */}
+        <Accordion 
+          expanded={expandedHealthRisk} 
+          onChange={() => setExpandedHealthRisk(!expandedHealthRisk)}
+          sx={{ 
+            boxShadow: 'none',
+            border: '1px solid',
+            borderColor: 'divider',
+            '&:before': { display: 'none' },
+            mb: 1
+          }}
+        >
+          <AccordionSummary 
+            expandIcon={<ExpandMoreIcon />}
+            sx={{ 
+              minHeight: '48px',
+              backgroundColor: 'background.default',
+              '& .MuiAccordionSummary-content': { 
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                my: 1
+              }
+            }}
+          >
+            <Typography sx={{ fontWeight: 600, fontSize: '14px', color: 'text.primary' }}>
+              Health Risk Data
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 0.5, mr: 1 }} onClick={(e) => e.stopPropagation()}>
+              <Box
+                component="span"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!city || !site || site === 'all') return;
+                  handleSelectAllHealthRisks();
+                }}
+                sx={{ 
+                  fontSize: '10px', 
+                  textTransform: 'none',
+                  padding: '2px 6px',
+                  color: (!city || !site || site === 'all') ? '#9CA3AF' : '#4A90E2',
+                  cursor: (!city || !site || site === 'all') ? 'not-allowed' : 'pointer',
+                  borderRadius: '4px',
+                  '&:hover': (!city || !site || site === 'all') ? {} : { backgroundColor: 'rgba(74, 144, 226, 0.08)' },
+                  userSelect: 'none'
+                }}
+              >
+                All
+              </Box>
+              <Box
+                component="span"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!city || !site || site === 'all') return;
+                  handleClearAllHealthRisks();
+                }}
+                sx={{ 
+                  fontSize: '10px', 
+                  textTransform: 'none',
+                  padding: '2px 6px',
+                  color: (!city || !site || site === 'all') ? '#9CA3AF' : '#6B7280',
+                  cursor: (!city || !site || site === 'all') ? 'not-allowed' : 'pointer',
+                  borderRadius: '4px',
+                  '&:hover': (!city || !site || site === 'all') ? {} : { backgroundColor: 'rgba(107, 114, 128, 0.08)' },
+                  userSelect: 'none'
+                }}
+              >
+                Clear
+              </Box>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails sx={{ pt: 0, pb: 2 }}>
+            <FormGroup>
           <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
             <span>
               <FormControlLabel
@@ -367,51 +415,248 @@ export function CollapsibleSidebar() {
               />
             </span>
           </Tooltip>
-        </FormGroup>
-      </Box>
+            </FormGroup>
+          </AccordionDetails>
+        </Accordion>
 
-      {/* Section 3: Weather Selectors (expanded height) */}
-      <Box sx={{ flex: '0 0 52%', padding: '24px', overflowY: 'auto' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600, fontSize: '16px' }}>
-            Weather Data
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              size="small"
-              variant="text"
-              onClick={handleSelectAllWeather}
-              disabled={!city || !site || site === 'all'}
-              sx={{ 
-                fontSize: '11px', 
-                textTransform: 'none',
-                minWidth: 'auto',
-                padding: '2px 8px',
-                color: '#4A90E2',
-                '&:hover': { backgroundColor: 'rgba(74, 144, 226, 0.08)' }
-              }}
-            >
-              Select All
-            </Button>
-            <Button
-              size="small"
-              variant="text"
-              onClick={handleClearAllWeather}
-              disabled={!city || !site || site === 'all'}
-              sx={{ 
-                fontSize: '11px', 
-                textTransform: 'none',
-                minWidth: 'auto',
-                padding: '2px 8px',
-                color: '#6B7280',
-                '&:hover': { backgroundColor: 'rgba(107, 114, 128, 0.08)' }
-              }}
-            >
-              Clear All
-            </Button>
-          </Box>
-        </Box>
-        <FormGroup>
+        {/* Resilience Data Accordion */}
+        <Accordion 
+          expanded={expandedResilience} 
+          onChange={() => setExpandedResilience(!expandedResilience)}
+          sx={{ 
+            boxShadow: 'none',
+            border: '1px solid',
+            borderColor: 'divider',
+            '&:before': { display: 'none' },
+            mb: 1
+          }}
+        >
+          <AccordionSummary 
+            expandIcon={<ExpandMoreIcon />}
+            sx={{ 
+              minHeight: '48px',
+              backgroundColor: 'background.default',
+              '& .MuiAccordionSummary-content': { 
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                my: 1
+              }
+            }}
+          >
+            <Typography sx={{ fontWeight: 600, fontSize: '14px', color: 'text.primary' }}>
+              Resilience Data
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 0.5, mr: 1 }} onClick={(e) => e.stopPropagation()}>
+              <Box
+                component="span"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!city || !site || site === 'all') return;
+                  handleSelectAllResilience();
+                }}
+                sx={{ 
+                  fontSize: '10px', 
+                  textTransform: 'none',
+                  padding: '2px 6px',
+                  color: (!city || !site || site === 'all') ? '#9CA3AF' : '#4A90E2',
+                  cursor: (!city || !site || site === 'all') ? 'not-allowed' : 'pointer',
+                  borderRadius: '4px',
+                  '&:hover': (!city || !site || site === 'all') ? {} : { backgroundColor: 'rgba(74, 144, 226, 0.08)' },
+                  userSelect: 'none'
+                }}
+              >
+                All
+              </Box>
+              <Box
+                component="span"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!city || !site || site === 'all') return;
+                  handleClearAllResilience();
+                }}
+                sx={{ 
+                  fontSize: '10px', 
+                  textTransform: 'none',
+                  padding: '2px 6px',
+                  color: (!city || !site || site === 'all') ? '#9CA3AF' : '#6B7280',
+                  cursor: (!city || !site || site === 'all') ? 'not-allowed' : 'pointer',
+                  borderRadius: '4px',
+                  '&:hover': (!city || !site || site === 'all') ? {} : { backgroundColor: 'rgba(107, 114, 128, 0.08)' },
+                  userSelect: 'none'
+                }}
+              >
+                Clear
+              </Box>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails sx={{ pt: 0, pb: 2 }}>
+            <FormGroup>
+          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
+            <span>
+              <FormControlLabel
+                disabled={!city || !site || site === 'all'}
+                control={
+                  <Checkbox
+                    checked={selectedResilienceMetrics.includes('waterQuality')}
+                    onChange={() => toggleResilienceMetric('waterQuality')}
+                    sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
+                  />
+                }
+                label={<Typography sx={{ fontSize: '12px' }}>Water Resources & Quality</Typography>}
+              />
+            </span>
+          </Tooltip>
+          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
+            <span>
+              <FormControlLabel
+                disabled={!city || !site || site === 'all'}
+                control={
+                  <Checkbox
+                    checked={selectedResilienceMetrics.includes('biodiversity')}
+                    onChange={() => toggleResilienceMetric('biodiversity')}
+                    sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
+                  />
+                }
+                label={<Typography sx={{ fontSize: '12px' }}>Biodiversity & Habitats</Typography>}
+              />
+            </span>
+          </Tooltip>
+          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
+            <span>
+              <FormControlLabel
+                disabled={!city || !site || site === 'all'}
+                control={
+                  <Checkbox
+                    checked={selectedResilienceMetrics.includes('riverbankProtection')}
+                    onChange={() => toggleResilienceMetric('riverbankProtection')}
+                    sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
+                  />
+                }
+                label={<Typography sx={{ fontSize: '12px' }}>Riverbank Protection</Typography>}
+              />
+            </span>
+          </Tooltip>
+          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
+            <span>
+              <FormControlLabel
+                disabled={!city || !site || site === 'all'}
+                control={
+                  <Checkbox
+                    checked={selectedResilienceMetrics.includes('airQuality')}
+                    onChange={() => toggleResilienceMetric('airQuality')}
+                    sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
+                  />
+                }
+                label={<Typography sx={{ fontSize: '12px' }}>Air Quality</Typography>}
+              />
+            </span>
+          </Tooltip>
+          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
+            <span>
+              <FormControlLabel
+                disabled={!city || !site || site === 'all'}
+                control={
+                  <Checkbox
+                    checked={selectedResilienceMetrics.includes('landUse')}
+                    onChange={() => toggleResilienceMetric('landUse')}
+                    sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
+                  />
+                }
+                label={<Typography sx={{ fontSize: '12px' }}>Sustainable Land Use</Typography>}
+              />
+            </span>
+          </Tooltip>
+          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
+            <span>
+              <FormControlLabel
+                disabled={!city || !site || site === 'all'}
+                control={
+                  <Checkbox
+                    checked={selectedResilienceMetrics.includes('wasteReduction')}
+                    onChange={() => toggleResilienceMetric('wasteReduction')}
+                    sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
+                  />
+                }
+                label={<Typography sx={{ fontSize: '12px' }}>Waste Reduction</Typography>}
+              />
+            </span>
+          </Tooltip>
+            </FormGroup>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* Weather Data Accordion */}
+        <Accordion 
+          expanded={expandedWeather} 
+          onChange={() => setExpandedWeather(!expandedWeather)}
+          sx={{ 
+            boxShadow: 'none',
+            border: '1px solid',
+            borderColor: 'divider',
+            '&:before': { display: 'none' },
+            mb: 1
+          }}
+        >
+          <AccordionSummary 
+            expandIcon={<ExpandMoreIcon />}
+            sx={{ 
+              minHeight: '48px',
+              backgroundColor: 'background.default',
+              '& .MuiAccordionSummary-content': { 
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                my: 1
+              }
+            }}
+          >
+            <Typography sx={{ fontWeight: 600, fontSize: '14px', color: 'text.primary' }}>
+              Weather Data
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 0.5, mr: 1 }} onClick={(e) => e.stopPropagation()}>
+              <Box
+                component="span"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!city || !site || site === 'all') return;
+                  handleSelectAllWeather();
+                }}
+                sx={{ 
+                  fontSize: '10px', 
+                  textTransform: 'none',
+                  padding: '2px 6px',
+                  color: (!city || !site || site === 'all') ? '#9CA3AF' : '#4A90E2',
+                  cursor: (!city || !site || site === 'all') ? 'not-allowed' : 'pointer',
+                  borderRadius: '4px',
+                  '&:hover': (!city || !site || site === 'all') ? {} : { backgroundColor: 'rgba(74, 144, 226, 0.08)' },
+                  userSelect: 'none'
+                }}
+              >
+                All
+              </Box>
+              <Box
+                component="span"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!city || !site || site === 'all') return;
+                  handleClearAllWeather();
+                }}
+                sx={{ 
+                  fontSize: '10px', 
+                  textTransform: 'none',
+                  padding: '2px 6px',
+                  color: (!city || !site || site === 'all') ? '#9CA3AF' : '#6B7280',
+                  cursor: (!city || !site || site === 'all') ? 'not-allowed' : 'pointer',
+                  borderRadius: '4px',
+                  '&:hover': (!city || !site || site === 'all') ? {} : { backgroundColor: 'rgba(107, 114, 128, 0.08)' },
+                  userSelect: 'none'
+                }}
+              >
+                Clear
+              </Box>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails sx={{ pt: 0, pb: 2 }}>
+            <FormGroup>
           {/* Wind Speed & Direction */}
           <Box sx={{ mb: 2 }}>
             <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
@@ -632,7 +877,9 @@ export function CollapsibleSidebar() {
               </Box>
             )}
           </Box>
-        </FormGroup>
+            </FormGroup>
+          </AccordionDetails>
+        </Accordion>
       </Box>
     </Box>
   )
