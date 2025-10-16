@@ -777,7 +777,7 @@ export function CityMap() {
             )}
         </MapContainer>
 
-        {/* Health Risk Charts Overlay - 2 rows from center to right */}
+        {/* Health Risk Charts Overlay - 2 rows from center to right - FIXED POSITION */}
         {site && site !== 'all' && selectedHealthRisks.length > 0 && (
           <Box
             sx={{
