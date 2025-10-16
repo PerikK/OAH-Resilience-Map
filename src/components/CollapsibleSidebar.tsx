@@ -67,6 +67,10 @@ export function CollapsibleSidebar() {
     setSelectedHealthRisks([])
     setSelectedResilienceMetrics([])
     setSelectedWeatherMetrics([])
+    // Collapse all accordions
+    setExpandedHealthRisk(false)
+    setExpandedResilience(false)
+    setExpandedWeather(false)
   }
 
   useEffect(() => {
