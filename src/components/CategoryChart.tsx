@@ -26,7 +26,7 @@ export function CategoryChart() {
     const healthData = getHealthRiskForSite(site)
     if (!healthData) return []
     
-    return [
+    const chartData = [
       {
         category: 'Pathogen',
         value: healthData.scaled_Pathogen_Risk * 100,
@@ -44,6 +44,9 @@ export function CategoryChart() {
         value: healthData.health_risk_score * 100,
       },
     ]
+    
+    console.log('CategoryChart data:', chartData)
+    return chartData
   }, [site])
   
   if (data.length === 0) {
@@ -57,23 +60,31 @@ export function CategoryChart() {
   }
   
   return (
-    <Box sx={{ width: '100%', height: 350 }}>
+    <Box sx={{ width: '100%', height: 350, minHeight: 350 }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
           layout="horizontal"
-          margin={{ top: 20, right: 30, left: 80, bottom: 20 }}
+          margin={{ top: 10, right: 20, left: 60, bottom: 10 }}
+          barSize={30}
         >
-          <XAxis type="number" domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
+          <XAxis 
+            type="number" 
+            domain={[0, 100]} 
+            axisLine={false} 
+            tickLine={false} 
+            tick={{ fontSize: 10, fill: '#6b7280' }}
+            ticks={[0, 25, 50, 75, 100]}
+          />
           <YAxis 
             type="category" 
             dataKey="category" 
             axisLine={false} 
             tickLine={false}
-            tick={{ fontSize: 12, fill: '#6b7280' }}
-            width={75}
+            tick={{ fontSize: 10, fill: '#6b7280' }}
+            width={60}
           />
-          <Bar dataKey="value" fill={colors[0]} radius={[0, 4, 4, 0]} />
+          <Bar dataKey="value" fill={colors[0]} radius={[0, 4, 4, 0]} minPointSize={2} />
         </BarChart>
       </ResponsiveContainer>
     </Box>

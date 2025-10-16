@@ -12,8 +12,8 @@ export function ResilienceMap() {
   // Determine if we have data to show (map should shrink)
   const hasData = city && site && site !== 'all' && (selectedHealthRisks.length > 0 || selectedWeatherMetrics.length > 0 || selectedResilienceMetrics.length > 0)
   
-  // Map height: 80vh when no data, 50vh when data is available (to show tables)
-  const mapHeight = hasData ? '50vh' : '80vh'
+  // Map height: 85vh when no data, 70vh when data is available (to show tables)
+  const mapHeight = hasData ? '70vh' : '85vh'
 
   return (
     <Box

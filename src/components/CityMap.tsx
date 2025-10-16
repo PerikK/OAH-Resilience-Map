@@ -1,7 +1,7 @@
 import { Box, Typography, CircularProgress } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
 import { useSelection, type City, type Site } from "../context/SelectionContext";
 import {
@@ -14,6 +14,9 @@ import {
 import { getHealthRiskForSite } from "../data/healthRiskData";
 import { getLatestResilienceData } from "../data/resilienceData";
 import { WeatherInfoBox } from "./WeatherInfoBox";
+import { MetricsCards } from "./MetricsCards";
+import { EcosystemChart } from "./EcosystemChart";
+import { CategoryChart } from "./CategoryChart";
 import "leaflet/dist/leaflet.css";
 
 const StyledMapContainer = styled(Box)({
@@ -21,7 +24,7 @@ const StyledMapContainer = styled(Box)({
   width: "100%",
   height: "100%",
   borderRadius: "8px",
-  overflow: "hidden",
+  overflow: "visible", // Changed from hidden to allow charts overlay
   "& .leaflet-container": {
     height: "100%",
     width: "100%",
@@ -49,6 +52,37 @@ L.Icon.Default.mergeOptions({
   shadowUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
+
+// Component to handle map repositioning when charts are shown
+function MapPositionController({ 
+  siteCoords, 
+  showCharts 
+}: { 
+  siteCoords: { lat: number; lon: number } | null; 
+  showCharts: boolean 
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (siteCoords && showCharts) {
+      // Pan the map to position the site in the top-left area
+      // We need to move the map so the site appears in the top-left
+      const point = map.latLngToContainerPoint([siteCoords.lat, siteCoords.lon]);
+      // Calculate target position: 25% from left, 25% from top of visible area
+      const targetX = map.getSize().x * 0.25;
+      const targetY = map.getSize().y * 0.25;
+      // Calculate the offset needed
+      const offsetX = point.x - targetX;
+      const offsetY = point.y - targetY;
+      // Apply the offset to move the map
+      const newPoint = L.point(point.x + offsetX, point.y + offsetY);
+      const newLatLng = map.containerPointToLatLng(newPoint);
+      map.panTo(newLatLng, { animate: true, duration: 0.5 });
+    }
+  }, [map, siteCoords, showCharts]);
+
+  return null;
+}
 
 // Component to show site circle with comprehensive popup
 interface WeatherData {
@@ -221,7 +255,7 @@ function SiteCircleWithPopup({ lat, lon, city, site, startDate }: { lat: number;
 }
 
 export function CityMap() {
-  const { city, site, startDate, selectedWeatherMetrics, setCity, setSite } =
+  const { city, site, startDate, selectedWeatherMetrics, selectedHealthRisks, setCity, setSite } =
     useSelection();
   const [loading, setLoading] = useState(true);
   const [sitesToShow, setSitesToShow] = useState<ResearchSite[]>([]);
@@ -643,6 +677,12 @@ export function CityMap() {
           style={{ height: "100%", width: "100%" }}
           key={`${city}-${site}`}
         >
+          {/* Map Position Controller - repositions map when charts are shown */}
+          <MapPositionController 
+            siteCoords={selectedSiteCoords} 
+            showCharts={site !== null && site !== 'all' && selectedHealthRisks.length > 0}
+          />
+
           {mapType === "satellite" ? (
             <TileLayer
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
@@ -736,6 +776,100 @@ export function CityMap() {
               />
             )}
         </MapContainer>
+
+        {/* Health Risk Charts Overlay - 2 rows from center to right */}
+        {site && site !== 'all' && selectedHealthRisks.length > 0 && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '12px',
+              left: '50%',
+              right: '12px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1.5,
+              zIndex: 1010,
+              pointerEvents: 'none',
+              '& > *': {
+                pointerEvents: 'auto',
+              },
+            }}
+          >
+            {/* Row 1: Metrics Cards */}
+            <Box
+              sx={{
+                background: 'rgba(255, 255, 255, 0.55)',
+                marginRight: '8px',
+                // backdropFilter: 'blur(8px)',
+                borderRadius: '6px',
+                padding: '8px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                overflow: 'visible',
+              }}
+            >
+              <Box sx={{ transform: 'scale(0.64)', transformOrigin: 'top left' }}>
+                <MetricsCards />
+              </Box>
+            </Box>
+
+            {/* Row 2: Charts side by side */}
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 1.5,
+              }}
+            >
+              {/* Ecosystem Pie Chart */}
+              <Box
+                sx={{
+                  flex: 1,
+                  // margin: '8px',
+                  background: 'rgba(255, 255, 255, 0.55)',
+                  // backdropFilter: 'blur(8px)',
+                  borderRadius: '6px',
+                  padding: '8px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                  height: '200px',
+                  overflow: 'hidden',
+                }}
+              >
+                <Typography variant="h6" sx={{ mb: 0.5, fontSize: '10px', fontWeight: 600 }}>
+                  Risk Distribution
+                </Typography>
+                <Box sx={{ transform: 'scale(0.6)', transformOrigin: 'top center', marginTop: '-20px' }}>
+                  <EcosystemChart />
+                </Box>
+              </Box>
+
+              {/* Category Bar Chart */}
+              <Box
+                sx={{
+                  flex: 1,
+                  marginRight: '8px',
+                  background: 'rgba(255, 255, 255, 0.65)',
+                  // backdropFilter: 'blur(8px)',
+                  borderRadius: '6px',
+                  padding: '8px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                  height: '230px',
+                  overflow: 'visible',
+                }}
+              >
+                <Typography variant="h6" sx={{ mb: 0.5, fontSize: '10px', fontWeight: 600 }}>
+                  Risk Breakdown
+                </Typography>
+                <Box sx={{ 
+                  transform: 'scale(0.6)', 
+                  transformOrigin: 'top left',
+                  marginTop: '0px',
+                  marginLeft: '-20px'
+                }}>
+                  <CategoryChart />
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
       </StyledMapContainer>
     </Box>
   );
