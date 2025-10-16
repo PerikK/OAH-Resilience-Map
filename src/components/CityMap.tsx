@@ -13,7 +13,7 @@ import {
 } from "../data/researchSites";
 import { getHealthRiskForSite } from "../data/healthRiskData";
 import { getLatestResilienceData } from "../data/resilienceData";
-import { WeatherLayer } from "./WeatherLayer";
+import { WeatherInfoBox } from "./WeatherInfoBox";
 import "leaflet/dist/leaflet.css";
 
 const StyledMapContainer = styled(Box)({
@@ -724,28 +724,17 @@ export function CityMap() {
             />
           )}
 
-          {/* Weather Layers - show selected weather data */}
+          {/* Weather Info Box - show selected weather data as a list */}
           {selectedSiteCoords &&
             startDate &&
-            selectedWeatherMetrics.map((metric) => {
-              // Map metric to WeatherLayer parameter
-              let parameter: "temp" | "humidity" | "wind_speed" | "clouds" | "precipitation" =
-                "temp";
-              if (metric === "wind") parameter = "wind_speed";
-              else if (metric === "humidity") parameter = "humidity";
-              else if (metric === "rainfall") parameter = "precipitation"; // Use actual precipitation data
-              else if (metric === "temperature") parameter = "temp";
-
-              return (
-                <WeatherLayer
-                  key={metric}
-                  lat={selectedSiteCoords.lat}
-                  lon={selectedSiteCoords.lon}
-                  date={startDate}
-                  parameter={parameter}
-                />
-              );
-            })}
+            selectedWeatherMetrics.length > 0 && (
+              <WeatherInfoBox
+                lat={selectedSiteCoords.lat}
+                lon={selectedSiteCoords.lon}
+                date={startDate}
+                selectedMetrics={selectedWeatherMetrics}
+              />
+            )}
         </MapContainer>
       </StyledMapContainer>
     </Box>
