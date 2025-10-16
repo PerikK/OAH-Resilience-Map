@@ -123,17 +123,13 @@ export function MetricsCards() {
   return (
     <Box
       sx={{
-        display: 'grid',
-        gap: 2,
-        gridTemplateColumns: {
-          xs: '1fr',
-          sm: 'repeat(2, 1fr)',
-          md: 'repeat(4, 1fr)',
-        },
+        display: 'flex',
+        gap: 1.5,
+        flexWrap: 'nowrap',
       }}
     >
       {metrics.map((metric, index) => (
-        <Box key={index}>
+        <Box key={index} sx={{ minWidth: 0, flex: '0 0 auto' }}>
           <MetricCardComponent {...metric} />
         </Box>
       ))}

@@ -783,11 +783,11 @@ export function CityMap() {
             sx={{
               position: 'absolute',
               top: '12px',
-              left: '50%',
+              left: '55%',
               right: '12px',
               display: 'flex',
               flexDirection: 'column',
-              gap: 1.5,
+              gap: 0,
               zIndex: 1010,
               pointerEvents: 'none',
               '& > *': {
@@ -795,16 +795,12 @@ export function CityMap() {
               },
             }}
           >
-            {/* Row 1: Metrics Cards */}
+            {/* Row 1: Metrics Cards - each card in its own container */}
             <Box
               sx={{
-                background: 'rgba(255, 255, 255, 0.55)',
-                marginRight: '8px',
-                // backdropFilter: 'blur(8px)',
-                borderRadius: '6px',
-                padding: '8px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-                overflow: 'visible',
+                display: 'flex',
+                gap: 0,
+                flexWrap: 'nowrap',
               }}
             >
               <Box sx={{ transform: 'scale(0.64)', transformOrigin: 'top left' }}>
@@ -823,9 +819,7 @@ export function CityMap() {
               <Box
                 sx={{
                   flex: 1,
-                  // margin: '8px',
                   background: 'rgba(255, 255, 255, 0.55)',
-                  // backdropFilter: 'blur(8px)',
                   borderRadius: '6px',
                   padding: '8px',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
@@ -847,12 +841,11 @@ export function CityMap() {
                   flex: 1,
                   marginRight: '8px',
                   background: 'rgba(255, 255, 255, 0.65)',
-                  // backdropFilter: 'blur(8px)',
                   borderRadius: '6px',
                   padding: '8px',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
                   height: '230px',
-                  overflow: 'visible',
+                  overflow: 'hidden',
                 }}
               >
                 <Typography variant="h6" sx={{ mb: 0.5, fontSize: '10px', fontWeight: 600 }}>
