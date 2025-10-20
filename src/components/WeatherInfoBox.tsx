@@ -189,7 +189,7 @@ export function WeatherInfoBox({ lat, lon, date, selectedMetrics }: WeatherInfoB
         html: buildInfoBoxHTML(),
         className: '',
         iconSize: [100, 80],
-        iconAnchor: [50, 180], // Position box well outside and above the circle
+        iconAnchor: [50, -60], // Position box below the circle (negative value moves it down)
       })}
     />
   )

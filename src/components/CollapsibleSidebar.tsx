@@ -1,12 +1,9 @@
-import { useEffect, useState } from 'react'
-import { Box, TextField, MenuItem, Typography, Checkbox, FormControlLabel, FormGroup, Tooltip, Button, Accordion, AccordionSummary, AccordionDetails } from '@mui/material'
+import { useState } from 'react'
+import { Box, TextField, MenuItem, Typography, Checkbox, FormControlLabel, FormGroup, Tooltip, Button, Accordion, AccordionSummary, AccordionDetails, CircularProgress } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useSelection, type City, type Site } from '../context/SelectionContext'
-import { getUniqueCities, getSitesByCity, type ResearchSite } from '../data/researchSites'
 
 export function CollapsibleSidebar() {
-  const [cities, setCities] = useState<string[]>([])
-  const [availableSites, setAvailableSites] = useState<ResearchSite[]>([])
   const [expandedHealthRisk, setExpandedHealthRisk] = useState(false)
   const [expandedResilience, setExpandedResilience] = useState(false)
   const [expandedWeather, setExpandedWeather] = useState(false)
@@ -17,22 +14,43 @@ export function CollapsibleSidebar() {
     endDate,
     selectedHealthRisks,
     selectedWeatherMetrics,
+    selectedUrbanParameters,
     selectedResilienceMetrics,
+    cities,
+    isLoadingCities,
+    isLoadingSites,
+    citiesError,
+    sitesError,
     setCity,
     setSite,
     setStartDate,
     setEndDate,
     setSelectedHealthRisks,
     setSelectedWeatherMetrics,
+    setSelectedUrbanParameters,
     setSelectedResilienceMetrics,
     toggleHealthRisk,
     toggleWeatherMetric,
-    toggleResilienceMetric,
+    toggleUrbanParameter,
+    getSitesByCity,
+    getHealthRiskBySiteCode,
+    getUrbanParametersBySiteCode,
   } = useSelection()
+
+  // Get available sites for selected city
+  const availableSites = city ? getSitesByCity(city) : []
+  
+  // Check if health risk data is available for the selected site
+  const healthRiskData = site && site !== 'all' ? getHealthRiskBySiteCode(site) : null
+  const hasHealthRiskData = !!healthRiskData
+  
+  // Check if urban parameters data is available for the selected site
+  const urbanParametersData = site && site !== 'all' ? getUrbanParametersBySiteCode(site) : null
+  const hasUrbanParametersData = !!urbanParametersData
 
   const allHealthRisks: ('pathogen' | 'fecal' | 'arg' | 'overall')[] = ['pathogen', 'fecal', 'arg', 'overall']
   const allWeatherMetrics: ('wind' | 'rainfall' | 'humidity' | 'temperature')[] = ['wind', 'rainfall', 'humidity', 'temperature']
-  const allResilienceMetrics: ('waterQuality' | 'biodiversity' | 'riverbankProtection' | 'airQuality' | 'landUse' | 'wasteReduction')[] = ['waterQuality', 'biodiversity', 'riverbankProtection', 'airQuality', 'landUse', 'wasteReduction']
+  const allUrbanParameters: ('vegetation' | 'urbanization' | 'imperviousSurface' | 'humanDensity' | 'distances')[] = ['vegetation', 'urbanization', 'imperviousSurface', 'humanDensity', 'distances']
 
   const handleSelectAllHealthRisks = () => {
     setSelectedHealthRisks(allHealthRisks)
@@ -41,6 +59,14 @@ export function CollapsibleSidebar() {
   const handleClearAllHealthRisks = () => {
     setSelectedHealthRisks([])
   }
+  
+  const handleSelectAllUrbanParameters = () => {
+    setSelectedUrbanParameters(allUrbanParameters)
+  }
+
+  const handleClearAllUrbanParameters = () => {
+    setSelectedUrbanParameters([])
+  }
 
   const handleSelectAllWeather = () => {
     setSelectedWeatherMetrics(allWeatherMetrics)
@@ -48,14 +74,6 @@ export function CollapsibleSidebar() {
 
   const handleClearAllWeather = () => {
     setSelectedWeatherMetrics([])
-  }
-
-  const handleSelectAllResilience = () => {
-    setSelectedResilienceMetrics(allResilienceMetrics)
-  }
-
-  const handleClearAllResilience = () => {
-    setSelectedResilienceMetrics([])
   }
 
   const handleClearSelections = () => {
@@ -67,23 +85,13 @@ export function CollapsibleSidebar() {
     setSelectedHealthRisks([])
     setSelectedResilienceMetrics([])
     setSelectedWeatherMetrics([])
+    setSelectedUrbanParameters([])
     // Collapse all accordions
     setExpandedHealthRisk(false)
     setExpandedResilience(false)
     setExpandedWeather(false)
   }
 
-  useEffect(() => {
-    const uniqueCities = getUniqueCities()
-    setCities(uniqueCities)
-  }, [])
-
-  useEffect(() => {
-    if (city) {
-      const sites = getSitesByCity(city)
-      setAvailableSites(sites)
-    }
-  }, [city])
 
   return (
     <Box
@@ -113,7 +121,7 @@ export function CollapsibleSidebar() {
             size="small"
             variant="outlined"
             onClick={handleClearSelections}
-            disabled={!city && !site && selectedHealthRisks.length === 0 && selectedResilienceMetrics.length === 0 && selectedWeatherMetrics.length === 0}
+            disabled={!city && !site && selectedHealthRisks.length === 0 && selectedResilienceMetrics.length === 0 && selectedWeatherMetrics.length === 0 && selectedUrbanParameters.length === 0}
             sx={{ 
               fontSize: '11px', 
               textTransform: 'none',
@@ -140,42 +148,51 @@ export function CollapsibleSidebar() {
           <Typography sx={{ mb: 0.5, fontSize: '13px', fontWeight: 600, color: 'text.primary' }}>
             Select an area
           </Typography>
-          <TextField
-            select
-            size="small"
-            value={city || ''}
-            onChange={(e) => {
-              setCity(e.target.value as City)
-              setSite(null)
-            }}
-            placeholder="Select area"
-            sx={{
-              width: '280px',
-              '& .MuiOutlinedInput-root': {
-                backgroundColor: 'background.default',
-                color: 'text.primary',
-                '& fieldset': {
-                  borderColor: 'divider',
+          {isLoadingCities ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CircularProgress size={20} />
+              <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>Loading cities...</Typography>
+            </Box>
+          ) : citiesError ? (
+            <Typography sx={{ fontSize: '13px', color: 'error.main' }}>{citiesError}</Typography>
+          ) : (
+            <TextField
+              select
+              size="small"
+              value={city || ''}
+              onChange={(e) => {
+                setCity(e.target.value as City)
+                setSite(null)
+              }}
+              placeholder="Select area"
+              sx={{
+                width: '280px',
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: 'background.default',
+                  color: 'text.primary',
+                  '& fieldset': {
+                    borderColor: 'divider',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'primary.main',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'primary.main',
+                  },
                 },
-                '&:hover fieldset': {
-                  borderColor: 'primary.main',
+                '& .MuiSelect-icon': {
+                  color: 'text.primary',
                 },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'primary.main',
-                },
-              },
-              '& .MuiSelect-icon': {
-                color: 'text.primary',
-              },
-            }}
-          >
-            <MenuItem value="">Select area</MenuItem>
-            {cities.map((cityName) => (
-              <MenuItem key={cityName} value={cityName}>
-                {cityName}
-              </MenuItem>
-            ))}
-          </TextField>
+              }}
+            >
+              <MenuItem value="">Select area</MenuItem>
+              {cities.map((cityData) => (
+                <MenuItem key={cityData.id} value={cityData.id}>
+                  {cityData.name}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
         </Box>
 
         {/* Site Selection */}
@@ -183,41 +200,50 @@ export function CollapsibleSidebar() {
           <Typography sx={{ mb: 0.5, fontSize: '13px', fontWeight: 600, color: 'text.primary' }}>
             Select Sites
           </Typography>
-          <TextField
-            select
-            size="small"
-            value={site || ''}
-            onChange={(e) => setSite(e.target.value as Site)}
-            disabled={!city}
-            placeholder="Select sites"
-            sx={{
-              width: '280px',
-              '& .MuiOutlinedInput-root': {
-                backgroundColor: 'background.default',
-                color: 'text.primary',
-                '& fieldset': {
-                  borderColor: 'divider',
+          {isLoadingSites ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CircularProgress size={20} />
+              <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>Loading sites...</Typography>
+            </Box>
+          ) : sitesError ? (
+            <Typography sx={{ fontSize: '13px', color: 'error.main' }}>{sitesError}</Typography>
+          ) : (
+            <TextField
+              select
+              size="small"
+              value={site || ''}
+              onChange={(e) => setSite(e.target.value as Site)}
+              disabled={!city}
+              placeholder="Select sites"
+              sx={{
+                width: '280px',
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: 'background.default',
+                  color: 'text.primary',
+                  '& fieldset': {
+                    borderColor: 'divider',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'primary.main',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'primary.main',
+                  },
                 },
-                '&:hover fieldset': {
-                  borderColor: 'primary.main',
+                '& .MuiSelect-icon': {
+                  color: 'text.primary',
                 },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'primary.main',
-                },
-              },
-              '& .MuiSelect-icon': {
-                color: 'text.primary',
-              },
-            }}
-          >
-            <MenuItem value="">Select sites</MenuItem>
-            <MenuItem value="all">All Sites</MenuItem>
-            {availableSites.map((siteData) => (
-              <MenuItem key={siteData['Site Nr.']} value={siteData['Site Nr.']}>
-                {siteData['Site Nr.']} - {siteData['Site Name']}
-              </MenuItem>
-            ))}
-          </TextField>
+              }}
+            >
+              <MenuItem value="">Select sites</MenuItem>
+              <MenuItem value="all">All Sites</MenuItem>
+              {availableSites.map((siteData) => (
+                <MenuItem key={siteData.code} value={siteData.code}>
+                  {siteData.code} - {siteData.name}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
         </Box>
 
         {/* Date Range */}
@@ -362,72 +388,114 @@ export function CollapsibleSidebar() {
             </Box>
           </AccordionSummary>
           <AccordionDetails sx={{ pt: 0, pb: 2 }}>
-            <FormGroup>
-          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
-            <span>
-              <FormControlLabel
-                disabled={!city || !site || site === 'all'}
-                control={
-                  <Checkbox
-                    checked={selectedHealthRisks.includes('pathogen')}
-                    onChange={() => toggleHealthRisk('pathogen')}
-                    sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
-                  />
-                }
-                label={<Typography sx={{ fontSize: '14px' }}>Pathogen Risk</Typography>}
-              />
-            </span>
-          </Tooltip>
-          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
-            <span>
-              <FormControlLabel
-                disabled={!city || !site || site === 'all'}
-                control={
-                  <Checkbox
-                    checked={selectedHealthRisks.includes('fecal')}
-                    onChange={() => toggleHealthRisk('fecal')}
-                    sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
-                  />
-                }
-                label={<Typography sx={{ fontSize: '14px' }}>Fecal Contamination Risk</Typography>}
-              />
-            </span>
-          </Tooltip>
-          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
-            <span>
-              <FormControlLabel
-                disabled={!city || !site || site === 'all'}
-                control={
-                  <Checkbox
-                    checked={selectedHealthRisks.includes('arg')}
-                    onChange={() => toggleHealthRisk('arg')}
-                    sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
-                  />
-                }
-                label={<Typography sx={{ fontSize: '14px' }}>ARG Risk</Typography>}
-              />
-            </span>
-          </Tooltip>
-          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
-            <span>
-              <FormControlLabel
-                disabled={!city || !site || site === 'all'}
-                control={
-                  <Checkbox
-                    checked={selectedHealthRisks.includes('overall')}
-                    onChange={() => toggleHealthRisk('overall')}
-                    sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
-                  />
-                }
-                label={<Typography sx={{ fontSize: '14px' }}>Overall Health Risk Score</Typography>}
-              />
-            </span>
-          </Tooltip>
-            </FormGroup>
+            {!hasHealthRiskData && site && site !== 'all' ? (
+              <Typography sx={{ fontSize: '12px', color: 'text.secondary', fontStyle: 'italic', py: 1 }}>
+                No health risk data available for this site
+              </Typography>
+            ) : (
+              <FormGroup>
+                <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : !hasHealthRiskData ? 'No data available for this site' : ''} arrow>
+                  <span>
+                    <FormControlLabel
+                      disabled={!city || !site || site === 'all' || !hasHealthRiskData}
+                      control={
+                        <Checkbox
+                          checked={selectedHealthRisks.includes('pathogen')}
+                          onChange={() => toggleHealthRisk('pathogen')}
+                          sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+                        />
+                      }
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography sx={{ fontSize: '14px' }}>Pathogen Risk</Typography>
+                          {healthRiskData && (
+                            <Typography sx={{ fontSize: '11px', color: '#DC2626', fontWeight: 600 }}>
+                              {(Number(healthRiskData.scaledPathogenRisk) * 100).toFixed(1)}%
+                            </Typography>
+                          )}
+                        </Box>
+                      }
+                    />
+                  </span>
+                </Tooltip>
+                <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : !hasHealthRiskData ? 'No data available for this site' : ''} arrow>
+                  <span>
+                    <FormControlLabel
+                      disabled={!city || !site || site === 'all' || !hasHealthRiskData}
+                      control={
+                        <Checkbox
+                          checked={selectedHealthRisks.includes('fecal')}
+                          onChange={() => toggleHealthRisk('fecal')}
+                          sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+                        />
+                      }
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography sx={{ fontSize: '14px' }}>Fecal Contamination Risk</Typography>
+                          {healthRiskData && (
+                            <Typography sx={{ fontSize: '11px', color: '#EA580C', fontWeight: 600 }}>
+                              {(Number(healthRiskData.scaledFecalRisk) * 100).toFixed(1)}%
+                            </Typography>
+                          )}
+                        </Box>
+                      }
+                    />
+                  </span>
+                </Tooltip>
+                <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : !hasHealthRiskData ? 'No data available for this site' : ''} arrow>
+                  <span>
+                    <FormControlLabel
+                      disabled={!city || !site || site === 'all' || !hasHealthRiskData}
+                      control={
+                        <Checkbox
+                          checked={selectedHealthRisks.includes('arg')}
+                          onChange={() => toggleHealthRisk('arg')}
+                          sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+                        />
+                      }
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography sx={{ fontSize: '14px' }}>ARG Risk</Typography>
+                          {healthRiskData && (
+                            <Typography sx={{ fontSize: '11px', color: '#D97706', fontWeight: 600 }}>
+                              {(Number(healthRiskData.scaledArgRisk) * 100).toFixed(1)}%
+                            </Typography>
+                          )}
+                        </Box>
+                      }
+                    />
+                  </span>
+                </Tooltip>
+                <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : !hasHealthRiskData ? 'No data available for this site' : ''} arrow>
+                  <span>
+                    <FormControlLabel
+                      disabled={!city || !site || site === 'all' || !hasHealthRiskData}
+                      control={
+                        <Checkbox
+                          checked={selectedHealthRisks.includes('overall')}
+                          onChange={() => toggleHealthRisk('overall')}
+                          sx={{ '&.Mui-checked': { color: '#4A90E2' } }}
+                        />
+                      }
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography sx={{ fontSize: '14px' }}>Overall Health Risk Score</Typography>
+                          {healthRiskData && (
+                            <Typography sx={{ fontSize: '11px', color: '#7C3AED', fontWeight: 600 }}>
+                              {(Number(healthRiskData.healthRiskScore) * 100).toFixed(1)}%
+                            </Typography>
+                          )}
+                        </Box>
+                      }
+                    />
+                  </span>
+                </Tooltip>
+              </FormGroup>
+            )}
           </AccordionDetails>
         </Accordion>
 
-        {/* Resilience Data Accordion */}
+        {/* Urban Parameters Accordion */}
         <Accordion 
           expanded={expandedResilience} 
           onChange={() => setExpandedResilience(!expandedResilience)}
@@ -452,24 +520,24 @@ export function CollapsibleSidebar() {
             }}
           >
             <Typography sx={{ fontWeight: 600, fontSize: '14px', color: 'text.primary' }}>
-              Resilience Data
+              Urban Parameters
             </Typography>
             <Box sx={{ display: 'flex', gap: 0.5, mr: 1 }} onClick={(e) => e.stopPropagation()}>
               <Box
                 component="span"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (!city || !site || site === 'all') return;
-                  handleSelectAllResilience();
+                  if (!city || !site || site === 'all' || !hasUrbanParametersData) return;
+                  handleSelectAllUrbanParameters();
                 }}
                 sx={{ 
                   fontSize: '10px', 
                   textTransform: 'none',
                   padding: '2px 6px',
-                  color: (!city || !site || site === 'all') ? '#9CA3AF' : '#4A90E2',
-                  cursor: (!city || !site || site === 'all') ? 'not-allowed' : 'pointer',
+                  color: (!city || !site || site === 'all' || !hasUrbanParametersData) ? '#9CA3AF' : '#4A90E2',
+                  cursor: (!city || !site || site === 'all' || !hasUrbanParametersData) ? 'not-allowed' : 'pointer',
                   borderRadius: '4px',
-                  '&:hover': (!city || !site || site === 'all') ? {} : { backgroundColor: 'rgba(74, 144, 226, 0.08)' },
+                  '&:hover': (!city || !site || site === 'all' || !hasUrbanParametersData) ? {} : { backgroundColor: 'rgba(74, 144, 226, 0.08)' },
                   userSelect: 'none'
                 }}
               >
@@ -479,17 +547,17 @@ export function CollapsibleSidebar() {
                 component="span"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (!city || !site || site === 'all') return;
-                  handleClearAllResilience();
+                  if (!city || !site || site === 'all' || !hasUrbanParametersData) return;
+                  handleClearAllUrbanParameters();
                 }}
                 sx={{ 
                   fontSize: '10px', 
                   textTransform: 'none',
                   padding: '2px 6px',
-                  color: (!city || !site || site === 'all') ? '#9CA3AF' : '#6B7280',
-                  cursor: (!city || !site || site === 'all') ? 'not-allowed' : 'pointer',
+                  color: (!city || !site || site === 'all' || !hasUrbanParametersData) ? '#9CA3AF' : '#6B7280',
+                  cursor: (!city || !site || site === 'all' || !hasUrbanParametersData) ? 'not-allowed' : 'pointer',
                   borderRadius: '4px',
-                  '&:hover': (!city || !site || site === 'all') ? {} : { backgroundColor: 'rgba(107, 114, 128, 0.08)' },
+                  '&:hover': (!city || !site || site === 'all' || !hasUrbanParametersData) ? {} : { backgroundColor: 'rgba(107, 114, 128, 0.08)' },
                   userSelect: 'none'
                 }}
               >
@@ -498,98 +566,89 @@ export function CollapsibleSidebar() {
             </Box>
           </AccordionSummary>
           <AccordionDetails sx={{ pt: 0, pb: 2 }}>
-            <FormGroup>
-          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
-            <span>
-              <FormControlLabel
-                disabled={!city || !site || site === 'all'}
-                control={
-                  <Checkbox
-                    checked={selectedResilienceMetrics.includes('waterQuality')}
-                    onChange={() => toggleResilienceMetric('waterQuality')}
-                    sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
-                  />
-                }
-                label={<Typography sx={{ fontSize: '12px' }}>Water Resources & Quality</Typography>}
-              />
-            </span>
-          </Tooltip>
-          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
-            <span>
-              <FormControlLabel
-                disabled={!city || !site || site === 'all'}
-                control={
-                  <Checkbox
-                    checked={selectedResilienceMetrics.includes('biodiversity')}
-                    onChange={() => toggleResilienceMetric('biodiversity')}
-                    sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
-                  />
-                }
-                label={<Typography sx={{ fontSize: '12px' }}>Biodiversity & Habitats</Typography>}
-              />
-            </span>
-          </Tooltip>
-          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
-            <span>
-              <FormControlLabel
-                disabled={!city || !site || site === 'all'}
-                control={
-                  <Checkbox
-                    checked={selectedResilienceMetrics.includes('riverbankProtection')}
-                    onChange={() => toggleResilienceMetric('riverbankProtection')}
-                    sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
-                  />
-                }
-                label={<Typography sx={{ fontSize: '12px' }}>Riverbank Protection</Typography>}
-              />
-            </span>
-          </Tooltip>
-          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
-            <span>
-              <FormControlLabel
-                disabled={!city || !site || site === 'all'}
-                control={
-                  <Checkbox
-                    checked={selectedResilienceMetrics.includes('airQuality')}
-                    onChange={() => toggleResilienceMetric('airQuality')}
-                    sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
-                  />
-                }
-                label={<Typography sx={{ fontSize: '12px' }}>Air Quality</Typography>}
-              />
-            </span>
-          </Tooltip>
-          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
-            <span>
-              <FormControlLabel
-                disabled={!city || !site || site === 'all'}
-                control={
-                  <Checkbox
-                    checked={selectedResilienceMetrics.includes('landUse')}
-                    onChange={() => toggleResilienceMetric('landUse')}
-                    sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
-                  />
-                }
-                label={<Typography sx={{ fontSize: '12px' }}>Sustainable Land Use</Typography>}
-              />
-            </span>
-          </Tooltip>
-          <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : ''} arrow>
-            <span>
-              <FormControlLabel
-                disabled={!city || !site || site === 'all'}
-                control={
-                  <Checkbox
-                    checked={selectedResilienceMetrics.includes('wasteReduction')}
-                    onChange={() => toggleResilienceMetric('wasteReduction')}
-                    sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
-                  />
-                }
-                label={<Typography sx={{ fontSize: '12px' }}>Waste Reduction</Typography>}
-              />
-            </span>
-          </Tooltip>
-            </FormGroup>
+            {!hasUrbanParametersData && site && site !== 'all' ? (
+              <Typography sx={{ fontSize: '12px', color: 'text.secondary', fontStyle: 'italic', py: 1 }}>
+                No urban parameters data available for this site
+              </Typography>
+            ) : (
+              <FormGroup>
+                <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : !hasUrbanParametersData ? 'No data available for this site' : ''} arrow>
+                  <span>
+                    <FormControlLabel
+                      disabled={!city || !site || site === 'all' || !hasUrbanParametersData}
+                      control={
+                        <Checkbox
+                          checked={selectedUrbanParameters.includes('vegetation')}
+                          onChange={() => toggleUrbanParameter('vegetation')}
+                          sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
+                        />
+                      }
+                      label={<Typography sx={{ fontSize: '12px' }}>Vegetation Cover & Density</Typography>}
+                    />
+                  </span>
+                </Tooltip>
+                <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : !hasUrbanParametersData ? 'No data available for this site' : ''} arrow>
+                  <span>
+                    <FormControlLabel
+                      disabled={!city || !site || site === 'all' || !hasUrbanParametersData}
+                      control={
+                        <Checkbox
+                          checked={selectedUrbanParameters.includes('urbanization')}
+                          onChange={() => toggleUrbanParameter('urbanization')}
+                          sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
+                        />
+                      }
+                      label={<Typography sx={{ fontSize: '12px' }}>Urbanization Percentage</Typography>}
+                    />
+                  </span>
+                </Tooltip>
+                <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : !hasUrbanParametersData ? 'No data available for this site' : ''} arrow>
+                  <span>
+                    <FormControlLabel
+                      disabled={!city || !site || site === 'all' || !hasUrbanParametersData}
+                      control={
+                        <Checkbox
+                          checked={selectedUrbanParameters.includes('imperviousSurface')}
+                          onChange={() => toggleUrbanParameter('imperviousSurface')}
+                          sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
+                        />
+                      }
+                      label={<Typography sx={{ fontSize: '12px' }}>Impervious Surface</Typography>}
+                    />
+                  </span>
+                </Tooltip>
+                <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : !hasUrbanParametersData ? 'No data available for this site' : ''} arrow>
+                  <span>
+                    <FormControlLabel
+                      disabled={!city || !site || site === 'all' || !hasUrbanParametersData}
+                      control={
+                        <Checkbox
+                          checked={selectedUrbanParameters.includes('humanDensity')}
+                          onChange={() => toggleUrbanParameter('humanDensity')}
+                          sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
+                        />
+                      }
+                      label={<Typography sx={{ fontSize: '12px' }}>Human Density Proxy</Typography>}
+                    />
+                  </span>
+                </Tooltip>
+                <Tooltip title={!city || !site || site === 'all' ? 'Please select a City and a Site first' : !hasUrbanParametersData ? 'No data available for this site' : ''} arrow>
+                  <span>
+                    <FormControlLabel
+                      disabled={!city || !site || site === 'all' || !hasUrbanParametersData}
+                      control={
+                        <Checkbox
+                          checked={selectedUrbanParameters.includes('distances')}
+                          onChange={() => toggleUrbanParameter('distances')}
+                          sx={{ '&.Mui-checked': { color: '#4A90E2' }, padding: '4px' }}
+                        />
+                      }
+                      label={<Typography sx={{ fontSize: '12px' }}>Distances to Infrastructure</Typography>}
+                    />
+                  </span>
+                </Tooltip>
+              </FormGroup>
+            )}
           </AccordionDetails>
         </Accordion>
 

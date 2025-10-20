@@ -2,18 +2,18 @@ import { Box } from '@mui/material'
 import { TopBar } from './TopBar'
 import { CollapsibleSidebar } from './CollapsibleSidebar'
 import { CityMap } from './CityMap'
-import { HealthRiskTable } from './HealthRiskTable'
 import { WeatherDataTable } from './WeatherDataTable'
+import { UrbanParametersTable } from './UrbanParametersTable'
 import { useSelection } from '../context/SelectionContext'
 
 export function ResilienceMap() {
-  const { city, site, selectedHealthRisks, selectedWeatherMetrics, selectedResilienceMetrics } = useSelection()
+  const { city, site, selectedWeatherMetrics, selectedUrbanParameters, selectedResilienceMetrics } = useSelection()
   
   // Determine if we have data to show (map should shrink)
-  const hasData = city && site && site !== 'all' && (selectedHealthRisks.length > 0 || selectedWeatherMetrics.length > 0 || selectedResilienceMetrics.length > 0)
+  const hasData = city && site && site !== 'all' && (selectedWeatherMetrics.length > 0 || selectedUrbanParameters.length > 0 || selectedResilienceMetrics.length > 0)
   
-  // Map height: 85vh when no data, 70vh when data is available (to show tables)
-  const mapHeight = hasData ? '70vh' : '85vh'
+  // Map height: 85vh when no data, 60vh when urban params shown (large table), 70vh for weather only
+  const mapHeight = selectedUrbanParameters.length > 0 ? '50vh' : hasData ? '70vh' : '85vh'
 
   return (
     <Box
@@ -43,7 +43,8 @@ export function ResilienceMap() {
             height: mapHeight,
             transition: 'height 0.5s ease-in-out',
             position: 'relative',
-            overflow: 'hidden',
+            overflow: 'hidden', // Clip content to prevent cards from overflowing when scrolling
+            isolation: 'isolate', // Create new stacking context to contain z-index
           }}
         >
           <CityMap />
@@ -59,20 +60,19 @@ export function ResilienceMap() {
               overflowY: 'auto',
             }}
           >
-            {/* Tables Grid */}
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
-                gap: 3,
-              }}
-            >
-              {/* Health Risk Table */}
-              <HealthRiskTable />
+            {/* Weather Data Table */}
+            {selectedWeatherMetrics.length > 0 && (
+              <Box sx={{ mb: 3 }}>
+                <WeatherDataTable />
+              </Box>
+            )}
 
-              {/* Weather Data Table */}
-              <WeatherDataTable />
-            </Box>
+            {/* Urban Parameters Table - Full Width */}
+            {selectedUrbanParameters.length > 0 && (
+              <Box sx={{ mt: 3 }}>
+                <UrbanParametersTable />
+              </Box>
+            )}
           </Box>
         )}
       </Box>

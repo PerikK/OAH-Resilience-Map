@@ -1,7 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 import { Box, Typography } from '@mui/material'
 import { useMemo } from 'react'
-import { getHealthRiskForSite } from '../data/healthRiskData'
 import { useSelection } from '../context/SelectionContext'
 import { styled } from '@mui/material/styles'
 
@@ -18,36 +17,36 @@ const EmptyStateContainer = styled(Box)({
 })
 
 export function CategoryChart() {
-  const { site } = useSelection()
+  const { site, getHealthRiskBySiteCode } = useSelection()
   
   const data = useMemo(() => {
     if (!site || site === 'all') return []
     
-    const healthData = getHealthRiskForSite(site)
+    const healthData = getHealthRiskBySiteCode(site)
     if (!healthData) return []
     
     const chartData = [
       {
         category: 'Pathogen',
-        value: healthData.scaled_Pathogen_Risk * 100,
+        value: Number(healthData.scaledPathogenRisk) * 100,
       },
       {
         category: 'Fecal',
-        value: healthData.scaled_Fecal_Risk * 100,
+        value: Number(healthData.scaledFecalRisk) * 100,
       },
       {
         category: 'ARG',
-        value: healthData.scaled_ARG_Risk * 100,
+        value: Number(healthData.scaledArgRisk) * 100,
       },
       {
         category: 'Overall',
-        value: healthData.health_risk_score * 100,
+        value: Number(healthData.healthRiskScore) * 100,
       },
     ]
     
     console.log('CategoryChart data:', chartData)
     return chartData
-  }, [site])
+  }, [site, getHealthRiskBySiteCode])
   
   if (data.length === 0) {
     return (

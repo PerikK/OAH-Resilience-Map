@@ -4,15 +4,6 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
 import { useSelection, type City, type Site } from "../context/SelectionContext";
-import {
-  getCityCoordinates,
-  getSitesByCity,
-  getSite,
-  getUniqueCities,
-  type ResearchSite,
-} from "../data/researchSites";
-import { getHealthRiskForSite } from "../data/healthRiskData";
-import { getLatestResilienceData } from "../data/resilienceData";
 import { WeatherInfoBox } from "./WeatherInfoBox";
 import { MetricsCards } from "./MetricsCards";
 import { EcosystemChart } from "./EcosystemChart";
@@ -24,7 +15,7 @@ const StyledMapContainer = styled(Box)({
   width: "100%",
   height: "100%",
   borderRadius: "8px",
-  overflow: "visible", // Changed from hidden to allow charts overlay
+  overflow: "visible", // Allow charts to overlay
   "& .leaflet-container": {
     height: "100%",
     width: "100%",
@@ -93,7 +84,25 @@ interface WeatherData {
   precipitation: number;
 }
 
-function SiteCircleWithPopup({ lat, lon, city, site, startDate }: { lat: number; lon: number; city: string; site: string; startDate: string }) {
+function SiteCircleWithPopup({ 
+  lat, 
+  lon, 
+  siteCode, 
+  siteName,
+  cityName,
+  startDate,
+  getHealthRiskBySiteCode,
+  getUrbanParametersBySiteCode,
+}: { 
+  lat: number; 
+  lon: number; 
+  siteCode: string;
+  siteName: string;
+  cityName: string;
+  startDate: string;
+  getHealthRiskBySiteCode: (code: string) => import('../types/api').HealthRiskResponse | undefined;
+  getUrbanParametersBySiteCode: (code: string) => import('../types/api').UrbanParametersResponse | undefined;
+}) {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -128,9 +137,8 @@ function SiteCircleWithPopup({ lat, lon, city, site, startDate }: { lat: number;
     }
   }, [lat, lon, startDate]);
 
-  const siteData = getSite(city, site);
-  const healthData = getHealthRiskForSite(site);
-  const resilienceData = getLatestResilienceData(site);
+  const healthData = getHealthRiskBySiteCode(siteCode);
+  const urbanParams = getUrbanParametersBySiteCode(siteCode);
 
   return (
     <Circle
@@ -147,10 +155,10 @@ function SiteCircleWithPopup({ lat, lon, city, site, startDate }: { lat: number;
       <Popup maxWidth={600} minWidth={500}>
         <Box sx={{ p: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontSize: '16px' }}>
-            {siteData?.['Site Nr.']} - {siteData?.['Site Name']}
+            {siteCode} - {siteName}
           </Typography>
           <Typography variant="body2" sx={{ color: '#666', mb: 2, fontSize: '12px' }}>
-            {city} • Lat: {lat.toFixed(5)}, Lon: {lon.toFixed(5)}
+            {cityName} • Lat: {lat.toFixed(5)}, Lon: {lon.toFixed(5)}
           </Typography>
           
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 2 }}>
@@ -162,16 +170,16 @@ function SiteCircleWithPopup({ lat, lon, city, site, startDate }: { lat: number;
               {healthData ? (
                 <Box sx={{ fontSize: '11px' }}>
                   <Box sx={{ mb: 0.5 }}>
-                    <strong>Pathogen Risk:</strong> {healthData.scaled_Pathogen_Risk.toFixed(3)}
+                    <strong>Pathogen Risk:</strong> {healthData.scaledPathogenRisk.toFixed(3)}
                   </Box>
                   <Box sx={{ mb: 0.5 }}>
-                    <strong>Fecal Risk:</strong> {healthData.scaled_Fecal_Risk.toFixed(3)}
+                    <strong>Fecal Risk:</strong> {healthData.scaledFecalRisk.toFixed(3)}
                   </Box>
                   <Box sx={{ mb: 0.5 }}>
-                    <strong>ARG Risk:</strong> {healthData.scaled_ARG_Risk.toFixed(3)}
+                    <strong>ARG Risk:</strong> {healthData.scaledArgRisk.toFixed(3)}
                   </Box>
                   <Box sx={{ mb: 0.5 }}>
-                    <strong>Overall Score:</strong> {healthData.health_risk_score.toFixed(3)}
+                    <strong>Overall Score:</strong> {healthData.healthRiskScore.toFixed(3)}
                   </Box>
                 </Box>
               ) : (
@@ -181,30 +189,30 @@ function SiteCircleWithPopup({ lat, lon, city, site, startDate }: { lat: number;
               )}
             </Box>
 
-            {/* Resilience Data Column */}
+            {/* Urban Parameters Column */}
             <Box>
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: '#10B981', fontSize: '13px' }}>
-                Resilience Data
+                Urban Parameters
               </Typography>
-              {resilienceData ? (
+              {urbanParams ? (
                 <Box sx={{ fontSize: '11px' }}>
                   <Box sx={{ mb: 0.5 }}>
-                    <strong>Water Quality:</strong> {resilienceData['Water Resources & Quality'].toFixed(1)}
+                    <strong>Vegetation (500m):</strong> {urbanParams.vegCoverFrac500m ? (Number(urbanParams.vegCoverFrac500m) * 100).toFixed(1) + '%' : 'N/A'}
                   </Box>
                   <Box sx={{ mb: 0.5 }}>
-                    <strong>Biodiversity:</strong> {resilienceData['Biodiversity & Habitats'].toFixed(1)}
+                    <strong>Urban (500m):</strong> {urbanParams.urbanPct500m ? Number(urbanParams.urbanPct500m).toFixed(1) + '%' : 'N/A'}
                   </Box>
                   <Box sx={{ mb: 0.5 }}>
-                    <strong>Riverbank:</strong> {resilienceData['Riverbank Protection'].toFixed(1)}
+                    <strong>Impervious (500m):</strong> {urbanParams.imperviousPct500m ? Number(urbanParams.imperviousPct500m).toFixed(1) + '%' : 'N/A'}
                   </Box>
                   <Box sx={{ mb: 0.5 }}>
-                    <strong>Air Quality:</strong> {resilienceData['Air Quality'].toFixed(1)}
+                    <strong>Human Density (500m):</strong> {urbanParams.humanDensityProxy500m ? Number(urbanParams.humanDensityProxy500m).toFixed(2) : 'N/A'}
                   </Box>
                   <Box sx={{ mb: 0.5 }}>
-                    <strong>Land Use:</strong> {resilienceData['Sustainable Land Use & Agriculture'].toFixed(1)}
+                    <strong>Dist. to Hospital:</strong> {urbanParams.distanceToHospitals ? Number(urbanParams.distanceToHospitals).toFixed(0) + 'm' : 'N/A'}
                   </Box>
                   <Box sx={{ mb: 0.5 }}>
-                    <strong>Waste:</strong> {resilienceData['Waste Reduction'].toFixed(1)}
+                    <strong>Dist. to Motorway:</strong> {urbanParams.distanceToMotorwayRoad ? Number(urbanParams.distanceToMotorwayRoad).toFixed(0) + 'm' : 'N/A'}
                   </Box>
                 </Box>
               ) : (
@@ -255,39 +263,56 @@ function SiteCircleWithPopup({ lat, lon, city, site, startDate }: { lat: number;
 }
 
 export function CityMap() {
-  const { city, site, startDate, selectedWeatherMetrics, selectedHealthRisks, setCity, setSite } =
-    useSelection();
+  const { 
+    city, 
+    site, 
+    startDate, 
+    selectedHealthRisks, 
+    selectedWeatherMetrics,
+    cities,
+    setCity,
+    setSite,
+    getCityById,
+    getSiteByCode,
+    getSitesByCity,
+    getHealthRiskBySiteCode,
+    getUrbanParametersBySiteCode,
+  } = useSelection();
   const [loading, setLoading] = useState(true);
-  const [sitesToShow, setSitesToShow] = useState<ResearchSite[]>([]);
   const [selectedSiteCoords, setSelectedSiteCoords] = useState<{
     lat: number;
     lon: number;
   } | null>(null);
   const [mapType, setMapType] = useState<"satellite" | "street">("satellite");
 
+  // Get sites to show based on selection
+  const sitesToShow = city ? getSitesByCity(city) : [];
+  const selectedCityData = city ? getCityById(city) : null;
+
   useEffect(() => {
     setLoading(true);
 
     if (city) {
-      const citySites = getSitesByCity(city);
+      const cityData = getCityById(city);
 
       if (site === "all") {
-        setSitesToShow(citySites);
         // For 'all', use city center coordinates
-        const cityCoords = getCityCoordinates(city);
-        setSelectedSiteCoords({ lat: cityCoords.lat, lon: cityCoords.lng });
+        if (cityData) {
+          setSelectedSiteCoords({ 
+            lat: Number(cityData.latitude), 
+            lon: Number(cityData.longitude) 
+          });
+        }
       } else if (site) {
-        const selectedSite = getSite(city, site);
-        setSitesToShow(selectedSite ? [selectedSite] : citySites);
+        const selectedSite = getSiteByCode(site);
         // Set coordinates for the selected site
         if (selectedSite) {
           setSelectedSiteCoords({
-            lat: selectedSite.Latitude,
-            lon: selectedSite.Longitude,
+            lat: Number(selectedSite.latitude),
+            lon: Number(selectedSite.longitude),
           });
         }
       } else {
-        setSitesToShow(citySites);
         setSelectedSiteCoords(null);
       }
     } else {
@@ -296,7 +321,7 @@ export function CityMap() {
 
     const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
-  }, [city, site]);
+  }, [city, site, getCityById, getSiteByCode]);
 
   if (loading) {
     return (
@@ -311,8 +336,6 @@ export function CityMap() {
 
   // Show Europe-centered map when no city is selected
   if (!city) {
-    const cities = getUniqueCities();
-
     return (
       <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
         {/* Map Type Toggle */}
@@ -376,15 +399,14 @@ export function CityMap() {
             )}
 
             {/* City circles - clickable to select city */}
-            {cities.map((cityName) => {
-              const cityCoords = getCityCoordinates(cityName);
-              const citySites = getSitesByCity(cityName);
+            {cities.map((cityData) => {
+              const citySites = getSitesByCity(cityData.id);
 
               return (
                 <Circle
-                  key={cityName}
-                  center={[cityCoords.lat, cityCoords.lng]}
-                  radius={35000} // 15km radius
+                  key={cityData.id}
+                  center={[Number(cityData.latitude), Number(cityData.longitude)]}
+                  radius={35000} // 35km radius
                   pathOptions={{
                     color: "#000",
                     fillColor: "#10B981",
@@ -393,7 +415,7 @@ export function CityMap() {
                   }}
                   eventHandlers={{
                     click: () => {
-                      setCity(cityName as City);
+                      setCity(cityData.id as City);
                       setSite(null);
                     },
                   }}
@@ -404,7 +426,7 @@ export function CityMap() {
                         variant="h6"
                         sx={{ fontWeight: 600, mb: 1, fontSize: "14px" }}
                       >
-                        {cityName}
+                        {cityData.name}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -422,7 +444,7 @@ export function CityMap() {
                           "&:hover": { textDecoration: "underline" },
                         }}
                         onClick={() => {
-                          setCity(cityName as City);
+                          setCity(cityData.id as City);
                           setSite(null);
                         }}
                       >
@@ -449,28 +471,29 @@ export function CityMap() {
     );
   }
 
-  const cityCoords = getCityCoordinates(city);
-
   // Get map center - use selected site if available, otherwise city center
   const getMapCenter = (): [number, number] => {
     if (site && site !== "all") {
-      const selectedSite = getSite(city, site);
+      const selectedSite = getSiteByCode(site);
       if (selectedSite) {
-        return [selectedSite.Latitude, selectedSite.Longitude];
+        return [Number(selectedSite.latitude), Number(selectedSite.longitude)];
       }
     }
-    return [cityCoords.lat, cityCoords.lng];
+    if (selectedCityData) {
+      return [Number(selectedCityData.latitude), Number(selectedCityData.longitude)];
+    }
+    return [40.0, -8.0]; // Default Portugal center
   };
 
   // Create custom icon with health risk symbol
-  const createHealthRiskIcon = (siteNr: string) => {
-    const healthData = getHealthRiskForSite(siteNr);
+  const createHealthRiskIcon = (siteCode: string) => {
+    const healthData = getHealthRiskBySiteCode(siteCode);
     if (!healthData) {
       // Return default Leaflet icon instead of undefined
       return new L.Icon.Default();
     }
 
-    const value = healthData.health_risk_score;
+    const value = healthData.healthRiskScore;
     let color = "#10B981"; // Green - Low risk
     let symbol = "▼"; // Down triangle
 
@@ -696,32 +719,33 @@ export function CityMap() {
           )}
 
           {sitesToShow.map((siteData) => {
-            const healthData = getHealthRiskForSite(siteData["Site Nr."]);
-            const customIcon = createHealthRiskIcon(siteData["Site Nr."]);
+            const healthData = getHealthRiskBySiteCode(siteData.code);
+            const customIcon = createHealthRiskIcon(siteData.code);
 
             return (
               <Marker
-                key={siteData["Site Nr."]}
-                position={[siteData.Latitude, siteData.Longitude]}
+                key={siteData.code}
+                position={[Number(siteData.latitude), Number(siteData.longitude)]}
                 icon={customIcon}
                 eventHandlers={{
                   click: () => {
-                    setSite(siteData["Site Nr."] as Site);
+                    setCity(siteData.city.id as City);
+                    setSite(siteData.code as Site);
                   },
                 }}
               >
                 <Popup>
                   <Box sx={{ minWidth: 200 }}>
                     <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                      {siteData["Site Nr."]} - {siteData["Site Name"]}
+                      {siteData.code} - {siteData.name}
                     </Typography>
                     <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>City:</strong> {siteData.City}
+                      <strong>City:</strong> {siteData.city.name}
                     </Typography>
                     <Typography variant="body2" sx={{ mb: 1 }}>
                       <strong>Coordinates:</strong>{" "}
-                      {siteData.Latitude.toFixed(5)},{" "}
-                      {siteData.Longitude.toFixed(5)}
+                      {Number(siteData.latitude).toFixed(5)},{" "}
+                      {Number(siteData.longitude).toFixed(5)}
                     </Typography>
                     {healthData && (
                       <Typography
@@ -729,7 +753,7 @@ export function CityMap() {
                         sx={{ mt: 1, pt: 1, borderTop: "1px solid #E5E7EB" }}
                       >
                         <strong>Health Risk Score:</strong>{" "}
-                        {healthData.health_risk_score.toFixed(3)}
+                        {healthData.healthRiskScore.toFixed(3)}
                       </Typography>
                     )}
                     {/* <Typography
@@ -754,15 +778,22 @@ export function CityMap() {
           })}
 
           {/* Site radius circle - always show when site is selected */}
-          {selectedSiteCoords && site && site !== 'all' && (
-            <SiteCircleWithPopup
-              lat={selectedSiteCoords.lat}
-              lon={selectedSiteCoords.lon}
-              city={city!}
-              site={site}
-              startDate={startDate}
-            />
-          )}
+          {selectedSiteCoords && site && site !== 'all' && (() => {
+            const selectedSite = getSiteByCode(site);
+            const cityData = getCityById(city!);
+            return selectedSite && cityData ? (
+              <SiteCircleWithPopup
+                lat={selectedSiteCoords.lat}
+                lon={selectedSiteCoords.lon}
+                siteCode={selectedSite.code}
+                siteName={selectedSite.name}
+                cityName={cityData.name}
+                startDate={startDate}
+                getHealthRiskBySiteCode={getHealthRiskBySiteCode}
+                getUrbanParametersBySiteCode={getUrbanParametersBySiteCode}
+              />
+            ) : null;
+          })()}
 
           {/* Weather Info Box - show selected weather data as a list */}
           {selectedSiteCoords &&

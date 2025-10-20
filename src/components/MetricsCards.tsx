@@ -1,6 +1,5 @@
 import { Card, CardContent, Typography, LinearProgress, Box } from '@mui/material'
 import { useMemo } from 'react'
-import { getHealthRiskForSite } from '../data/healthRiskData'
 import { useSelection } from '../context/SelectionContext'
 import { styled } from '@mui/material/styles'
 
@@ -66,49 +65,49 @@ function MetricCardComponent({
 }
 
 export function MetricsCards() {
-  const { site } = useSelection()
+  const { site, getHealthRiskBySiteCode } = useSelection()
   
   const metrics = useMemo(() => {
     if (!site || site === 'all') return []
     
-    const healthData = getHealthRiskForSite(site)
+    const healthData = getHealthRiskBySiteCode(site)
     if (!healthData) return []
     
     return [
       {
         title: 'Pathogen Risk',
-        value: `${(healthData.scaled_Pathogen_Risk * 100).toFixed(1)}%`,
-        percentage: healthData.scaled_Pathogen_Risk * 100,
+        value: `${(healthData.scaledPathogenRisk * 100).toFixed(1)}%`,
+        percentage: Number(healthData.scaledPathogenRisk) * 100,
         subtitle: 'Scaled Risk Score',
         color: '#DC2626',
         bgColor: '#DC2626',
       },
       {
         title: 'Fecal Contamination',
-        value: `${(healthData.scaled_Fecal_Risk * 100).toFixed(1)}%`,
-        percentage: healthData.scaled_Fecal_Risk * 100,
+        value: `${(healthData.scaledFecalRisk * 100).toFixed(1)}%`,
+        percentage: Number(healthData.scaledFecalRisk) * 100,
         subtitle: 'Scaled Risk Score',
         color: '#EA580C',
         bgColor: '#EA580C',
       },
       {
         title: 'ARG Risk',
-        value: `${(healthData.scaled_ARG_Risk * 100).toFixed(1)}%`,
-        percentage: healthData.scaled_ARG_Risk * 100,
+        value: `${(healthData.scaledArgRisk * 100).toFixed(1)}%`,
+        percentage: Number(healthData.scaledArgRisk) * 100,
         subtitle: 'Scaled Risk Score',
         color: '#D97706',
         bgColor: '#D97706',
       },
       {
         title: 'Overall Health Risk',
-        value: `${(healthData.health_risk_score * 100).toFixed(1)}%`,
-        percentage: healthData.health_risk_score * 100,
+        value: `${(healthData.healthRiskScore * 100).toFixed(1)}%`,
+        percentage: Number(healthData.healthRiskScore) * 100,
         subtitle: 'Combined Score',
         color: '#7C3AED',
         bgColor: '#7C3AED',
       },
     ]
-  }, [site])
+  }, [site, getHealthRiskBySiteCode])
 
   if (metrics.length === 0) {
     return (

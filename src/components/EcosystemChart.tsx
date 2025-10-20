@@ -1,7 +1,6 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { Box, Typography } from '@mui/material'
 import { useMemo } from 'react'
-import { getHealthRiskForSite } from '../data/healthRiskData'
 import { useSelection } from '../context/SelectionContext'
 import { styled } from '@mui/material/styles'
 
@@ -16,32 +15,32 @@ const EmptyStateContainer = styled(Box)({
 })
 
 export function EcosystemChart() {
-  const { site } = useSelection()
+  const { site, getHealthRiskBySiteCode } = useSelection()
   
   const data = useMemo(() => {
     if (!site || site === 'all') return []
     
-    const healthData = getHealthRiskForSite(site)
+    const healthData = getHealthRiskBySiteCode(site)
     if (!healthData) return []
     
     return [
       {
         name: 'Pathogen Risk',
-        value: Math.round(healthData.scaled_Pathogen_Risk * 100),
+        value: Math.round(Number(healthData.scaledPathogenRisk) * 100),
         color: '#DC2626'
       },
       {
         name: 'Fecal Risk',
-        value: Math.round(healthData.scaled_Fecal_Risk * 100),
+        value: Math.round(Number(healthData.scaledFecalRisk) * 100),
         color: '#EA580C'
       },
       {
         name: 'ARG Risk',
-        value: Math.round(healthData.scaled_ARG_Risk * 100),
+        value: Math.round(Number(healthData.scaledArgRisk) * 100),
         color: '#D97706'
       },
     ]
-  }, [site])
+  }, [site, getHealthRiskBySiteCode])
   
   if (data.length === 0) {
     return (
