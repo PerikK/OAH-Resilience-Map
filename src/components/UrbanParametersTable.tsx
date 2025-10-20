@@ -10,9 +10,12 @@ import {
   Paper 
 } from '@mui/material'
 import { useSelection } from '../context/SelectionContext'
+import { useSiteByCode, useUrbanParametersBySiteCode } from '../hooks/useApiQueries'
 
 export function UrbanParametersTable() {
-  const { site, selectedUrbanParameters, getUrbanParametersBySiteCode, getSiteByCode } = useSelection()
+  const { site, selectedUrbanParameters } = useSelection()
+  const siteData = useSiteByCode(site)
+  const urbanParams = useUrbanParametersBySiteCode(site && site !== 'all' ? site : null)
   
   if (!site || site === 'all') {
     return (
@@ -23,9 +26,6 @@ export function UrbanParametersTable() {
       </Box>
     )
   }
-
-  const urbanParams = getUrbanParametersBySiteCode(site)
-  const siteData = getSiteByCode(site)
 
   if (!urbanParams) {
     return (

@@ -2,11 +2,14 @@ import { useState } from 'react'
 import { Box, TextField, MenuItem, Typography, Checkbox, FormControlLabel, FormGroup, Tooltip, Button, Accordion, AccordionSummary, AccordionDetails, CircularProgress } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useSelection, type City, type Site } from '../context/SelectionContext'
+import { useCities, useSitesByCity, useHealthRiskBySiteCode, useUrbanParametersBySiteCode } from '../hooks/useApiQueries'
 
 export function CollapsibleSidebar() {
   const [expandedHealthRisk, setExpandedHealthRisk] = useState(false)
   const [expandedResilience, setExpandedResilience] = useState(false)
   const [expandedWeather, setExpandedWeather] = useState(false)
+  
+  // Get selection state from context
   const {
     city,
     site,
@@ -16,11 +19,6 @@ export function CollapsibleSidebar() {
     selectedWeatherMetrics,
     selectedUrbanParameters,
     selectedResilienceMetrics,
-    cities,
-    isLoadingCities,
-    isLoadingSites,
-    citiesError,
-    sitesError,
     setCity,
     setSite,
     setStartDate,
@@ -32,20 +30,15 @@ export function CollapsibleSidebar() {
     toggleHealthRisk,
     toggleWeatherMetric,
     toggleUrbanParameter,
-    getSitesByCity,
-    getHealthRiskBySiteCode,
-    getUrbanParametersBySiteCode,
   } = useSelection()
 
-  // Get available sites for selected city
-  const availableSites = city ? getSitesByCity(city) : []
+  // Get API data from React Query
+  const { data: cities = [], isLoading: isLoadingCities, error: citiesError } = useCities()
+  const availableSites = useSitesByCity(city)
+  const healthRiskData = useHealthRiskBySiteCode(site && site !== 'all' ? site : null)
+  const urbanParametersData = useUrbanParametersBySiteCode(site && site !== 'all' ? site : null)
   
-  // Check if health risk data is available for the selected site
-  const healthRiskData = site && site !== 'all' ? getHealthRiskBySiteCode(site) : null
   const hasHealthRiskData = !!healthRiskData
-  
-  // Check if urban parameters data is available for the selected site
-  const urbanParametersData = site && site !== 'all' ? getUrbanParametersBySiteCode(site) : null
   const hasUrbanParametersData = !!urbanParametersData
 
   const allHealthRisks: ('pathogen' | 'fecal' | 'arg' | 'overall')[] = ['pathogen', 'fecal', 'arg', 'overall']
@@ -154,7 +147,7 @@ export function CollapsibleSidebar() {
               <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>Loading cities...</Typography>
             </Box>
           ) : citiesError ? (
-            <Typography sx={{ fontSize: '13px', color: 'error.main' }}>{citiesError}</Typography>
+            <Typography sx={{ fontSize: '13px', color: 'error.main' }}>{citiesError.message}</Typography>
           ) : (
             <TextField
               select
@@ -200,15 +193,7 @@ export function CollapsibleSidebar() {
           <Typography sx={{ mb: 0.5, fontSize: '13px', fontWeight: 600, color: 'text.primary' }}>
             Select Sites
           </Typography>
-          {isLoadingSites ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <CircularProgress size={20} />
-              <Typography sx={{ fontSize: '13px', color: 'text.secondary' }}>Loading sites...</Typography>
-            </Box>
-          ) : sitesError ? (
-            <Typography sx={{ fontSize: '13px', color: 'error.main' }}>{sitesError}</Typography>
-          ) : (
-            <TextField
+          <TextField
               select
               size="small"
               value={site || ''}
@@ -243,7 +228,6 @@ export function CollapsibleSidebar() {
                 </MenuItem>
               ))}
             </TextField>
-          )}
         </Box>
 
         {/* Date Range */}

@@ -1,16 +1,16 @@
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
 import { useSelection } from '../context/SelectionContext'
+import { useSiteByCode, useHealthRiskBySiteCode } from '../hooks/useApiQueries'
 
 export function HealthRiskTable() {
-  const { city, site, selectedHealthRisks, getSiteByCode, getHealthRiskBySiteCode } = useSelection()
+  const { city, site, selectedHealthRisks } = useSelection()
+  const siteData = useSiteByCode(site)
+  const healthData = useHealthRiskBySiteCode(site && site !== 'all' ? site : null)
 
   // Don't show table if no site selected or no metrics selected
   if (!city || !site || site === 'all' || selectedHealthRisks.length === 0) {
     return null
   }
-
-  const healthData = getHealthRiskBySiteCode(site)
-  const siteData = getSiteByCode(site)
 
   if (!siteData) {
     return (

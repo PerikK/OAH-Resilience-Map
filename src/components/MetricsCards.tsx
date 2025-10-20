@@ -2,6 +2,7 @@ import { Card, CardContent, Typography, LinearProgress, Box } from '@mui/materia
 import { useMemo } from 'react'
 import { useSelection } from '../context/SelectionContext'
 import { styled } from '@mui/material/styles'
+import { useHealthRiskBySiteCode } from '../hooks/useApiQueries'
 
 const MetricCard = styled(Card)(({ theme }) => ({
   height: '100%',
@@ -65,13 +66,11 @@ function MetricCardComponent({
 }
 
 export function MetricsCards() {
-  const { site, getHealthRiskBySiteCode } = useSelection()
+  const { site } = useSelection()
+  const healthData = useHealthRiskBySiteCode(site && site !== 'all' ? site : null)
   
   const metrics = useMemo(() => {
-    if (!site || site === 'all') return []
-    
-    const healthData = getHealthRiskBySiteCode(site)
-    if (!healthData) return []
+    if (!site || site === 'all' || !healthData) return []
     
     return [
       {
@@ -107,7 +106,7 @@ export function MetricsCards() {
         bgColor: '#7C3AED',
       },
     ]
-  }, [site, getHealthRiskBySiteCode])
+  }, [site, healthData])
 
   if (metrics.length === 0) {
     return (

@@ -3,6 +3,7 @@ import { Box, Typography } from '@mui/material'
 import { useMemo } from 'react'
 import { useSelection } from '../context/SelectionContext'
 import { styled } from '@mui/material/styles'
+import { useHealthRiskBySiteCode } from '../hooks/useApiQueries'
 
 const colors = ['#DC2626', '#EA580C', '#D97706']
 
@@ -17,13 +18,11 @@ const EmptyStateContainer = styled(Box)({
 })
 
 export function CategoryChart() {
-  const { site, getHealthRiskBySiteCode } = useSelection()
+  const { site } = useSelection()
+  const healthData = useHealthRiskBySiteCode(site && site !== 'all' ? site : null)
   
   const data = useMemo(() => {
-    if (!site || site === 'all') return []
-    
-    const healthData = getHealthRiskBySiteCode(site)
-    if (!healthData) return []
+    if (!site || site === 'all' || !healthData) return []
     
     const chartData = [
       {
@@ -46,7 +45,7 @@ export function CategoryChart() {
     
     console.log('CategoryChart data:', chartData)
     return chartData
-  }, [site, getHealthRiskBySiteCode])
+  }, [site, healthData])
   
   if (data.length === 0) {
     return (

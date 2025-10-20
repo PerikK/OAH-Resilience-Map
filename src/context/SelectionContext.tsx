@@ -1,8 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useMemo, useEffect } from 'react'
+import { createContext, useContext, useState, useMemo } from 'react'
 import type { ReactNode } from 'react'
-import type { CityDTO, ResearchSiteDTO, HealthRiskResponse, UrbanParametersResponse } from '../types/api'
-import { citiesService, sitesService, resilienceService, handleApiError } from '../services'
 
 // Type definitions for city and site selection
 export type City = string | null  // City ID
@@ -25,24 +23,6 @@ export type SelectionContextValue = {
   selectedUrbanParameters: UrbanParameterMetric[]
   selectedResilienceMetrics: ResilienceMetric[]
   
-  // API data
-  cities: CityDTO[]
-  sites: ResearchSiteDTO[]
-  healthRisks: HealthRiskResponse[]
-  urbanParameters: UrbanParametersResponse[]
-  
-  // Loading states
-  isLoadingCities: boolean
-  isLoadingSites: boolean
-  isLoadingHealthRisks: boolean
-  isLoadingUrbanParameters: boolean
-  
-  // Error states
-  citiesError: string | null
-  sitesError: string | null
-  healthRisksError: string | null
-  urbanParametersError: string | null
-  
   // Setters
   setCity: (c: City) => void
   setSite: (s: Site) => void
@@ -56,19 +36,12 @@ export type SelectionContextValue = {
   toggleWeatherMetric: (metric: WeatherMetric) => void
   toggleUrbanParameter: (param: UrbanParameterMetric) => void
   toggleResilienceMetric: (metric: ResilienceMetric) => void
-  
-  // Helper functions
-  getCityById: (id: string) => CityDTO | undefined
-  getSiteByCode: (code: string) => ResearchSiteDTO | undefined
-  getSitesByCity: (cityId: string) => ResearchSiteDTO[]
-  getHealthRiskBySiteCode: (siteCode: string) => HealthRiskResponse | undefined
-  getUrbanParametersBySiteCode: (siteCode: string) => UrbanParametersResponse | undefined
 }
 
 const SelectionContext = createContext<SelectionContextValue | undefined>(undefined)
 
 export function SelectionProvider({ children }: { children: ReactNode }) {
-  // Selection state
+  // Selection state - UI state only, no API data
   const [city, setCity] = useState<City>(null)
   const [site, setSite] = useState<Site>(null)
   const [startDate, setStartDate] = useState<string>('2025-01-01')
@@ -77,100 +50,6 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
   const [selectedWeatherMetrics, setSelectedWeatherMetrics] = useState<WeatherMetric[]>([])
   const [selectedUrbanParameters, setSelectedUrbanParameters] = useState<UrbanParameterMetric[]>([])
   const [selectedResilienceMetrics, setSelectedResilienceMetrics] = useState<ResilienceMetric[]>([])
-  
-  // API data state
-  const [cities, setCities] = useState<CityDTO[]>([])
-  const [sites, setSites] = useState<ResearchSiteDTO[]>([])
-  const [healthRisks, setHealthRisks] = useState<HealthRiskResponse[]>([])
-  const [urbanParameters, setUrbanParameters] = useState<UrbanParametersResponse[]>([])
-  
-  // Loading states
-  const [isLoadingCities, setIsLoadingCities] = useState(false)
-  const [isLoadingSites, setIsLoadingSites] = useState(false)
-  const [isLoadingHealthRisks, setIsLoadingHealthRisks] = useState(false)
-  const [isLoadingUrbanParameters, setIsLoadingUrbanParameters] = useState(false)
-  
-  // Error states
-  const [citiesError, setCitiesError] = useState<string | null>(null)
-  const [sitesError, setSitesError] = useState<string | null>(null)
-  const [healthRisksError, setHealthRisksError] = useState<string | null>(null)
-  const [urbanParametersError, setUrbanParametersError] = useState<string | null>(null)
-  
-  // Fetch cities on mount
-  useEffect(() => {
-    const fetchCities = async () => {
-      setIsLoadingCities(true)
-      setCitiesError(null)
-      try {
-        const data = await citiesService.getAllCities()
-        setCities(data)
-      } catch (error) {
-        const errorMessage = handleApiError(error)
-        setCitiesError(errorMessage)
-        console.error('Failed to fetch cities:', errorMessage)
-      } finally {
-        setIsLoadingCities(false)
-      }
-    }
-    fetchCities()
-  }, [])
-  
-  // Fetch sites on mount
-  useEffect(() => {
-    const fetchSites = async () => {
-      setIsLoadingSites(true)
-      setSitesError(null)
-      try {
-        const data = await sitesService.getAllSites()
-        setSites(data)
-      } catch (error) {
-        const errorMessage = handleApiError(error)
-        setSitesError(errorMessage)
-        console.error('Failed to fetch sites:', errorMessage)
-      } finally {
-        setIsLoadingSites(false)
-      }
-    }
-    fetchSites()
-  }, [])
-  
-  // Fetch health risks on mount
-  useEffect(() => {
-    const fetchHealthRisks = async () => {
-      setIsLoadingHealthRisks(true)
-      setHealthRisksError(null)
-      try {
-        const data = await resilienceService.getHealthRisks()
-        setHealthRisks(data)
-      } catch (error) {
-        const errorMessage = handleApiError(error)
-        setHealthRisksError(errorMessage)
-        console.error('Failed to fetch health risks:', errorMessage)
-      } finally {
-        setIsLoadingHealthRisks(false)
-      }
-    }
-    fetchHealthRisks()
-  }, [])
-  
-  // Fetch urban parameters on mount
-  useEffect(() => {
-    const fetchUrbanParameters = async () => {
-      setIsLoadingUrbanParameters(true)
-      setUrbanParametersError(null)
-      try {
-        const data = await resilienceService.getUrbanParameters()
-        setUrbanParameters(data)
-      } catch (error) {
-        const errorMessage = handleApiError(error)
-        setUrbanParametersError(errorMessage)
-        console.error('Failed to fetch urban parameters:', errorMessage)
-      } finally {
-        setIsLoadingUrbanParameters(false)
-      }
-    }
-    fetchUrbanParameters()
-  }, [])
 
   const toggleHealthRisk = (risk: HealthRiskMetric) => {
     setSelectedHealthRisks(prev =>
@@ -196,26 +75,7 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
     )
   }
   
-  // Helper functions
-  const getCityById = (id: string): CityDTO | undefined => {
-    return cities.find(c => c.id === id)
-  }
-  
-  const getSiteByCode = (code: string): ResearchSiteDTO | undefined => {
-    return sites.find(s => s.code === code)
-  }
-  
-  const getSitesByCity = (cityId: string): ResearchSiteDTO[] => {
-    return sites.filter(s => s.city.id === cityId)
-  }
-  
-  const getHealthRiskBySiteCode = (siteCode: string): HealthRiskResponse | undefined => {
-    return healthRisks.find(hr => hr.researchSiteCode === siteCode)
-  }
-  
-  const getUrbanParametersBySiteCode = (siteCode: string): UrbanParametersResponse | undefined => {
-    return urbanParameters.find(up => up.researchSiteCode === siteCode)
-  }
+  // Toggle functions for multi-select metrics
 
   const value = useMemo(
     () => ({
@@ -228,24 +88,6 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
       selectedWeatherMetrics,
       selectedUrbanParameters,
       selectedResilienceMetrics,
-      
-      // API data
-      cities,
-      sites,
-      healthRisks,
-      urbanParameters,
-      
-      // Loading states
-      isLoadingCities,
-      isLoadingSites,
-      isLoadingHealthRisks,
-      isLoadingUrbanParameters,
-      
-      // Error states
-      citiesError,
-      sitesError,
-      healthRisksError,
-      urbanParametersError,
       
       // Setters
       setCity,
@@ -260,13 +102,6 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
       toggleWeatherMetric,
       toggleUrbanParameter,
       toggleResilienceMetric,
-      
-      // Helper functions
-      getCityById,
-      getSiteByCode,
-      getSitesByCity,
-      getHealthRiskBySiteCode,
-      getUrbanParametersBySiteCode,
     }),
     [
       city, 
@@ -277,18 +112,6 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
       selectedWeatherMetrics, 
       selectedUrbanParameters,
       selectedResilienceMetrics,
-      cities,
-      sites,
-      healthRisks,
-      urbanParameters,
-      isLoadingCities,
-      isLoadingSites,
-      isLoadingHealthRisks,
-      isLoadingUrbanParameters,
-      citiesError,
-      sitesError,
-      healthRisksError,
-      urbanParametersError,
     ]
   )
 
