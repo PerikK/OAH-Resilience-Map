@@ -43,7 +43,7 @@ export function CategoryChart() {
       },
     ]
     
-    console.log('CategoryChart data:', chartData)
+    // console.log('CategoryChart data:', chartData)
     return chartData
   }, [site, healthData])
   
